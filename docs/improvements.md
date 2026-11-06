@@ -12,5 +12,5 @@
 - Security & regression review: only local static HTML and tests changed; no credentials or production data. HTTP retains fetch and status-error behavior.
 - Risk & rollback: duplicated snapshot may drift; parity test detects it when run. Close Draft PR or revert branch commit.
 - Follow-up: run node --test tests/offline-catalog.test.cjs and real Chrome file:// and HTTP E2E before merge.
-- Commit: pending
-- PR: pending
+- Commit: bc3364500d6e1f664948cdb22cce584ca9581849
+- PR: https://github.com/1998x-stack/sqlite-source-analysis-tutorial/pull/1
