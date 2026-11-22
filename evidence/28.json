@@ -1,0 +1,116 @@
+{
+  "chapter": "28",
+  "reviewed_at": "2026-11-22",
+  "source_baseline": "SQLite 3.54.1",
+  "scope": "Official compile-time option, build, VFS, I/O methods, extension and function API documentation",
+  "claims": [
+    {
+      "id": "28-01",
+      "claim": "SQLITE_OMIT_* options are mostly unsupported and may not work reliably with a prebuilt amalgamation",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/compile.html",
+      "locator": "Options To Omit Features",
+      "status": "verified",
+      "notes": "The same option set may need to be passed to Lemon and mkkeywordhash when generating canonical-source builds."
+    },
+    {
+      "id": "28-02",
+      "claim": "Custom amalgamation generation should configure the canonical source tree and use the sqlite3.c make target",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/howtocompile.html",
+      "locator": "§5 Building The Amalgamation",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "28-03",
+      "claim": "sqlite3_vfs defines the OS interface and includes xOpen, xDelete, xAccess and other platform services",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/vfs.html",
+      "locator": "OS Interface Object",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "28-04",
+      "claim": "sqlite3_io_methods defines per-file read, write, truncate, sync, lock, shared-memory and related operations",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/io_methods.html",
+      "locator": "OS Interface File Virtual Methods Object",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "28-05",
+      "claim": "Extension loading is disabled by default; SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION can enable only the C API while keeping SQL load_extension disabled",
+      "kind": "security",
+      "source_url": "https://sqlite.org/c3ref/enable_load_extension.html",
+      "locator": "Security warning",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "28-06",
+      "claim": "SQLITE_DETERMINISTIC and SQLITE_INNOCUOUS express different function properties and must not be applied casually",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/c_deterministic.html",
+      "locator": "Function Flags",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "28-07",
+      "claim": "sqlite3_create_function_v2 registers application-defined scalar, aggregate or window callbacks",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/create_function.html",
+      "locator": "Create Or Redefine SQL Functions",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "28-08",
+      "claim": "The tracing VFS example intercepts xOpen and delegates to the parent VFS; it does not transform or encrypt file bytes",
+      "kind": "illustrative",
+      "source_url": "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/os_unix.c",
+      "locator": "Parent VFS xOpen delegation pattern",
+      "status": "illustrative",
+      "notes": "The code is independently authored and tested against the system SQLite library."
+    },
+    {
+      "id": "28-09",
+      "claim": "A complete VFS must preserve file, sync, lock and shared-memory contracts, not merely wrap main database xRead/xWrite",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/io_methods.html",
+      "locator": "Complete sqlite3_io_methods interface",
+      "status": "derived",
+      "notes": "The article explicitly distinguishes a tracing wrapper from an encryption implementation."
+    },
+    {
+      "id": "28-10",
+      "claim": "The SQLite Encryption Extension is a separately licensed extension rather than a generic core encryption switch",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/see",
+      "locator": "SQLite Encryption Extension overview",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "28-11",
+      "claim": "SQLCipher is a third-party encrypted SQLite distribution",
+      "kind": "technical",
+      "source_url": "https://www.zetetic.net/sqlcipher/",
+      "locator": "Project overview",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "28-12",
+      "claim": "ECB mode reveals repeated plaintext block patterns and is not a suitable database-file encryption design",
+      "kind": "security",
+      "source_url": "https://csrc.nist.gov/pubs/sp/800/38/a/final",
+      "locator": "Block cipher modes of operation",
+      "status": "verified",
+      "notes": "The tutorial does not publish a homemade production encryption protocol."
+    }
+  ]
+}
