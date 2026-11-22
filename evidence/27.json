@@ -123,12 +123,21 @@
     },
     {
       "id": "27-14",
-      "claim": "Claims of a new generic star-join algorithm or a broad sorted-merge rewrite are not included as 3.53.0 features without a verified release note or check-in",
+      "claim": "SQLite 3.53.0 explicitly adds sort-and-merge for EXCEPT, INTERSECT and UNION and improves join-order selection for large multi-way star-schema joins, along with other planner changes",
       "kind": "technical",
       "source_url": "https://sqlite.org/changes.html",
-      "locator": "3.53.0 release entry",
-      "status": "derived",
-      "notes": "Absence from the release summary is not a universal proof that no internal change exists; the chapter intentionally makes no such claim."
+      "locator": "2026-04-09 (3.53.0), item 7 Query planner improvements",
+      "status": "verified",
+      "notes": "The article limits each optimization to the SQL shape stated by the release note and makes no universal speed guarantee."
+    },
+    {
+      "id": "27-15",
+      "claim": "SQLite 3.54.0 separately speeds up UNION queries with LIMIT exactly 1 and uses less memory",
+      "kind": "performance",
+      "source_url": "https://sqlite.org/changes.html",
+      "locator": "2026-10-09 (3.54.0), item 2d Query planner improvements",
+      "status": "verified",
+      "notes": "Distinct from the 3.53.0 sort-and-merge changes."
     }
   ]
 }
