@@ -124,7 +124,7 @@ def main() -> int:
         for x in ERRORS:
             print(" -", x)
         return 1
-    print(f"PASS: {len(chapters)} chapters, {len(svg_paths)} SVGs, 5 evidence ledgers, local references and a11y structure")
+    print(f"PASS: {len(chapters)} chapters, {len(svg_paths)} SVGs, {sum(c['status'] == 'revised' for c in chapters)} evidence ledgers, local references and a11y structure")
     return 0
 
 
