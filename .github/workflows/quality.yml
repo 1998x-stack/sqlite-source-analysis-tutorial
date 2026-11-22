@@ -18,7 +18,7 @@ jobs:
         run: |
           python scripts/test_examples.py
           sudo apt-get update -qq
-          sudo apt-get install -y -qq libsqlite3-dev
+          sudo apt-get install -y -qq libsqlite3-dev sqlite3
           cc -std=c11 -Wall -Wextra -Werror -O2 examples/05_lookaside_status.c -lsqlite3 -o /tmp/sqlite-lookaside-status
           /tmp/sqlite-lookaside-status
           python examples/09_toy_reduce.py
@@ -46,6 +46,16 @@ jobs:
             cc -std=c11 -Wall -Wextra -Werror -O2 "examples/${name}.c" -lsqlite3 -o "/tmp/sqlite-${name}"
             "/tmp/sqlite-${name}"
           done
+      - name: Verify FTS5, CLI, regression and performance examples
+        run: |
+          python examples/21_tokenizer_probe.py
+          python examples/24_test_contracts.py
+          python examples/25_benchmark.py
+          sqlite3 :memory: < examples/23_cli_workflow.sql > /tmp/sqlite-cli-output.txt
+          grep -q "Ada" /tmp/sqlite-cli-output.txt
+          grep -q "Mira" /tmp/sqlite-cli-output.txt
+          cc -std=c11 -Wall -Wextra -Werror -O2 examples/25_stmt_status.c -lsqlite3 -o /tmp/sqlite-25-status
+          /tmp/sqlite-25-status
       - name: Install Chromium for visual smoke tests
         run: |
           python -m pip install playwright

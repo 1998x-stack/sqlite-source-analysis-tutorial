@@ -1,0 +1,71 @@
+{
+  "chapter": "23",
+  "reviewed_at": "2026-11-22",
+  "source_baseline": "SQLite 3.54.1 (2026-10-16)",
+  "scope": "Official SQLite documentation and version-pinned SQLite source; examples are independently authored",
+  "claims": [
+    {
+      "id": "23-01",
+      "claim": "The sqlite3 CLI is an application separate from the SQLite library",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/cli.html#sqlite3_program_versus_sqlite_library",
+      "locator": "§1.1",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "23-02",
+      "claim": "CLI dot commands are interpreted by the shell and the documented command set exceeds 60",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/cli.html#special_commands_dot_commands",
+      "locator": "§2",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "23-03",
+      "claim": "process_input routes dot commands to do_meta_command and SQL through runOneSqlLine",
+      "kind": "technical",
+      "source_url": "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/shell.c.in#L13612-L13723",
+      "locator": "process_input, 3.54.1",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "23-04",
+      "claim": "mkshellc.tcl generates shell.c from src/shell.c.in and included components",
+      "kind": "technical",
+      "source_url": "https://github.com/sqlite/sqlite/blob/version-3.54.1/tool/mkshellc.tcl",
+      "locator": "file header and generation passes",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "23-05",
+      "claim": "QRF was added in SQLite 3.53.0; interactive CLI uses QRF box output while batch sessions retain legacy output",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/changes.html#version_3_53_0",
+      "locator": "3.53.0 release notes",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "23-06",
+      "claim": "QRF uses sqlite3_qrf_spec and sqlite3_format_query_result",
+      "kind": "technical",
+      "source_url": "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/qrf/qrf.h",
+      "locator": "QRF public interface",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "23-07",
+      "claim": "QRF columnar styles evaluate the full query and buffer results in memory to calculate column widths",
+      "kind": "technical",
+      "source_url": "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/qrf/qrf.c#L2016-L2065",
+      "locator": "qrfColumnar and sqlite3_format_query_result",
+      "status": "verified",
+      "notes": "Streaming styles use a different output path."
+    }
+  ]
+}

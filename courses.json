@@ -231,63 +231,58 @@
     },
     {
       "num": "21",
-      "title": "FTS全文搜索",
+      "title": "FTS5 全文搜索",
       "topics": [
-        "FTS3/4/5演进",
-        "倒排索引结构",
-        "分词器实现",
-        "FTS5 ranking"
+        "倒排索引与 posting lists",
+        "Segment B-tree 与合并",
+        "Tokenizer / BM25 / 外部内容"
       ],
       "file": "chapters/21.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "22",
       "title": "表达式索引与自修复",
       "topics": [
-        "表达式索引原理",
-        "索引到期原因",
-        "3.53自修复机制",
-        "REINDEX EXPRESSIONS"
+        "表达式语法匹配",
+        "确定性函数与 stale index",
+        "3.53+ 自修复与 REINDEX EXPRESSIONS"
       ],
       "file": "chapters/22.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "23",
-      "title": "CLI shell源码",
+      "title": "SQLite CLI 源码",
       "topics": [
-        "shell.c.in架构",
-        "点命令分发表",
-        "QRF格式化库",
-        "自定义点命令"
+        "process_input / do_meta_command",
+        "点命令与 SQL 分流",
+        "QRF 结果格式化"
       ],
       "file": "chapters/23.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "24",
-      "title": "测试框架",
+      "title": "SQLite 测试体系",
       "topics": [
-        "100%分支覆盖",
-        "TH3测试套件",
-        "TCL测试脚本",
-        "Fuzz测试"
+        "TCL / TH3 / SQL Logic Test",
+        "OOM / VFS 故障注入",
+        "Fuzzing 与覆盖率边界"
       ],
       "file": "chapters/24.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "25",
-      "title": "性能分析与优化",
+      "title": "性能诊断与可重复基准",
       "topics": [
-        "EXPLAIN解读",
-        "PRAGMA调优",
-        "编译时剪裁",
-        "批处理优化实战"
+        "EXPLAIN / stmt_status",
+        "ANALYZE / PRAGMA optimize",
+        "基准测试与持久性取舍"
       ],
       "file": "chapters/25.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "26",
@@ -326,5 +321,5 @@
       "status": "legacy"
     }
   ],
-  "description": "01–20 已逐章独立图解重构并配有证据台账与可复现代码；21–28 为迁移保留的原版，仍待版本化技术审计。"
+  "description": "01–25 已逐章独立图解重构并配有证据台账与可复现代码；26–28 保留原版，仍待版本化技术审计。"
 }
