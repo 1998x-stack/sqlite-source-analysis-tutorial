@@ -1,0 +1,43 @@
+{
+  "chapter": "11",
+  "reviewed_at": "2026-11-22",
+  "scope": "Official SQLite source & file format; internal implementation revision-dependent",
+  "claims": [
+    {
+      "id": "11-01",
+      "claim": "VDBE program instructions use five operands P1 to P5",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/opcode.html",
+      "locator": "2.2 Instruction Format",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "11-02",
+      "claim": "Opcode meanings and EXPLAIN outputs are not guaranteed ABI",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/opcode.html",
+      "locator": "Overview",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "11-03",
+      "claim": "sqlite3_step returns ROW, DONE or error and prepared statements can reset",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/step.html",
+      "locator": "Result codes",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "11-04",
+      "claim": "Register teaching trace is not actual output of SQLite EXPLAIN",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/opcode.html",
+      "locator": "Registers",
+      "status": "illustrative",
+      "notes": "Teaching abstraction"
+    }
+  ]
+}

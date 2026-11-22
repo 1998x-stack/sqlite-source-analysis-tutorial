@@ -1,0 +1,52 @@
+{
+  "chapter": "12",
+  "reviewed_at": "2026-11-22",
+  "scope": "Official SQLite source & file format; internal implementation revision-dependent",
+  "claims": [
+    {
+      "id": "12-01",
+      "claim": "B-tree page types are table/index, leaf/interior",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fileformat2.html",
+      "locator": "1.6 B-tree pages",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "12-02",
+      "claim": "Page 1 includes 100-byte database header; leaf header 8 bytes/interior header 12 bytes",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fileformat2.html",
+      "locator": "B-tree page header",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "12-03",
+      "claim": "Cell pointer array consists of 2-byte offsets, sorted by key",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fileformat2.html",
+      "locator": "Cell pointer array",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "12-04",
+      "claim": "WITHOUT ROWID table uses an index B-tree",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fileformat2.html",
+      "locator": "B-tree pages",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "12-05",
+      "claim": "Page split drawing is illustrative and not fixed balancing algorithm",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fileformat2.html",
+      "locator": "B-tree pages",
+      "status": "illustrative",
+      "notes": "Teaching abstraction"
+    }
+  ]
+}
