@@ -6,11 +6,11 @@
 <p>错误的基础类型仍是 <code>SQLITE_BUSY</code>，扩展码说明具体情形。<a href="https://sqlite.org/isolation.html" target="_blank" rel="noopener noreferrer">SQLite Isolation 文档</a>和 <a href="https://sqlite.org/rescode.html" target="_blank" rel="noopener noreferrer">Result Codes</a>都强调该场景。实际代码应检查 <code>sqlite3_extended_errcode()</code> 或 Python 新版本的异常 <code>sqlite_errorcode</code>，不能只靠文本“database is locked”判断。</p></section><section id="busy" aria-labelledby="h-busy"><h2 id="h-busy">4. SQLITE_BUSY 与 SQLITE_LOCKED 不宜混用</h2><p>两者都可能被用户笼统称作“锁错误”，但通常涉及不同资源竞争范围：<code>SQLITE_BUSY</code> 常由不同数据库连接争夺同一文件/事务资源触发；<code>SQLITE_LOCKED</code> 也可能出现在同一连接的语句生命周期冲突，或共享缓存表级锁冲突。它们的恢复策略不应一概设计为等待几毫秒后重试。</p>
 <figure><img loading="lazy" width="960" src="../assets/svg/17-busy-locked.svg" alt="SQLITE_BUSY 与 SQLITE_LOCKED 的不同可能来源及后续恢复策略"><figcaption>图 3 · 不能仅依据日志里的“locked”字符串做分类；必须结合基础/扩展码、连接间关系以及具体共享缓存或游标状态。</figcaption></figure>
 <p><code>sqlite3_busy_timeout()</code> 为 busy 情形配置等待策略；并不会修复逻辑上的过期快照，也不能自动保证对 <code>LOCKED</code> 有用。共享缓存模式是 SQLite 官方明确不推荐新应用使用的历史特性，<a href="https://sqlite.org/sharedcache.html" target="_blank" rel="noopener noreferrer">Shared Cache 文档</a>建议优先用 WAL 解决普通读写并发诉求。</p>
-<table><thead><tr><th>失败类型</th><th>典型原因</th><th>首先确认</th></tr></thead><tbody>
+<div class="table-scroll" role="region" aria-label="SQLite 锁结果码对照表" tabindex="0"><table><thead><tr><th>失败类型</th><th>典型原因</th><th>首先确认</th></tr></thead><tbody>
 <tr><td><code>SQLITE_BUSY</code></td><td>另一连接持有写入资源</td><td>锁持有者 / busy_timeout</td></tr>
 <tr><td><code>SQLITE_BUSY_SNAPSHOT</code></td><td>WAL 旧快照尝试升级写事务</td><td>是否先 ROLLBACK 并重开</td></tr>
 <tr><td><code>SQLITE_LOCKED</code></td><td>同连接或 shared-cache 锁冲突</td><td>未完成的 stmt / cache 模式</td></tr>
-</tbody></table></section><section id="tests" aria-labelledby="h-tests"><h2 id="h-tests">5. 一套 C/Python 实验如何避免“共享连接”误判</h2><p>仓库新增 <code>examples/17_lock_matrix.py</code>。测试首先用两个独立连接创建 rollback 数据库，验证第二个 writer 不能与第一个 IMMEDIATE writer 同时执行；再用 WAL 文件验证读快照升级为写返回 BUSY 类错误并在可用 Python/SQLite 组合下识别 <code>BUSY_SNAPSHOT</code>。</p>
+</tbody></table></div></section><section id="tests" aria-labelledby="h-tests"><h2 id="h-tests">5. 一套 C/Python 实验如何避免“共享连接”误判</h2><p>仓库新增 <code>examples/17_lock_matrix.py</code>。测试首先用两个独立连接创建 rollback 数据库，验证第二个 writer 不能与第一个 IMMEDIATE writer 同时执行；再用 WAL 文件验证读快照升级为写返回 BUSY 类错误并在可用 Python/SQLite 组合下识别 <code>BUSY_SNAPSHOT</code>。</p>
 <pre><code>python3 examples/17_lock_matrix.py
 # PASS: rollback second writer blocked
 # PASS: WAL stale read snapshot cannot be upgraded

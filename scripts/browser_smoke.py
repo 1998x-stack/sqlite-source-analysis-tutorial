@@ -28,7 +28,21 @@ def main() -> None:
                 page.goto((ROOT / file).as_uri(), wait_until="load")
                 dims = page.evaluate("({width: document.documentElement.scrollWidth, viewport: innerWidth})")
                 if dims["width"] > dims["viewport"] + 1:
-                    problems.append(f"horizontal overflow: {dims}")
+                    overflow = page.evaluate("""() => Array.from(document.querySelectorAll('body *'))
+                        .filter(el => el.getBoundingClientRect().right > innerWidth + 1 ||
+                                      el.getBoundingClientRect().left < -1)
+                        .filter(el => {
+                          const p = el.parentElement;
+                          while (p && p !== document.body) {
+                            if (getComputedStyle(p).overflowX === 'auto' ||
+                                getComputedStyle(p).overflowX === 'scroll') return false;
+                            p = p.parentElement;
+                          }
+                          return true;
+                        })
+                        .slice(0, 8)
+                        .map(el => ({tag: el.tagName, cls: el.className, width: Math.round(el.getBoundingClientRect().width)}))""")
+                    problems.append(f"horizontal overflow: {dims}; outside elements: {overflow}")
                 images = page.locator("img")
                 for index in range(images.count()):
                     image = images.nth(index)
