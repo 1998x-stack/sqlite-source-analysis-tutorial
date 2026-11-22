@@ -17,6 +17,8 @@ jobs:
           node-version: '22'
       - name: Verify chapters, source links, and SVGs
         run: python scripts/check_site.py
+      - name: Audit all 28 HTML articles, evidence, SVGs and deep links
+        run: python scripts/audit_content.py --output qa-local/editorial-audit.json
       - name: Test SQL and C examples
         run: |
           python scripts/test_examples.py
