@@ -305,7 +305,7 @@ def audit() -> tuple[list[str], dict]:
     require(example_index.is_file(), "public examples index missing", errors)
     if evidence_index.is_file():
         content = evidence_index.read_text(encoding="utf-8")
-        cards = re.findall(r'<a class="chapter-card"[^>]*>[\\s\\S]*?<\\/a>', content)
+        cards = re.findall(r'<a class="chapter-card"[^>]*>[\s\S]*?</a>', content)
         require(len(cards) == 28, "public evidence index should list 28 chapters", errors)
         require(f'{evidence_count}</strong> 条主张记录' in content,
                 "public evidence index claim count is stale", errors)
