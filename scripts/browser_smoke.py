@@ -7,7 +7,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-PAGES = ["index.html"] + [f"chapters/{i:02}.html" for i in range(1, 29)]
+PAGES = ["index.html"] + [f"chapters/{i:02}.html" for i in range(1, 29)] + ["evidence/index.html", "examples/index.html"]
 VIEWPORTS = [(1440, 900), (390, 844), (360, 800)]
 
 def main() -> None:
@@ -55,7 +55,7 @@ def main() -> None:
                     q.fill("")
                     if page.locator(".chapter-card:visible").count() != 28:
                         problems.append("search reset failed")
-                else:
+                elif file.startswith("chapters/"):
                     details = page.locator("details").first
                     if details.count() == 0:
                         problems.append("no interactive detail/answer control")
@@ -63,7 +63,22 @@ def main() -> None:
                         details.locator("summary").click()
                         if details.get_attribute("open") is None:
                             problems.append("summary control did not open")
-                if file != "index.html":
+                elif file == "evidence/index.html":
+                    if page.locator(".chapter-card").count() != 28:
+                        problems.append("public evidence index does not list all 28 chapters")
+                    if page.locator('.chapter-card[href="01.json"]').count() != 1:
+                        problems.append("public evidence JSON links missing")
+                elif file == "examples/index.html":
+                    details = page.locator(".example-groups details")
+                    if details.count() < 20:
+                        problems.append("experimental source index missing chapter groups")
+                    else:
+                        details.first.locator("summary").click()
+                        if details.first.get_attribute("open") is None:
+                            problems.append("experiment group did not open")
+                        if details.first.locator("a").count() == 0:
+                            problems.append("experiment group missing file links")
+                if file.startswith("chapters/"):
                     zooms = page.locator("article figure a.svg-zoom")
                     figures = page.locator("article figure")
                     if zooms.count() != figures.count():
