@@ -1,0 +1,116 @@
+{
+  "chapter": "26",
+  "reviewed_at": "2026-11-22",
+  "source_baseline": "SQLite 3.54.1; @sqlite.org/sqlite-wasm 3.54.1-build1",
+  "scope": "Official SQLite WASM documentation, the official sqlite/sqlite-wasm package, and SQLite 3.54.1 source",
+  "claims": [
+    {
+      "id": "26-01",
+      "claim": "The official npm package wraps SQLite WASM as an ES module and adds TypeScript types without modifying the underlying WASM implementation",
+      "kind": "technical",
+      "source_url": "https://github.com/sqlite/sqlite-wasm/blob/main/README.md",
+      "locator": "README introduction",
+      "status": "verified",
+      "notes": "Package metadata pins 3.54.1-build1."
+    },
+    {
+      "id": "26-02",
+      "claim": "The official npm package currently supports Node.js only for in-memory databases without persistence",
+      "kind": "technical",
+      "source_url": "https://github.com/sqlite/sqlite-wasm/blob/main/README.md",
+      "locator": "Node.js support",
+      "status": "verified",
+      "notes": "Do not reuse browser OPFS examples as Node persistence."
+    },
+    {
+      "id": "26-03",
+      "claim": "OPFS is available only in Worker-thread contexts, not the main UI thread",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/wasm/doc/trunk/persistence.md",
+      "locator": "The Origin-Private FileSystem",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "26-04",
+      "claim": "The standard OPFS VFS requires SharedArrayBuffer and COOP/COEP response headers",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/wasm/doc/trunk/persistence.md",
+      "locator": "COOP and COEP HTTP Headers",
+      "status": "verified",
+      "notes": "COEP require-corp or applicable credentialless mode; COOP same-origin."
+    },
+    {
+      "id": "26-05",
+      "claim": "The opfs-wl VFS was added in 3.53.0 and uses Web Locks, requiring Atomics.waitAsync",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/wasm/doc/trunk/persistence.md",
+      "locator": "OPFS with Web Locks",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "26-06",
+      "claim": "opfs-sahpool avoids COOP/COEP and offers high OPFS throughput but does not provide transparent multi-instance concurrency",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/wasm/doc/trunk/persistence.md",
+      "locator": "OPFS SyncAccessHandle Pool VFS",
+      "status": "verified",
+      "notes": "Multi-instance sharing requires explicit application-level coordination."
+    },
+    {
+      "id": "26-07",
+      "claim": "kvvfs stores a database in localStorage or sessionStorage, is main-thread-only in its primary implementation, and supports one database per storage object",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/wasm/doc/trunk/persistence.md",
+      "locator": "Key-Value VFS",
+      "status": "verified",
+      "notes": "Typical storage limits are small, around 5MB."
+    },
+    {
+      "id": "26-08",
+      "claim": "Worker1 and Promiser APIs are deprecated as of 2026-04-15 and are discouraged for new applications",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/wasm/doc/trunk/api-worker1.md",
+      "locator": "Document notice at top",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "26-09",
+      "claim": "An oo1.DB instance corresponds to a sqlite3* database connection and must be closed after use",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/wasm/doc/trunk/api-oo1.md",
+      "locator": "DB Class and DB constructor",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "26-10",
+      "claim": "OPFS locking requires short transactions and clients to handle SQLITE_BUSY under contention",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/wasm/doc/trunk/persistence.md",
+      "locator": "Concurrency and File Locking",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "26-11",
+      "claim": "WASMFS + OPFS requires a custom build and is not part of the canonical sqlite3.wasm build",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/wasm/doc/trunk/persistence.md",
+      "locator": "OPFS over WASMFS",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "26-12",
+      "claim": "A single Worker message should contain the full transaction when using an asynchronous message interface",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/wasm/doc/trunk/api-worker1.md",
+      "locator": "Worker1 limitations and transaction discussion",
+      "status": "derived",
+      "notes": "The course demo uses a synchronous OO1 API inside an application-owned Worker."
+    }
+  ]
+}

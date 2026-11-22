@@ -1,6 +1,6 @@
 # SQLite 源码解剖：从一条 SQL 理解数据库内核
 
-> 28 章 SQLite 内核原理与源码分析的中文阅读路线。已重构 **01–25**；**26–28 保留原版**，后续将逐章核对、绘制可解释的 SVG，并补充可复现实验。
+> 28 章 SQLite 内核原理与源码分析的中文阅读路线。已重构 **01–28**；全部章节均有独立叙事、图解、证据台账与可复现实验。
 
 **课程首页**（GitHub Pages 已部署）：https://1998x-stack.github.io/sqlite-source-analysis-tutorial/
 
@@ -32,9 +32,11 @@
 | 23 | CLI 输入分流、点命令、shell.c.in 与 QRF | 深度重构 |
 | 24 | TCL、TH3、SQL Logic Test、dbsqlfuzz 与故障注入 | 深度重构 |
 | 25 | EQP、stmt_status、PRAGMA optimize 与可重复 benchmark | 深度重构 |
-| 26–28 | 剩余扩展、CLI/WASM 等历史内容 | 原版迁移，待复核 |
+| 26 | SQLite WASM、OO1、Worker、OPFS / opfs-wl / sahpool | 深度重构 |
+| 27 | 3.52 撤回、3.53–3.54 版本演进、浮点转换与 C API | 深度重构 |
+| 28 | canonical build、Extension API、VFS 与加密安全边界 | 深度重构 |
 
-章节清单和真实相对路径以 [courses.json](courses.json) 为准。首页既是学习入口，也清楚标记哪些章节还未完成技术复审。
+章节清单和真实相对路径以 [courses.json](courses.json) 为准。首页既是学习入口，也展示完整 28 章路线、图解数量和统一质量门禁。
 
 ## 项目结构
 
@@ -42,15 +44,14 @@
 .
 ├── index.html                 # GitHub Pages 首页（根目录发布）
 ├── chapters/
-│   ├── 01.html ... 25.html   # 已完成独立叙事 + 图解 + 实验
-│   ├── 26.html ... 28.html   # 从根目录迁移的原版
+│   ├── 01.html ... 28.html   # 全部完成独立叙事 + 图解 + 实验
 │   ├── index.html            # 旧章内“返回首页”兼容跳转
 │   └── theme.css             # 原版页面暂用的兼容主题
 ├── assets/
 │   ├── css/site.css          # 重构版视觉系统
-│   └── svg/*.svg             # 71 张原创可访问的独立 SVG
-├── evidence/01.json ... 25.json
-├── examples/                 # SQL / C 实验（不复制上游 SQLite）
+│   └── svg/*.svg             # 83 张原创可访问的独立 SVG
+├── evidence/01.json ... 28.json
+├── examples/                 # SQL / Python / C / JavaScript 实验（不复制上游 SQLite）
 ├── scripts/                  # 静态检查、浏览器 QA、部署打包
 ├── courses.json              # 28 章导航数据和重构状态
 ├── AGENTS.md                 # 内容技术标准和维护约束
@@ -171,4 +172,29 @@ sqlite3 :memory: < examples/23_cli_workflow.sql
 cc -std=c11 -Wall -Wextra -Werror -O2 examples/25_stmt_status.c -lsqlite3 -o /tmp/25-status
 /tmp/25-status
 python scripts/check_site.py
+```
+
+## 第六轮：26–28 浏览器运行时、版本演进与定制交付
+本批新增 12 张原创 SVG，全站累计 83 张；至此 28 章全部完成独立叙事重构。新增 SQLite WASM 的 Node/Worker 实验、版本门控的 REINDEX EXPRESSIONS 探针、动态 Extension host 和可运行 tracing VFS。新增 26–28 三份证据台账，内部实现以 SQLite 3.54.1 为基线。
+
+本轮关键纠偏：
+- OPFS VFS 运行在 Worker；标准 OPFS 依赖 COOP/COEP，opfs-wl 需要 Web Locks / Atomics.waitAsync，sahpool 有不同并发合同。
+- 官方 SQLite WASM npm 包的 Node.js 支持限定为内存数据库；不能把浏览器 OPFS 示例直接当成 Node 文件持久化。
+- Worker1 / Promiser API 已标记 deprecated；新应用在自建 Worker 中定义消息协议。
+- 3.52.0 曾撤回；3.53.0 重发并修复 WAL-reset 问题；3.54.1 修复部分 32 位构建中的 heap-buffer overflow。
+- sqlite3_result_str() 接收 sqlite3_str* 和所有权标志，不是普通 char* + 长度。
+- SQLITE_OMIT_* 多数不受支持；VFS tracing 示例只记录 xOpen 并委托父 VFS，明确不是加密实现。AES-ECB 旧方案不再作为生产加密示例。
+
+```bash
+python scripts/test_examples.py
+python examples/27_release_probe.py
+(cd examples/26_wasm && npm install && npm run test:node && npm run build)
+cc -std=c11 -Wall -Wextra -Werror -O2 examples/28_vfs_trace.c -lsqlite3 -o /tmp/vfs-trace
+(cd /tmp && /tmp/vfs-trace)
+cc -std=c11 -Wall -Wextra -Werror -O2 -fPIC -shared examples/28_course_ext.c -o /tmp/course_ext.so
+cc -std=c11 -Wall -Wextra -Werror -O2 examples/28_extension_host.c -lsqlite3 -o /tmp/extension-host
+/tmp/extension-host /tmp/course_ext.so
+python scripts/check_site.py
+python scripts/browser_smoke.py
+python scripts/wasm_browser_smoke.py
 ```
