@@ -5,7 +5,10 @@ self.addEventListener('message', async (event) => {
   let db;
   try {
     const sqlite3 = await sqlite3InitModule();
-    const useOpfs = typeof sqlite3.oo1.OpfsDb === 'function';
+    const useOpfs = typeof sqlite3.oo1.OpfsDb === 'function'
+      && typeof navigator !== 'undefined'
+      && typeof navigator.storage?.getDirectory === 'function'
+      && self.crossOriginIsolated === true;
     db = useOpfs
       ? new sqlite3.oo1.OpfsDb('/sqlite-course-worker-demo.sqlite3', 'c')
       : new sqlite3.oo1.DB(':memory:');
