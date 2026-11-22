@@ -196,4 +196,5 @@ cc -std=c11 -Wall -Wextra -Werror -O2 examples/28_extension_host.c -lsqlite3 -o 
 /tmp/extension-host /tmp/course_ext.so
 python scripts/check_site.py
 python scripts/browser_smoke.py
+python scripts/wasm_browser_smoke.py
 ```
