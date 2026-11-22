@@ -1,5 +1,5 @@
 {
-  "description": "第一轮 5 篇教程的原创 SVG 资产；图中示意路径未省略事实边界，所有配图须配文章内的解释和官方来源。",
+  "description": "01–25 章节的原创 SVG 资产；每张图均有独立标题、描述、图注与官方来源，所有示意路径标注事实边界。",
   "figures": [
     {
       "file": "01-sql-path.svg",
@@ -455,6 +455,141 @@
       "source": [
         "https://sqlite.org/vtab.html",
         "https://sqlite.org/c3ref/index_info.html"
+      ]
+    },
+    {
+      "file": "21-inverted-index.svg",
+      "chapter": "21",
+      "source": [
+        "https://sqlite.org/fts5.html",
+        "https://sqlite.org/fts3.html"
+      ]
+    },
+    {
+      "file": "21-segment-merging.svg",
+      "chapter": "21",
+      "source": [
+        "https://sqlite.org/fts5.html",
+        "https://sqlite.org/fts3.html"
+      ]
+    },
+    {
+      "file": "21-tokenizer-ranking.svg",
+      "chapter": "21",
+      "source": [
+        "https://sqlite.org/fts5.html",
+        "https://sqlite.org/fts3.html"
+      ]
+    },
+    {
+      "file": "22-expression-index.svg",
+      "chapter": "22",
+      "source": [
+        "https://sqlite.org/expridx.html",
+        "https://sqlite.org/staleexpridx.html",
+        "https://sqlite.org/changes.html#version_3_53_0"
+      ]
+    },
+    {
+      "file": "22-expression-match.svg",
+      "chapter": "22",
+      "source": [
+        "https://sqlite.org/expridx.html",
+        "https://sqlite.org/staleexpridx.html",
+        "https://sqlite.org/changes.html#version_3_53_0"
+      ]
+    },
+    {
+      "file": "22-stale-selfheal.svg",
+      "chapter": "22",
+      "source": [
+        "https://sqlite.org/expridx.html",
+        "https://sqlite.org/staleexpridx.html",
+        "https://sqlite.org/changes.html#version_3_53_0"
+      ]
+    },
+    {
+      "file": "23-cli-pipeline.svg",
+      "chapter": "23",
+      "source": [
+        "https://sqlite.org/cli.html",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/shell.c.in",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/qrf/qrf.h"
+      ]
+    },
+    {
+      "file": "23-dot-vs-sql.svg",
+      "chapter": "23",
+      "source": [
+        "https://sqlite.org/cli.html",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/shell.c.in",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/qrf/qrf.h"
+      ]
+    },
+    {
+      "file": "23-qrf-pipeline.svg",
+      "chapter": "23",
+      "source": [
+        "https://sqlite.org/cli.html",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/shell.c.in",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/qrf/qrf.h"
+      ]
+    },
+    {
+      "file": "24-test-harnesses.svg",
+      "chapter": "24",
+      "source": [
+        "https://sqlite.org/testing.html",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/test/tester.tcl",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/test/fuzzcheck.c"
+      ]
+    },
+    {
+      "file": "24-anomaly-testing.svg",
+      "chapter": "24",
+      "source": [
+        "https://sqlite.org/testing.html",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/test/tester.tcl",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/test/fuzzcheck.c"
+      ]
+    },
+    {
+      "file": "24-coverage-layers.svg",
+      "chapter": "24",
+      "source": [
+        "https://sqlite.org/testing.html",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/test/tester.tcl",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/test/fuzzcheck.c"
+      ]
+    },
+    {
+      "file": "25-measurement-loop.svg",
+      "chapter": "25",
+      "source": [
+        "https://sqlite.org/eqp.html",
+        "https://sqlite.org/c3ref/stmt_status.html",
+        "https://sqlite.org/lang_analyze.html",
+        "https://sqlite.org/pragma.html"
+      ]
+    },
+    {
+      "file": "25-query-counters.svg",
+      "chapter": "25",
+      "source": [
+        "https://sqlite.org/eqp.html",
+        "https://sqlite.org/c3ref/stmt_status.html",
+        "https://sqlite.org/lang_analyze.html",
+        "https://sqlite.org/pragma.html"
+      ]
+    },
+    {
+      "file": "25-tuning-tradeoffs.svg",
+      "chapter": "25",
+      "source": [
+        "https://sqlite.org/eqp.html",
+        "https://sqlite.org/c3ref/stmt_status.html",
+        "https://sqlite.org/lang_analyze.html",
+        "https://sqlite.org/pragma.html"
       ]
     }
   ]
