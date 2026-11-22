@@ -1,0 +1,6 @@
+CREATE TABLE scores(grp TEXT, n INTEGER);
+INSERT INTO scores VALUES('A',1),('A',2),('A',3),('B',7);
+SELECT grp,n,
+  SUM(n) OVER (PARTITION BY grp ORDER BY n
+    ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS moving
+FROM scores ORDER BY grp,n;
