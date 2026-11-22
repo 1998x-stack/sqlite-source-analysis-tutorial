@@ -1,0 +1,7 @@
+PRAGMA journal_mode=DELETE;
+PRAGMA synchronous=FULL;
+BEGIN IMMEDIATE;
+CREATE TABLE IF NOT EXISTS txdemo(n INTEGER);
+INSERT INTO txdemo VALUES(42);
+COMMIT;
+PRAGMA integrity_check;

@@ -1,0 +1,70 @@
+{
+  "chapter": "15",
+  "reviewed_at": "2026-11-22",
+  "scope": "SQLite DELETE rollback journal and transaction docs; environment-dependent durability assumptions",
+  "claims": [
+    {
+      "id": "15-01",
+      "claim": "Rollback journal holds original pages and must be safe before DB file writes",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/atomiccommit.html",
+      "locator": "3.5 Creating A Rollback Journal",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "15-02",
+      "claim": "DELETE journal mode commits typically by deleting rollback journal",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/atomiccommit.html",
+      "locator": "3.11 Deleting The Rollback Journal",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "15-03",
+      "claim": "Hot journal requires more conditions than file existence",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/atomiccommit.html",
+      "locator": "4.2 Hot Rollback Journals",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "15-04",
+      "claim": "BEGIN IMMEDIATE starts a write transaction and may return BUSY",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/lang_transaction.html",
+      "locator": "2.2 DEFERRED, IMMEDIATE, EXCLUSIVE",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "15-05",
+      "claim": "EXCLUSIVE and IMMEDIATE are equivalent in WAL mode, not rollback mode",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/lang_transaction.html",
+      "locator": "2.2 DEFERRED, IMMEDIATE, EXCLUSIVE",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "15-06",
+      "claim": "WAL commit uses different mechanism than DELETE rollback journal",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/wal.html",
+      "locator": "Overview",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "15-07",
+      "claim": "Demonstration of rollback is not a power-failure injection test",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/atomiccommit.html",
+      "locator": "Assumptions",
+      "status": "illustrative",
+      "notes": "Not actual hardware crash test"
+    }
+  ]
+}
