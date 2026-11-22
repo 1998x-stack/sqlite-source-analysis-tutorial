@@ -219,6 +219,123 @@
         "https://sqlite.org/lang_expr.html",
         "https://sqlite.org/datatype3.html"
       ]
+    },
+    {
+      "file": "11-vdbe-steps.svg",
+      "chapter": "11",
+      "source": [
+        "https://sqlite.org/opcode.html",
+        "https://sqlite.org/c3ref/step.html"
+      ]
+    },
+    {
+      "file": "11-register-trace.svg",
+      "chapter": "11",
+      "source": [
+        "https://sqlite.org/opcode.html",
+        "https://sqlite.org/c3ref/step.html"
+      ]
+    },
+    {
+      "file": "11-cursor-bridge.svg",
+      "chapter": "11",
+      "source": [
+        "https://sqlite.org/opcode.html",
+        "https://sqlite.org/c3ref/step.html"
+      ]
+    },
+    {
+      "file": "12-btree-lookup.svg",
+      "chapter": "12",
+      "source": [
+        "https://sqlite.org/fileformat2.html"
+      ]
+    },
+    {
+      "file": "12-page-layout.svg",
+      "chapter": "12",
+      "source": [
+        "https://sqlite.org/fileformat2.html"
+      ]
+    },
+    {
+      "file": "12-split.svg",
+      "chapter": "12",
+      "source": [
+        "https://sqlite.org/fileformat2.html"
+      ]
+    },
+    {
+      "file": "13-pager-layers.svg",
+      "chapter": "13",
+      "source": [
+        "https://sqlite.org/pragma.html",
+        "https://sqlite.org/lockingv3.html"
+      ]
+    },
+    {
+      "file": "13-pager-states.svg",
+      "chapter": "13",
+      "source": [
+        "https://sqlite.org/pragma.html",
+        "https://sqlite.org/lockingv3.html"
+      ]
+    },
+    {
+      "file": "13-cache-metrics.svg",
+      "chapter": "13",
+      "source": [
+        "https://sqlite.org/pragma.html",
+        "https://sqlite.org/lockingv3.html"
+      ]
+    },
+    {
+      "file": "14-vfs-interface.svg",
+      "chapter": "14",
+      "source": [
+        "https://sqlite.org/vfs.html",
+        "https://sqlite.org/c3ref/io_methods.html"
+      ]
+    },
+    {
+      "file": "14-vfs-trace.svg",
+      "chapter": "14",
+      "source": [
+        "https://sqlite.org/vfs.html",
+        "https://sqlite.org/c3ref/io_methods.html"
+      ]
+    },
+    {
+      "file": "14-vfs-shim.svg",
+      "chapter": "14",
+      "source": [
+        "https://sqlite.org/vfs.html",
+        "https://sqlite.org/c3ref/io_methods.html"
+      ]
+    },
+    {
+      "file": "15-commit-timeline.svg",
+      "chapter": "15",
+      "source": [
+        "https://sqlite.org/atomiccommit.html",
+        "https://sqlite.org/lang_transaction.html"
+      ]
+    },
+    {
+      "file": "15-crash-recovery.svg",
+      "chapter": "15",
+      "source": [
+        "https://sqlite.org/atomiccommit.html",
+        "https://sqlite.org/lang_transaction.html"
+      ]
+    },
+    {
+      "file": "15-transaction-locks.svg",
+      "chapter": "15",
+      "source": [
+        "https://sqlite.org/atomiccommit.html",
+        "https://sqlite.org/lang_transaction.html"
+      ]
     }
   ]
 }
