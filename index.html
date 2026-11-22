@@ -1,370 +1,43 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-    <title>课程目录</title>
-    <link rel="stylesheet" href="theme.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            background: linear-gradient(145deg, #f9fcf5 0%, #e8f3e8 100%);
-            font-family: 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', system-ui, -apple-system, sans-serif;
-            padding: 2rem 1.5rem 1rem;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .container {
-            display: block;
-            max-width: 1400px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.70);
-            backdrop-filter: blur(2px);
-            border-radius: 48px 48px 32px 32px;
-            padding: 2rem 2rem 1.5rem;
-            box-shadow: 0 20px 40px rgba(90, 140, 100, 0.15), 0 8px 20px rgba(0, 30, 20, 0.08);
-            border: 1px solid rgba(255, 245, 200, 0.5);
-        }
-
-        .header {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-            justify-content: space-between;
-            margin-bottom: 2rem;
-            border-bottom: 4px solid #f7d44a;
-            padding-bottom: 0.75rem;
-        }
-
-        .header h1 {
-            font-size: 2.4rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            background: linear-gradient(135deg, #2b7a4b, #3f9e6b);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 2px 8px rgba(60, 140, 80, 0.12);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .header h1 .emoji {
-            font-size: 2.2rem;
-            filter: drop-shadow(0 2px 4px rgba(255, 200, 50, 0.3));
-        }
-
-        .header .sub {
-            font-size: 1rem;
-            background: #fef7e0;
-            padding: 0.3rem 1.2rem;
-            border-radius: 40px;
-            color: #3f6b4a;
-            font-weight: 600;
-            border: 1px solid #f3d98a;
-            box-shadow: 0 2px 6px rgba(200, 160, 50, 0.1);
-            white-space: nowrap;
-        }
-
-        .course-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.2rem;
-            margin: 1.8rem 0 1.2rem;
-        }
-
-        .card {
-            background: #ffffff;
-            border-radius: 28px;
-            padding: 1rem 1.2rem 1rem 1.2rem;
-            box-shadow: 0 6px 14px rgba(70, 120, 80, 0.08), 0 2px 6px rgba(0, 0, 0, 0.02);
-            transition: all 0.2s ease;
-            border: 1px solid rgba(210, 230, 200, 0.5);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            backdrop-filter: blur(2px);
-        }
-
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 14px 24px rgba(70, 140, 90, 0.15), 0 4px 12px rgba(40, 100, 60, 0.05);
-            border-color: #b8d9b0;
-            background: #fefefc;
-        }
-
-        .card-header {
-            display: flex;
-            align-items: baseline;
-            gap: 0.4rem;
-            margin-bottom: 0.4rem;
-            flex-wrap: wrap;
-        }
-
-        .chapter-num {
-            font-size: 1.1rem;
-            font-weight: 700;
-            background: #f5d142;
-            color: #2a5a3a;
-            padding: 0 0.6rem;
-            border-radius: 40px;
-            line-height: 1.6;
-            display: inline-block;
-            box-shadow: inset 0 -2px 0 #dbb42c;
-            letter-spacing: 0.3px;
-            min-width: 2.2rem;
-            text-align: center;
-        }
-
-        .card-title {
-            font-size: 1.2rem;
-            font-weight: 650;
-            color: #1f4d33;
-            letter-spacing: -0.3px;
-            line-height: 1.3;
-            flex: 1;
-        }
-
-        .topic-list {
-            list-style: none;
-            margin-top: 0.3rem;
-            padding-left: 0.2rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.2rem 0.6rem;
-        }
-
-        .topic-list li {
-            font-size: 0.8rem;
-            color: #2d543a;
-            background: #f1f9ee;
-            padding: 0.1rem 0.7rem 0.2rem 1.2rem;
-            border-radius: 30px;
-            line-height: 1.6;
-            position: relative;
-            border: 1px solid #dcebd4;
-            box-shadow: inset 0 1px 2px white;
-        }
-
-        .topic-list li::before {
-            content: "⚡";
-            position: absolute;
-            left: 4px;
-            top: 0px;
-            font-size: 0.7rem;
-            color: #e5b13b;
-        }
-
-        .card-footer {
-            margin-top: 0.6rem;
-            display: flex;
-            justify-content: flex-end;
-            border-top: 1px dashed #d4e8d0;
-            padding-top: 0.5rem;
-        }
-
-        .card-footer a {
-            background: #b7d8b0;
-            color: #1f452b;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.85rem;
-            padding: 0.2rem 1.2rem;
-            border-radius: 40px;
-            transition: 0.15s;
-            border: 1px solid #8fb88a;
-            box-shadow: 0 2px 4px rgba(60, 120, 60, 0.1);
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .card-footer a::after {
-            content: "→";
-            font-size: 1rem;
-            transition: transform 0.1s;
-        }
-
-        .card-footer a:hover {
-            background: #f7d44a;
-            border-color: #dbb42c;
-            color: #1f3d28;
-            box-shadow: 0 4px 8px rgba(200, 160, 40, 0.2);
-            transform: scale(1.02);
-        }
-
-        .card-footer a:active {
-            transform: scale(0.96);
-        }
-
-        .footer {
-            margin-top: 2.5rem;
-            text-align: center;
-            font-size: 1rem;
-            color: #3b6b47;
-            background: #f2fcee;
-            padding: 0.8rem 2rem;
-            border-radius: 60px;
-            display: inline-block;
-            border: 1px solid #c6dfbe;
-            box-shadow: 0 2px 8px rgba(80, 130, 70, 0.08);
-            font-weight: 500;
-            letter-spacing: 0.3px;
-            backdrop-filter: blur(2px);
-        }
-
-        .footer span {
-            background: #f9eec1;
-            padding: 0.1rem 0.8rem;
-            border-radius: 30px;
-            margin: 0 4px;
-        }
-
-        @media (max-width: 640px) {
-            body { padding: 1rem 0.8rem; }
-            .container { padding: 1.2rem 1rem; border-radius: 32px; }
-            .header h1 { font-size: 1.8rem; }
-            .header .sub { font-size: 0.75rem; padding: 0.2rem 0.8rem; }
-            .course-grid { grid-template-columns: 1fr; gap: 1rem; }
-            .card-title { font-size: 1.05rem; }
-            .topic-list li { font-size: 0.7rem; }
-        }
-
-        @media (min-width: 768px) and (max-width: 1024px) {
-            .course-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        .container::before {
-            content: "";
-            display: block;
-            height: 6px;
-            width: 120px;
-            background: linear-gradient(90deg, #f7d44a, #7fc47c, #4aa0b0, #f7b07a);
-            border-radius: 10px;
-            margin-bottom: 0.2rem;
-        }
-
-        .card:nth-child(6n+1) .chapter-num { background: #f7b07a; color: #3d2e1a; }
-        .card:nth-child(6n+2) .chapter-num { background: #a7d4a0; color: #1f452b; }
-        .card:nth-child(6n+3) .chapter-num { background: #f5d44a; color: #2f4d2a; }
-        .card:nth-child(6n+4) .chapter-num { background: #b3d9e8; color: #1a3f4a; }
-        .card:nth-child(6n+5) .chapter-num { background: #f7c6c6; color: #5a2e2e; }
-        .card:nth-child(6n) .chapter-num { background: #c4b3e0; color: #2f2a4a; }
-
-        .state-msg {
-            text-align: center;
-            padding: 3rem;
-            color: #5f7f66;
-            font-size: 1.1rem;
-        }
-        .state-msg.error {
-            color: #b91c1c;
-            background: #fef2f2;
-            border-radius: 20px;
-            margin: 1rem 0;
-        }
-    </style>
-</head>
-<body>
-<div class="container">
-    <div class="header">
-        <h1><span class="emoji"></span><span class="title-text"></span></h1>
-        <div class="sub"></div>
-    </div>
-
-    <div id="cardContainer" class="course-grid"></div>
-
-    <div style="text-align:center;">
-        <div class="footer"></div>
-    </div>
-</div>
-
-<script>
-    (function() {
-        var container = document.getElementById('cardContainer');
-        var emojiEl = document.querySelector('.header .emoji');
-        var titleEl = document.querySelector('.header .title-text');
-        var subEl = document.querySelector('.header .sub');
-        var footerEl = document.querySelector('.footer');
-
-        function showError(msg) {
-            container.innerHTML = '<div class="state-msg error">' + msg + '</div>';
-        }
-
-        fetch('courses.json')
-            .then(function(res) {
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                return res.json();
-            })
-            .then(function(data) {
-                document.title = data.title + ' · 课程目录';
-                emojiEl.textContent = data.emoji;
-                titleEl.textContent = data.title;
-                subEl.textContent = data.subtitle;
-                footerEl.innerHTML = '<span>' + data.chapterCount + '章</span> 实战体系 · 从入门到精通';
-
-                if (!data.chapters || data.chapters.length === 0) {
-                    showError('暂无课程数据');
-                    return;
-                }
-
-                container.innerHTML = '';
-                data.chapters.forEach(function(course) {
-                    var card = document.createElement('div');
-                    card.className = 'card';
-
-                    var headerDiv = document.createElement('div');
-                    headerDiv.className = 'card-header';
-
-                    var numSpan = document.createElement('span');
-                    numSpan.className = 'chapter-num';
-                    numSpan.textContent = course.num;
-
-                    var titleSpan = document.createElement('span');
-                    titleSpan.className = 'card-title';
-                    titleSpan.textContent = course.title;
-
-                    headerDiv.appendChild(numSpan);
-                    headerDiv.appendChild(titleSpan);
-                    card.appendChild(headerDiv);
-
-                    if (course.topics && course.topics.length > 0) {
-                        var topicUl = document.createElement('ul');
-                        topicUl.className = 'topic-list';
-                        course.topics.forEach(function(topic) {
-                            var li = document.createElement('li');
-                            li.textContent = topic;
-                            topicUl.appendChild(li);
-                        });
-                        card.appendChild(topicUl);
-                    }
-
-                    var footerDiv = document.createElement('div');
-                    footerDiv.className = 'card-footer';
-                    var link = document.createElement('a');
-                    link.href = course.file;
-                    link.textContent = '开始学习 ';
-                    footerDiv.appendChild(link);
-                    card.appendChild(footerDiv);
-
-                    container.appendChild(card);
-                });
-            })
-            .catch(function(err) {
-                showError('课程数据加载失败: ' + err.message + '。请刷新页面重试。');
-            });
-    })();
-</script>
-
-<noscript>
-    <div style="background:#fcf0d9; padding:1rem; border-radius:20px; text-align:center; color:#92400e;">
-        请启用 JavaScript 以浏览课程目录。
-    </div>
-</noscript>
-</body>
-</html>
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="28 章 SQLite 源码分析教程。从 sqlite3_prepare_v2 到 VDBE、B-Tree、Pager 与 WAL，使用原创架构图、源码定位与可复现实验逐层学习数据库内核。"><meta name="theme-color" content="#153438"><title>SQLite 源码解剖 · 28 章数据库内核学习路线</title><link rel="stylesheet" href="assets/css/site.css"></head><body>
+<a class="skip" href="#main">跳转至正文</a>
+<header class="sitebar"><div class="shell nav-inner"><a class="brand" href="index.html"><span class="brand-icon">SQLite</span><span>SQLite 源码解剖<br><small>逐层理解数据库内核</small></span></a><nav class="navlinks" aria-label="站点导航"><a href="#route">学习路线</a><a href="#chapters">全部章节</a><a href="https://github.com/1998x-stack/sqlite-source-analysis-tutorial">GitHub 仓库</a></nav></div></header>
+<main id="main">
+<section class="hero"><div class="shell hero-grid"><div><span class="eyebrow">An illustrated guide to SQLite internals</span><h1>从一条 SQL 开始，<br>读懂数据库内核。</h1><p>SQLite 如何把 <code>SELECT</code> 编译成字节码？数据页又如何经过 B-Tree、Pager 和 VFS 被找到？从可观察的实验开始，跟随源码、结构图与控制流，一层一层理解。</p><div class="actions"><a class="btn" href="chapters/01.html">从第一章开始</a><a class="btn secondary" href="#chapters">浏览 28 章目录</a></div><div class="statline"><span><strong>28</strong> 章完整路线</span><span><strong>5</strong> 章首批深度重构</span><span><strong>11</strong> 张专业 SVG 结构图</span></div></div><div class="hero-art"><img src="assets/svg/03-layers.svg" alt="SQL 编译器、虚拟机、B-Tree、Pager 与 VFS 的分层源码地图" width="960" height="490"></div></div></section>
+<section class="band" id="route"><div class="shell"><div class="eyebrow">Reading route</div><h2>不是照着文件名从上到下读，而是沿因果关系探索</h2><p class="band-lead">先观察现象，随后理解生成程序的中间表示，再把每个指令接到数据结构、页缓存、事务与操作系统接口。每一篇力求独立可读；相关前置知识在文中补足。</p><div class="concept-grid">
+<div class="concept"><span class="kicker">01–07 · 基础入口</span><b>构建可追踪的源码坐标</b><p>从运行一条 SQL 开始，找到准备、执行、对象与内存之间的边界。</p></div>
+<div class="concept"><span class="kicker">08–11 · SQL 编译链</span><b>语法如何变成字节码</b><p>Tokenizer、Lemon、Expr 代码生成与 VDBE 指令执行。</p></div>
+<div class="concept"><span class="kicker">12–17 · 存储和事务</span><b>记录如何安全落到页面</b><p>B-Tree、Pager、VFS、WAL、锁与原子提交。</p></div>
+<div class="concept"><span class="kicker">18–22 · 执行与扩展</span><b>查询规划和可扩展性</b><p>优化器、函数、虚拟表、FTS 与索引设计。</p></div>
+<div class="concept"><span class="kicker">23–28 · 工程化</span><b>从理解到动手定制</b><p>CLI、测试、性能、WASM 与工程实验。</p></div>
+<div class="concept"><span class="kicker">学习习惯</span><b>每个结论都可以追问</b><p>它来自哪份源码、哪个 SQLite 版本？怎样用 SQL/C 实验独立核验？</p></div></div></div></section>
+<section class="band" id="chapters" style="background:#edf2ed;border-block:1px solid #dbe4de"><div class="shell"><div class="index-head"><div><div class="eyebrow">Chapter library</div><h2>全部 28 章</h2><p class="band-lead">01–05 已按独立长文重构；06–28 完整迁移保留，仍可阅读，尚待下一轮事实复审和图解扩展。</p></div><div><label for="filter" style="display:block;font-size:13px;font-weight:700;color:#3f5d60">查找主题或章节</label><input id="filter" class="search" type="search" placeholder="例如 VDBE、Pager、WAL" autocomplete="off" aria-controls="chapter-grid"><p id="match-count" role="status" aria-live="polite" style="font-size:12px;margin:6px 0;color:#53676d">显示 28 / 28 章</p></div></div><div id="chapter-grid" class="chapter-grid"><a class="chapter-card" data-search="01 概览与源码获取 历史演进 版本号体系 三种源码获取方式 目录结构鸟瞰" href="chapters/01.html" aria-label="第 01 章 概览与源码获取，已精修"><span class="cardtop"><span class="number">01</span><span class="pill new">深度重构</span></span><h3>概览与源码获取</h3><p>历史演进 · 版本号体系 · 三种源码获取方式</p></a>
+<a class="chapter-card" data-search="02 编译体系深度解析 autotools/makefile.msc/cmake sqlite_* 编译选项 合并版生成内幕 自定义编译实战" href="chapters/02.html" aria-label="第 02 章 编译体系深度解析，已精修"><span class="cardtop"><span class="number">02</span><span class="pill new">深度重构</span></span><h3>编译体系深度解析</h3><p>Autotools/Makefile.msc/CMake · SQLITE_* 编译选项 · 合并版生成内幕</p></a>
+<a class="chapter-card" data-search="03 源码整体架构 10层架构管线 src/目录文件映射 核心头文件关系 生成文件的角色" href="chapters/03.html" aria-label="第 03 章 源码整体架构，已精修"><span class="cardtop"><span class="number">03</span><span class="pill new">深度重构</span></span><h3>源码整体架构</h3><p>10层架构管线 · src/目录文件映射 · 核心头文件关系</p></a>
+<a class="chapter-card" data-search="04 核心数据结构 sqlite3连接对象 parse编译上下文 table/index模式对象 select/expr查询树" href="chapters/04.html" aria-label="第 04 章 核心数据结构，已精修"><span class="cardtop"><span class="number">04</span><span class="pill new">深度重构</span></span><h3>核心数据结构</h3><p>sqlite3连接对象 · Parse编译上下文 · Table/Index模式对象</p></a>
+<a class="chapter-card" data-search="05 内存管理机制 lookaside allocator page cache分配策略 scratch pool 内存统计与调试" href="chapters/05.html" aria-label="第 05 章 内存管理机制，已精修"><span class="cardtop"><span class="number">05</span><span class="pill new">深度重构</span></span><h3>内存管理机制</h3><p>Lookaside allocator · Page cache分配策略 · Scratch pool</p></a>
+<a class="chapter-card" data-search="06 错误处理与断言 错误码体系 rc传播链 assert使用哲学 日志与诊断" href="chapters/06.html" aria-label="第 06 章 错误处理与断言，原版待复核"><span class="cardtop"><span class="number">06</span><span class="pill ">原版保留</span></span><h3>错误处理与断言</h3><p>错误码体系 · rc传播链 · assert使用哲学</p></a>
+<a class="chapter-card" data-search="07 调试基础设施 sqlite_debug模式 ast可视化打印 vdbe跟踪 gdb调试技巧" href="chapters/07.html" aria-label="第 07 章 调试基础设施，原版待复核"><span class="cardtop"><span class="number">07</span><span class="pill ">原版保留</span></span><h3>调试基础设施</h3><p>SQLITE_DEBUG模式 · AST可视化打印 · VDBE跟踪</p></a>
+<a class="chapter-card" data-search="08 词法分析器 tokenize.c概览 关键词完美哈希 token类型系统 词法错误恢复" href="chapters/08.html" aria-label="第 08 章 词法分析器，原版待复核"><span class="cardtop"><span class="number">08</span><span class="pill ">原版保留</span></span><h3>词法分析器</h3><p>tokenize.c概览 · 关键词完美哈希 · Token类型系统</p></a>
+<a class="chapter-card" data-search="09 lemon解析器与语法 lalr(1)解析器 parse.y文件结构 shift/reduce过程 parse上下文" href="chapters/09.html" aria-label="第 09 章 Lemon解析器与语法，原版待复核"><span class="cardtop"><span class="number">09</span><span class="pill ">原版保留</span></span><h3>Lemon解析器与语法</h3><p>LALR(1)解析器 · parse.y文件结构 · Shift/Reduce过程</p></a>
+<a class="chapter-card" data-search="10 表达式编译 expr树构建 递归代码生成 类型推导与affinity in/case/cast编译" href="chapters/10.html" aria-label="第 10 章 表达式编译，原版待复核"><span class="cardtop"><span class="number">10</span><span class="pill ">原版保留</span></span><h3>表达式编译</h3><p>Expr树构建 · 递归代码生成 · 类型推导与Affinity</p></a>
+<a class="chapter-card" data-search="11 vdbe虚拟机 虚拟机设计哲学 主执行循环 寄存器模型 191个opcode详解" href="chapters/11.html" aria-label="第 11 章 VDBE虚拟机，原版待复核"><span class="cardtop"><span class="number">11</span><span class="pill ">原版保留</span></span><h3>VDBE虚拟机</h3><p>虚拟机设计哲学 · 主执行循环 · 寄存器模型</p></a>
+<a class="chapter-card" data-search="12 b-tree存储引擎 b+tree与b-tree 数据库文件格式 页面内部布局 分裂与合并算法" href="chapters/12.html" aria-label="第 12 章 B-Tree存储引擎，原版待复核"><span class="cardtop"><span class="number">12</span><span class="pill ">原版保留</span></span><h3>B-Tree存储引擎</h3><p>B+Tree与B-Tree · 数据库文件格式 · 页面内部布局</p></a>
+<a class="chapter-card" data-search="13 pager与页缓存 pager状态机 pcache lru缓存 脏页管理与回刷 i/o聚合与延迟写" href="chapters/13.html" aria-label="第 13 章 Pager与页缓存，原版待复核"><span class="cardtop"><span class="number">13</span><span class="pill ">原版保留</span></span><h3>Pager与页缓存</h3><p>Pager状态机 · PCache LRU缓存 · 脏页管理与回刷</p></a>
+<a class="chapter-card" data-search="14 vfs抽象层 可插拔vfs设计 sqlite3_io_methods unix/windows实现 自定义vfs实战" href="chapters/14.html" aria-label="第 14 章 VFS抽象层，原版待复核"><span class="cardtop"><span class="number">14</span><span class="pill ">原版保留</span></span><h3>VFS抽象层</h3><p>可插拔VFS设计 · sqlite3_io_methods · Unix/Windows实现</p></a>
+<a class="chapter-card" data-search="15 原子提交与事务 acid实现 rollback journal格式 事务类型选择 崩溃恢复流程" href="chapters/15.html" aria-label="第 15 章 原子提交与事务，原版待复核"><span class="cardtop"><span class="number">15</span><span class="pill ">原版保留</span></span><h3>原子提交与事务</h3><p>ACID实现 · Rollback journal格式 · 事务类型选择</p></a>
+<a class="chapter-card" data-search="16 wal模式深度解析 wal文件格式 checkpoint算法 读写并发模型 3.51.3 wal bug修复" href="chapters/16.html" aria-label="第 16 章 WAL模式深度解析，原版待复核"><span class="cardtop"><span class="number">16</span><span class="pill ">原版保留</span></span><h3>WAL模式深度解析</h3><p>WAL文件格式 · Checkpoint算法 · 读写并发模型</p></a>
+<a class="chapter-card" data-search="17 锁机制与并发 五级文件锁 posix锁实现 windows srwl新锁 死锁预防策略" href="chapters/17.html" aria-label="第 17 章 锁机制与并发，原版待复核"><span class="cardtop"><span class="number">17</span><span class="pill ">原版保留</span></span><h3>锁机制与并发</h3><p>五级文件锁 · POSIX锁实现 · Windows SRWL新锁</p></a>
+<a class="chapter-card" data-search="18 查询规划器 whereloop构建 cost估算模型 连接顺序优化 3.53星型join改进" href="chapters/18.html" aria-label="第 18 章 查询规划器，原版待复核"><span class="cardtop"><span class="number">18</span><span class="pill ">原版保留</span></span><h3>查询规划器</h3><p>WhereLoop构建 · Cost估算模型 · 连接顺序优化</p></a>
+<a class="chapter-card" data-search="19 内置函数实现 函数注册机制 标量与聚合函数 window函数框架 日期时间函数" href="chapters/19.html" aria-label="第 19 章 内置函数实现，原版待复核"><span class="cardtop"><span class="number">19</span><span class="pill ">原版保留</span></span><h3>内置函数实现</h3><p>函数注册机制 · 标量与聚合函数 · Window函数框架</p></a>
+<a class="chapter-card" data-search="20 虚拟表与扩展 sqlite3_module接口 虚拟表生命周期 carray扩展示例 实现kv存储虚拟表" href="chapters/20.html" aria-label="第 20 章 虚拟表与扩展，原版待复核"><span class="cardtop"><span class="number">20</span><span class="pill ">原版保留</span></span><h3>虚拟表与扩展</h3><p>sqlite3_module接口 · 虚拟表生命周期 · carray扩展示例</p></a>
+<a class="chapter-card" data-search="21 fts全文搜索 fts3/4/5演进 倒排索引结构 分词器实现 fts5 ranking" href="chapters/21.html" aria-label="第 21 章 FTS全文搜索，原版待复核"><span class="cardtop"><span class="number">21</span><span class="pill ">原版保留</span></span><h3>FTS全文搜索</h3><p>FTS3/4/5演进 · 倒排索引结构 · 分词器实现</p></a>
+<a class="chapter-card" data-search="22 表达式索引与自修复 表达式索引原理 索引到期原因 3.53自修复机制 reindex expressions" href="chapters/22.html" aria-label="第 22 章 表达式索引与自修复，原版待复核"><span class="cardtop"><span class="number">22</span><span class="pill ">原版保留</span></span><h3>表达式索引与自修复</h3><p>表达式索引原理 · 索引到期原因 · 3.53自修复机制</p></a>
+<a class="chapter-card" data-search="23 cli shell源码 shell.c.in架构 点命令分发表 qrf格式化库 自定义点命令" href="chapters/23.html" aria-label="第 23 章 CLI shell源码，原版待复核"><span class="cardtop"><span class="number">23</span><span class="pill ">原版保留</span></span><h3>CLI shell源码</h3><p>shell.c.in架构 · 点命令分发表 · QRF格式化库</p></a>
+<a class="chapter-card" data-search="24 测试框架 100%分支覆盖 th3测试套件 tcl测试脚本 fuzz测试" href="chapters/24.html" aria-label="第 24 章 测试框架，原版待复核"><span class="cardtop"><span class="number">24</span><span class="pill ">原版保留</span></span><h3>测试框架</h3><p>100%分支覆盖 · TH3测试套件 · TCL测试脚本</p></a>
+<a class="chapter-card" data-search="25 性能分析与优化 explain解读 pragma调优 编译时剪裁 批处理优化实战" href="chapters/25.html" aria-label="第 25 章 性能分析与优化，原版待复核"><span class="cardtop"><span class="number">25</span><span class="pill ">原版保留</span></span><h3>性能分析与优化</h3><p>EXPLAIN解读 · PRAGMA调优 · 编译时剪裁</p></a>
+<a class="chapter-card" data-search="26 sqlite wasm与js绑定 wasm编译流程 opfs/opfs-wl vfs 浏览器端sqlite ext/wasm目录" href="chapters/26.html" aria-label="第 26 章 SQLite WASM与JS绑定，原版待复核"><span class="cardtop"><span class="number">26</span><span class="pill ">原版保留</span></span><h3>SQLite WASM与JS绑定</h3><p>WASM编译流程 · OPFS/opfs-wl VFS · 浏览器端SQLite</p></a>
+<a class="chapter-card" data-search="27 2026新特性源码解读 自修复索引 浮点数17位精度 srwl锁迁移 o_tmpfile支持" href="chapters/27.html" aria-label="第 27 章 2026新特性源码解读，原版待复核"><span class="cardtop"><span class="number">27</span><span class="pill ">原版保留</span></span><h3>2026新特性源码解读</h3><p>自修复索引 · 浮点数17位精度 · SRWL锁迁移</p></a>
+<a class="chapter-card" data-search="28 实战：定制sqlite 功能剪裁 加密vfs实现 extension编写 课程总结" href="chapters/28.html" aria-label="第 28 章 实战：定制SQLite，原版待复核"><span class="cardtop"><span class="number">28</span><span class="pill ">原版保留</span></span><h3>实战：定制SQLite</h3><p>功能剪裁 · 加密VFS实现 · Extension编写</p></a></div><p id="no-results" hidden class="note">未找到匹配章节。请尝试“编译”“页面”“索引”等关键词。</p></div></section>
+<section class="band"><div class="shell"><div class="eyebrow">Reading with evidence</div><h2>事实、示意图和代码示例各有边界</h2><p class="band-lead">当前重构批次尽量链接 SQLite 上游文档，说明哪些图是教学抽象、哪些输出依赖本机版本，避免把一次实验结果推广到所有 SQLite 版本。</p><div class="note"><strong>版本说明：</strong>旧版 06–28 章尚未统一技术复核，部分关于 2026 年新特性、历史锁实现或操作码数量的描述可能有版本依赖；请始终以所用版本源码及 <a href="https://sqlite.org/changes.html">SQLite 官方变更日志</a> 为准。</div><div class="actions"><a class="btn secondary" href="https://sqlite.org/arch.html">SQLite 官方架构文档</a><a class="btn secondary" href="https://sqlite.org/src">SQLite 上游源码（Fossil）</a></div></div></section>
+</main><footer class="foot"><div class="shell foot-inner"><span>SQLite 源码解剖 · 静态页面，开放阅读</span><span><a href="https://github.com/1998x-stack/sqlite-source-analysis-tutorial">源码与贡献</a> · <a href="https://sqlite.org/">SQLite 官方网站</a></span></div></footer>
+<script>(()=>{const input=document.getElementById('filter');const cards=[...document.querySelectorAll('.chapter-card')];const status=document.getElementById('match-count');const empty=document.getElementById('no-results');if(!input)return;input.addEventListener('input',()=>{const q=input.value.trim().toLocaleLowerCase();let n=0;for(const card of cards){const ok=card.dataset.search.includes(q);card.hidden=!ok;if(ok)n++;}status.textContent='显示 '+n+' / '+cards.length+' 章';empty.hidden=n!==0;});})();</script></body></html>
