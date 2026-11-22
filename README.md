@@ -1,6 +1,6 @@
 # SQLite 源码解剖：从一条 SQL 理解数据库内核
 
-> 28 章 SQLite 内核原理与源码分析的中文阅读路线。已重构 **01–20**；**21–28 保留原版**，后续将逐章核对、绘制可解释的 SVG，并补充可复现实验。
+> 28 章 SQLite 内核原理与源码分析的中文阅读路线。已重构 **01–25**；**26–28 保留原版**，后续将逐章核对、绘制可解释的 SVG，并补充可复现实验。
 
 **课程首页**（GitHub Pages 已部署）：https://1998x-stack.github.io/sqlite-source-analysis-tutorial/
 
@@ -27,7 +27,12 @@
 | 18 | Planner、N3、索引前缀、ANALYZE | 深度重构 |
 | 19 | 标量、聚合与窗口 C API | 深度重构 |
 | 20 | sqlite3_module 与可执行的 C 虚拟表 | 深度重构 |
-| 21–28 | 后续优化、扩展、CLI、WASM 等 | 原版迁移，待复核 |
+| 21 | FTS5、倒排索引、segment merge、tokenizer 与 BM25 | 深度重构 |
+| 22 | 表达式索引、stale index、自修复与 REINDEX EXPRESSIONS | 深度重构 |
+| 23 | CLI 输入分流、点命令、shell.c.in 与 QRF | 深度重构 |
+| 24 | TCL、TH3、SQL Logic Test、dbsqlfuzz 与故障注入 | 深度重构 |
+| 25 | EQP、stmt_status、PRAGMA optimize 与可重复 benchmark | 深度重构 |
+| 26–28 | 剩余扩展、CLI/WASM 等历史内容 | 原版迁移，待复核 |
 
 章节清单和真实相对路径以 [courses.json](courses.json) 为准。首页既是学习入口，也清楚标记哪些章节还未完成技术复审。
 
@@ -37,14 +42,14 @@
 .
 ├── index.html                 # GitHub Pages 首页（根目录发布）
 ├── chapters/
-│   ├── 01.html ... 20.html   # 已完成独立叙事 + 图解 + 实验
-│   ├── 21.html ... 28.html   # 从根目录迁移的原版
+│   ├── 01.html ... 25.html   # 已完成独立叙事 + 图解 + 实验
+│   ├── 26.html ... 28.html   # 从根目录迁移的原版
 │   ├── index.html            # 旧章内“返回首页”兼容跳转
 │   └── theme.css             # 原版页面暂用的兼容主题
 ├── assets/
 │   ├── css/site.css          # 重构版视觉系统
-│   └── svg/*.svg             # 56 张原创可访问的独立 SVG
-├── evidence/01.json ... 20.json
+│   └── svg/*.svg             # 71 张原创可访问的独立 SVG
+├── evidence/01.json ... 25.json
 ├── examples/                 # SQL / C 实验（不复制上游 SQLite）
 ├── scripts/                  # 静态检查、浏览器 QA、部署打包
 ├── courses.json              # 28 章导航数据和重构状态
@@ -146,3 +151,24 @@ cc -std=c11 -Wall -Wextra -Werror -O2 examples/20_vtab_rows.c -lsqlite3 -o /tmp/
 python scripts/check_site.py
 ```
 `generate_series` 是 SQLite CLI 常见扩展而非所有核心库默认函数。新增 `examples/20_json_virtual.sql` 为可选 JSON 表值函数练习，主 CI 则运行无需特定扩展安装的 C 模块实验。
+
+## 第五轮：21–25 全文检索、CLI、测试与性能
+本批新增 15 张 SVG，累计 71 张；重写 FTS5、表达式索引、SQLite CLI、测试体系和性能诊断五篇文章。源码定位固定在 SQLite 3.54.1 快照，公开接口与内部实现分别标注。
+
+重点纠偏：
+- FTS5 的 unicode61 不会自动做中文词典分词；automerge 发生在写入路径，不是后台常驻线程。
+- SQLite 3.53.0 确实加入 stale expression index 的有限自修复和 REINDEX EXPRESSIONS，但不是通用 corruption repair。
+- CLI 的 dot commands 属于 Shell，不是 SQL；QRF 的真实接口是 sqlite3_qrf_spec / sqlite3_format_query_result()。
+- TH3 和 dbsqlfuzz 为专有测试工具；fuzzcheck 是 corpus 回放工具，不是 SQL 结果验证器。
+- EQP 是诊断输出；性能对比要记录 source id、数据、参数、事务、缓存和计数器。
+
+```bash
+python scripts/test_examples.py
+python examples/21_tokenizer_probe.py
+python examples/24_test_contracts.py
+python examples/25_benchmark.py
+sqlite3 :memory: < examples/23_cli_workflow.sql
+cc -std=c11 -Wall -Wextra -Werror -O2 examples/25_stmt_status.c -lsqlite3 -o /tmp/25-status
+/tmp/25-status
+python scripts/check_site.py
+```

@@ -11,7 +11,7 @@
 ## 仓库边界
 - `index.html` 是 GitHub Pages 首页；`chapters/NN.html` 是章节唯一正文。
 - 根目录 `01.html` … `28.html` 只是旧链接兼容重定向，**不要在这里写文章内容**。
-- `chapters/21.html` … `28.html` 是尚待逐章技术审计的历史正文，不得标记为已验证。
+- `chapters/26.html` … `28.html` 是尚待逐章技术审计的历史正文，不得标记为已验证。
 - 新版文章 CSS 只维护在 `assets/css/site.css`；旧版页面暂用 `chapters/theme.css`，下一轮迁移后可以逐步淘汰。
 - 每张原创 SVG 存在 `assets/svg/` 并登记到 `assets/svg/manifest.json`。示意箭头、单位与 caption 必须与真实执行关系一致。
 - `courses.json` 是章节清单的事实单源，章节状态字段取值 `revised`、`legacy`。新增、改名、迁移同步修改首页链接。
@@ -64,7 +64,7 @@
 - Tokenizer：Token 边界、字符串转义、UTF-8 字节位置与 parser fallback 必须明确分层。
 - Lemon：构建期 parse.y → parse.c/h 与运行期 token 驱动的 parser 必须区分。玩具 reduce 模型需明确标注非真实 SQLite 状态栈。
 - Expr：区分 AST/寄存器/控制流；NULL 三值逻辑、CASE 惰性、列 affinity 和 CAST 要有固定 SQL 测例。
-- 静态检查与浏览器检查覆盖 `chapters/01.html` 到 `chapters/10.html`；所有新增 C 程序需在 CI 实际编译并运行。
+- 静态检查与浏览器检查覆盖 `chapters/01.html` 到 `chapters/25.html`；所有新增 C 程序需在 CI 实际编译并运行。
 
 ## 11–15 存储与事务专项规则
 - VDBE：用 EXPLAIN 解释职责，严禁固定 opcode 数量、指令地址或把伪指令称为 SQLite 真实指令。
@@ -81,3 +81,11 @@
 - Functions：公开的 sqlite3_create_function_v2 与 sqlite3_create_window_function API 优先于私有 FuncDef 字段图；deterministic 是正确性契约，不是必然 memoization。
 - Virtual table：区分 sqlite3_module/vtab/cursor 的生命周期；xBestIndex 在 prepare，xFilter 在执行期。argvIndex/omit 语义严格，避免错误的类型过滤；普通核心库不保证 generate_series 可用。
 - 更新网页状态、证据台账、SVG manifest、单元实验及浏览器 1440/390/360 验收，才可合并发布。
+
+## 21–25 FTS / CLI / 测试 / 性能专项约束
+- FTS5：区分普通 B-tree 与全文倒排索引；tokenizer 决定 MATCH 语义。unicode61 不等于中文词典分词；trigram 是子串检索 tokenization，不是语言学分词。segment automerge 在写入路径推进，optimize 可能是长操作；external-content 必须同步触发器并支持 rebuild。
+- 表达式索引：Planner 按表达式结构匹配，不做一般代数等价证明。函数必须 deterministic；SQLite 3.53+ 的 stale-expression self-healing 只覆盖特定 UPDATE/DELETE 路径，不等于通用索引修复。REINDEX EXPRESSIONS 是显式重建，不是自修复标志。
+- CLI：分开 shell.c.in 与 SQLite library。process_input / do_meta_command / runOneSqlLine / shell_exec 的源码定位按版本核对；dot command 不是 SQL，不能声称存在 sqlite3_import API。QRF 真实接口以 ext/qrf/qrf.h 为准。
+- 测试：准确区分 TCL、TH3、SQL Logic Test、dbsqlfuzz；TH3/dbsqlfuzz 专有。fuzzcheck 是回放器，不验证 SQL 结果。覆盖率数字必须说明目标、配置和工具，不能泛化到所有扩展/平台。
+- 性能：EQP 输出不是稳定 API；stmt_status 是语句工作量计数器，不等于磁盘 I/O。PRAGMA optimize 依据连接生命周期使用；cache_size 正负单位不同；synchronous 的持久性风险必须说明。任何 benchmark 都不得设硬件无关速度承诺。
+- 本批源码内部引用固定 SQLite 3.54.1 快照，release note 解释 3.53+ 特性；示例运行时按实际 sqlite_version/sourceid 记录。新增 21–25 的 SQL/Python/C/CLI 示例必须在 CI 执行。
