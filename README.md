@@ -46,11 +46,10 @@
 ├── chapters/
 │   ├── 01.html ... 28.html   # 全部完成独立叙事 + 图解 + 实验
 │   ├── index.html            # 旧章内“返回首页”兼容跳转
-│   ├── index.html            # 旧章内“返回首页”兼容跳转
 │   └── theme.css             # 原版页面暂用的兼容主题
 ├── assets/
 │   ├── css/site.css          # 重构版视觉系统
-│   └── svg/*.svg             # 82 张原创可访问的独立 SVG
+│   └── svg/*.svg             # 83 张原创可访问的独立 SVG
 ├── evidence/01.json ... 28.json
 ├── examples/                 # SQL / C 实验（不复制上游 SQLite）
 ├── scripts/                  # 静态检查、浏览器 QA、部署打包
@@ -176,7 +175,7 @@ python scripts/check_site.py
 ```
 
 ## 第六轮：26–28 浏览器运行时、版本演进与定制交付
-本批新增 11 张原创 SVG，全站累计 82 张；至此 28 章全部完成独立叙事重构。新增 SQLite WASM 的 Node/Worker 实验、版本门控的 REINDEX EXPRESSIONS 探针、动态 Extension host 和可运行 tracing VFS。新增 26–28 三份证据台账，内部实现以 SQLite 3.54.1 为基线。
+本批新增 12 张原创 SVG，全站累计 83 张；至此 28 章全部完成独立叙事重构。新增 SQLite WASM 的 Node/Worker 实验、版本门控的 REINDEX EXPRESSIONS 探针、动态 Extension host 和可运行 tracing VFS。新增 26–28 三份证据台账，内部实现以 SQLite 3.54.1 为基线。
 
 本轮关键纠偏：
 - OPFS VFS 运行在 Worker；标准 OPFS 依赖 COOP/COEP，opfs-wl 需要 Web Locks / Atomics.waitAsync，sahpool 有不同并发合同。
@@ -189,7 +188,7 @@ python scripts/check_site.py
 ```bash
 python scripts/test_examples.py
 python examples/27_release_probe.py
-cd examples/26_wasm && npm install && npm run test:node && npm run build
+(cd examples/26_wasm && npm install && npm run test:node && npm run build)
 cc -std=c11 -Wall -Wextra -Werror -O2 examples/28_vfs_trace.c -lsqlite3 -o /tmp/vfs-trace
 (cd /tmp && /tmp/vfs-trace)
 cc -std=c11 -Wall -Wextra -Werror -O2 -fPIC -shared examples/28_course_ext.c -o /tmp/course_ext.so
