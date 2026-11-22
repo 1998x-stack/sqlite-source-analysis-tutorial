@@ -195,6 +195,7 @@ cc -std=c11 -Wall -Wextra -Werror -O2 -fPIC -shared examples/28_course_ext.c -o 
 cc -std=c11 -Wall -Wextra -Werror -O2 examples/28_extension_host.c -lsqlite3 -o /tmp/extension-host
 /tmp/extension-host /tmp/course_ext.so
 python scripts/check_site.py
+python scripts/svg_visual_audit.py
 python scripts/browser_smoke.py
 python scripts/wasm_browser_smoke.py
 ```
@@ -206,12 +207,14 @@ python scripts/wasm_browser_smoke.py
 - **知识依赖导航**：`data/reading_paths.json` 保存 28 篇的 56 条人工策划的机制级关系。文章文末“知识关联”说明为什么关联，并指向另一章的准确小节锚点；首页增加编译、执行、存储、事务链路导航。
 - **高清 SVG**：文章内 SVG 图解均可通过图片链接单独打开矢量原图；360px/390px 屏幕优先保持标签可读并允许局部横向滚动。
 - **独立网页身份**：每章含 canonical、独立 description、Open Graph 元数据以及上一章 / 下一章的 head 关系。28 个旧路径重定向页面使用有效 HTML，并指定正式 canonical。
-- **质量门禁**：`scripts/audit_content.py` 检查首页数据同步、全站链接 fragment、知识图谱、独立 SVG、evidence claim id、元数据唯一性及历史 URL；`scripts/check_site.py` 仍负责基础 HTML/SVG 和本地文件检查。两者均在 Actions 执行。
-- **真实实验验证**：既有 SQL/Python/C/Node/Chromium 和 GitHub Pages 验收流程继续保留，旧路径也纳入回归测试。详见 `audits/2026-11-22.md`。
+- **质量门禁**：`scripts/audit_content.py` 检查首页数据同步、全站链接 fragment、知识图谱、独立 SVG、evidence claim id、元数据唯一性及历史 URL；`scripts/check_site.py` 负责基础结构检查，`scripts/svg_visual_audit.py` 在真实 Chromium 中检测 SVG 文本越界。
+- **证据与实验可公开追溯**：Pages 构建现在包含 `evidence/`、`examples/`、`data/`、`audits/`，提供 [技术证据索引](https://1998x-stack.github.io/sqlite-source-analysis-tutorial/evidence/) 与 [实验源文件索引](https://1998x-stack.github.io/sqlite-source-analysis-tutorial/examples/)；每篇文章都能打开对应的 JSON 证据台账。
+- **真实实验及部署验证**：原有 SQL/Python/C/Node/Chromium 实验继续保留；首页、28 篇文章和两张资源索引页分别在 1440/390/360 测试，共 93 个视口。`scripts/audit_deployment.py` 核验 Pages 实际包含 28 个兼容地址、83 张 SVG、28 份台账、实验和审计记录。详见 `audits/2026-11-22.md`。
 
 ```bash
 python scripts/check_site.py
 python scripts/audit_content.py --output qa-local/editorial-audit.json
+python scripts/build_site.py && python scripts/audit_deployment.py
 python scripts/test_examples.py
 python scripts/browser_smoke.py
 python scripts/wasm_browser_smoke.py

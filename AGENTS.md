@@ -107,3 +107,9 @@
 - 可放大的 SVG 必须有独立可访问的链接；移动端保留清晰的矢量标签，不能以全图缩小到不可读为代价消除横向滚动。键盘用户应可触达 SVG 链接。
 - 全站审计程序至少验证：章节清单与首页状态同步、跨文档 fragment 锚点存在、章节首选 URL、双向前后页导航、evidence id 唯一且与章节一致、SVG manifest 唯一且图解实际使用、SVG 内没有危险的脚本或远程资源。
 - 任何审计数字应来自确定性脚本输出；审核报告必须区分“本地或 CI 实际检查通过”与“未执行的人工视觉和外部链接检查”。
+
+## Pages 公开证据和质量门禁
+- 所有 28 份 evidence JSON、所有仓库内原始实验源码、`data/reading_paths.json` 与 `audits/2026-11-22.md` 必须被 `scripts/build_site.py` 复制进 Pages 发布包；禁止把证据索引写成仅存在于 GitHub 仓库而不对网页读者开放。
+- 维护 `evidence/index.html` 与 `examples/index.html` 时，同步台账 claim 数和实验文件数量；`scripts/audit_content.py` 必须发现失同步。
+- 所有章节的 reference section 下方提供本章 JSON 台账与实验源文件索引链接。删除或移动资源必须同步 `scripts/audit_deployment.py` 和部署工作流 path filters。
+- CI 的完整构建链：静态结构 → 深度内容/链接审计 → 实际 Pages 包体审计 → 可复现 SQL/C/Node/Python → Chromium SVG 文本边界 → 桌面/移动端与资源索引页 → WASM OPFS 持久化。
