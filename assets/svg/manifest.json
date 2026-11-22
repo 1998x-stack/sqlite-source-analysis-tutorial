@@ -543,6 +543,20 @@
       "source": [
         "https://sqlite.org/wasm/doc/trunk/persistence.md"
       ]
+    },
+    {
+      "file": "27-timeline.svg",
+      "chapter": "27",
+      "source": [
+        "https://sqlite.org/changes.html"
+      ]
+    },
+    {
+      "file": "27-planner.svg",
+      "chapter": "27",
+      "source": [
+        "https://sqlite.org/changes.html"
+      ]
     }
   ]
 }

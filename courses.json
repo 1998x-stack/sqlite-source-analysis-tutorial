@@ -305,13 +305,13 @@
       "num": "27",
       "title": "2026新特性源码解读",
       "topics": [
-        "自修复索引",
-        "浮点数17位精度",
-        "SRWL锁迁移",
-        "O_TMPFILE支持"
+        "3.53.0 发布内容",
+        "查询规划器改进",
+        "3.54.0 CLI 与平台",
+        "3.54.1 修复"
       ],
       "file": "chapters/27.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "28",
