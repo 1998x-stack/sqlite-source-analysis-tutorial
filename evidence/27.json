@@ -156,6 +156,33 @@
       "locator": "2026-04-09 (3.53.0), item 8",
       "status": "verified",
       "notes": "Includes change_begin, change_blob, change_double, change_int64, change_null, change_text, change_finish and changegroup_config."
+    },
+    {
+      "id": "27-18",
+      "claim": "SQLite 3.53.0 adds sqlite3_str_truncate/free, sqlite3_carray_bind_v2, SQLITE_PREPARE_FROM_DDL, SQLITE_UTF8_ZT and SQLITE_LIMIT_PARSER_DEPTH",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/changes.html",
+      "locator": "2026-04-09 (3.53.0), item 6 New C-language interfaces",
+      "status": "verified",
+      "notes": "The release note separately lists SQLITE_DBCONFIG_FP_DIGITS."
+    },
+    {
+      "id": "27-19",
+      "claim": "SQLite 3.53.0 QRF output is used by interactive CLI sessions while batch CLI sessions retain legacy output for compatibility",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/changes.html",
+      "locator": "2026-04-09 (3.53.0), item 5c CLI renovations",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "27-20",
+      "claim": "SQLite 3.54.0 drops Windows XP and earlier including Windows CE; Windows support requires Vista or later",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/changes.html",
+      "locator": "2026-10-09 (3.54.0), item 10",
+      "status": "verified",
+      "notes": "The same item notes SRW locks for non-recursive mutexes."
     }
   ]
 }
