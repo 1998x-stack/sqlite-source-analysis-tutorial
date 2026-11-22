@@ -28,20 +28,17 @@ def main() -> None:
                 page.goto((ROOT / file).as_uri(), wait_until="load")
                 dims = page.evaluate("({width: document.documentElement.scrollWidth, viewport: innerWidth})")
                 if dims["width"] > dims["viewport"] + 1:
-                    overflow = page.evaluate("""() => Array.from(document.querySelectorAll('body *'))
-                        .filter(el => el.getBoundingClientRect().right > innerWidth + 1 ||
-                                      el.getBoundingClientRect().left < -1)
-                        .filter(el => {
-                          let p = el.parentElement;
-                          while (p && p !== document.body) {
-                            if (getComputedStyle(p).overflowX === 'auto' ||
-                                getComputedStyle(p).overflowX === 'scroll') return false;
-                            p = p.parentElement;
-                          }
-                          return true;
+                    overflow = page.evaluate("""() => Array.from(document.querySelectorAll('html,body,body *'))
+                        .map(el => {
+                          const r = el.getBoundingClientRect();
+                          return { tag: el.tagName, id: el.id, cls: String(el.className).slice(0,80),
+                                   sw: el.scrollWidth, cw: el.clientWidth,
+                                   left: Math.round(r.left), right: Math.round(r.right),
+                                   overflow: getComputedStyle(el).overflowX };
                         })
-                        .slice(0, 8)
-                        .map(el => ({tag: el.tagName, cls: el.className, width: Math.round(el.getBoundingClientRect().width)}))""")
+                        .filter(x => x.sw > x.cw + 4 || x.right > innerWidth + 4)
+                        .sort((a,b) => (b.sw-b.cw)-(a.sw-a.cw))
+                        .slice(0, 24)""")
                     problems.append(f"horizontal overflow: {dims}; outside elements: {overflow}")
                 images = page.locator("img")
                 for index in range(images.count()):
