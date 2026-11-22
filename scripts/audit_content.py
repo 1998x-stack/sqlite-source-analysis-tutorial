@@ -219,7 +219,7 @@ def audit() -> tuple[list[str], dict]:
                         f"{rel}: missing head next relation", errors)
 
     home = (ROOT / "index.html").read_text(encoding="utf-8")
-    cards = re.findall(r'<a class="chapter-card"\b[^>]*>[\s\S]*?<\/a>', home)
+    cards = re.findall(r'<a class="chapter-card"[^>]*>[\s\S]*?<\/a>', home)
     require(len(cards) == 28, f"homepage: expected 28 cards, got {len(cards)}", errors)
     for c in chapters:
         matches = [card for card in cards if f'href="{c["file"]}"' in card]
