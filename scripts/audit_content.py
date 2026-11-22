@@ -158,6 +158,10 @@ def audit() -> tuple[list[str], dict]:
             require(doc.details >= 1, f"{rel}: missing interactive knowledge check", errors)
             require(doc.related_items == 2, f"{rel}: expected two concept connections", errors)
             require("reading-path" in doc.ids, f"{rel}: missing concept navigation anchor", errors)
+            require(f'../evidence/{num}.json' in doc.hrefs,
+                    f"{rel}: direct evidence ledger link missing", errors)
+            require("../examples/index.html" in doc.hrefs,
+                    f"{rel}: public experiment source link missing", errors)
             require("#reading-path" in doc.hrefs, f"{rel}: TOC does not link to concept navigation", errors)
             expected_related = [f'{item["target"]}.html#{item["anchor"]}' for item in links_by_num[num]]
             require(all(h in doc.hrefs for h in expected_related),
@@ -293,6 +297,35 @@ def audit() -> tuple[list[str], dict]:
                     f"legacy redirect {num}.html has invalid structure", errors)
             require(f'<link rel="canonical" href="{SITE}/chapters/{num}.html">' in content,
                     f"legacy redirect {num}.html missing canonical", errors)
+
+    # The two public source indexes are part of the editorial contract.
+    evidence_index = ROOT / "evidence/index.html"
+    example_index = ROOT / "examples/index.html"
+    require(evidence_index.is_file(), "public evidence index missing", errors)
+    require(example_index.is_file(), "public examples index missing", errors)
+    if evidence_index.is_file():
+        content = evidence_index.read_text(encoding="utf-8")
+        cards = re.findall(r'<a class="chapter-card"[^>]*>[\\s\\S]*?<\\/a>', content)
+        require(len(cards) == 28, "public evidence index should list 28 chapters", errors)
+        require(f'{evidence_count}</strong> 条主张记录' in content,
+                "public evidence index claim count is stale", errors)
+        for c in chapters:
+            require(f'href="{c["num"]}.json"' in content,
+                    f"public evidence index missing chapter {c['num']}", errors)
+    if example_index.is_file():
+        content = example_index.read_text(encoding="utf-8")
+        source_files = [
+            p for p in (ROOT / "examples").rglob("*")
+            if p.is_file() and p.name != "index.html"
+            and not any(part in {"node_modules", "__pycache__", ".vite", "dist"}
+                        for part in p.parts)
+        ]
+        require(f'{len(source_files)} 个实验源文件' in content,
+                "public examples index file count is stale", errors)
+        for source in source_files:
+            ref = source.relative_to(ROOT / "examples").as_posix()
+            require(f'href="{ref}"' in content,
+                    f"public examples index does not expose {ref}", errors)
 
     metrics = {
         "chapters": len(chapters),
