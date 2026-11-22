@@ -557,6 +557,21 @@
       "source": [
         "https://sqlite.org/changes.html"
       ]
+    },
+    {
+      "file": "28-levers.svg",
+      "chapter": "28",
+      "source": [
+        "https://sqlite.org/compile.html",
+        "https://sqlite.org/loadext.html"
+      ]
+    },
+    {
+      "file": "28-extension.svg",
+      "chapter": "28",
+      "source": [
+        "https://sqlite.org/loadext.html"
+      ]
     }
   ]
 }

@@ -317,13 +317,13 @@
       "num": "28",
       "title": "实战：定制SQLite",
       "topics": [
-        "功能剪裁",
-        "加密VFS实现",
-        "Extension编写",
-        "课程总结"
+        "编译时剪裁选项",
+        "扩展注册函数/虚拟表",
+        "VFS 加密与 SEE",
+        "定制后测试验收"
       ],
       "file": "chapters/28.html",
-      "status": "legacy"
+      "status": "revised"
     }
   ],
   "description": "01–20 已逐章独立图解重构并配有证据台账与可复现代码；21–28 为迁移保留的原版，仍待版本化技术审计。"
