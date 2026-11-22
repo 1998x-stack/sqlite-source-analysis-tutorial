@@ -10,7 +10,9 @@ try {
     bind: { $label: 'WASM memory smoke test' },
   });
   const rows = db.selectObjects('SELECT id, label FROM item ORDER BY id');
-  assert.deepEqual(rows, [{ id: 1, label: 'WASM memory smoke test' }]);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].id, 1);
+  assert.equal(rows[0].label, 'WASM memory smoke test');
   assert.equal(db.selectValue('SELECT count(*) FROM item'), 1);
   console.log(`PASS: SQLite WASM ${sqlite3.version.libVersion}; Node.js in-memory database`);
 } finally {
