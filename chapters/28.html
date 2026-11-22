@@ -8,7 +8,7 @@
 
 <section id="requirements" aria-labelledby="h-requirements"><h2 id="h-requirements">1. 先定义交付合同，而不是先挑编译宏</h2>
 <p>假设要把 SQLite 嵌入一个离线终端。需求可能包括 CRUD、事务、参数绑定、索引、WAL 或 rollback journal、备份恢复、加密存储、崩溃恢复、跨版本数据库兼容和可诊断性。每一项都对应不同层：SQL 语法与内置函数、编译选项、扩展注册、VFS I/O、部署密钥管理和测试。</p>
-<p>例如“不要全文搜索”不等于可以随意定义 <code>SQLITE_OMIT_FTS5</code> 并宣称二进制体积会减半；“加密数据库”也不等于只把主数据库文件的字节写成密文。先列出功能与非功能要求，再核对上游支持的构建选项和接口。</p>
+<p>例如“不要全文搜索”不等于可以随意定义一串 <code>SQLITE_OMIT_*</code> 宏并宣称二进制体积会减半；“加密数据库”也不等于只把主数据库文件的字节写成密文。先列出功能与非功能要求，再核对上游支持的构建选项和接口。</p>
 <figure><img src="../assets/svg/28-customization-contract.svg" alt="从应用需求到 SQL 能力、编译配置、扩展、VFS、安全与验收的定制合同"><figcaption>图 1 · 定制方案必须把功能、持久性、升级和安全合同串起来；任何一层缺失都会让“能编译”误变成“可交付”。</figcaption></figure></section>
 
 <section id="build" aria-labelledby="h-build"><h2 id="h-build">2. 编译与功能裁剪：SQLITE_OMIT_* 不是稳定产品配置语言</h2>
@@ -93,7 +93,7 @@ sqlite3_vfs_register(&amp;g_wrapper, 0);</code></pre>
 
 <section id="encryption" aria-labelledby="h-encryption"><h2 id="h-encryption">5. 加密边界：AES-ECB 示例不能成为生产设计</h2>
 <p>SQLite 核心并不提供一个可以通过几行 C 代码开启的通用透明数据库加密开关。加密可以由专门的 SQLite 扩展、商业加密版本或经过安全审查的存储层实现；但选择哪一层，会决定数据库格式、备份兼容、WAL 行为和密钥管理方式。</p>
-<p>旧版示例中的 AES-256-ECB 不具备现代文件加密所需的安全属性：相同明文块会产生相同密文块；它没有认证标签来检测篡改；示例还把密钥直接当作字符串，没有 KDF、随机盐、密钥轮换或错误处理。把固定 IV 按文件偏移推导出来，也不能自动保证 nonce 在每次改写后唯一。这样的代码只能作为反例，不能保留为“加密 VFS 核心实现”。</p>
+<p>旧版示例中的 AES-256-ECB 不具备现代文件加密所需的安全属性：相同明文块会产生相同密文块；它没有认证标签来检测篡改；示例还把密钥直接当作字符串，没有 KDF、随机盐、密钥轮换或错误处理。即便改用带 nonce/IV 的模式，也必须证明同一密钥下 nonce 不重复，并处理崩溃恢复。这样的代码只能作为反例，不能保留为“加密 VFS 核心实现”。</p>
 <figure><img src="../assets/svg/28-vfs-encryption-boundary.svg" alt="SQLite 核心通过 VFS 访问数据库、journal、WAL 和临时文件；加密边界必须覆盖完整 I/O 生命周期"><figcaption>图 4 · VFS 层加密不是只处理主数据库文件的 xWrite；journal、WAL、临时文件、锁与恢复路径都必须纳入威胁模型。</figcaption></figure>
 <p>设计页面级或文件级加密时，至少要回答：每个加密单元如何认证；nonce 如何保证在同一密钥下不重复；页号、文件类型、数据库身份和格式版本是否进入认证上下文；密钥如何从用户凭据安全派生；错误密钥与篡改如何区分；WAL、rollback journal、临时文件和备份如何处理；崩溃中途写入如何恢复；如何 rekey 和升级文件格式。</p>
 <div class="callout warn"><strong>生产建议</strong>不要把本教程中的 tracing VFS 改几个函数就称为安全加密方案。若需要透明加密，优先评估有独立安全设计、测试和维护记录的方案（例如 SQLCipher 或 SQLite SEE），并逐项核对其数据库格式、WAL、备份、平台支持、许可和密钥管理要求。</div>
