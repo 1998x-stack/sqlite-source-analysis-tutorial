@@ -1,0 +1,399 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-11-22",
+  "description": "Curated mechanism-level cross-links. Each target is an independently resolvable chapter section, not a strict learning prerequisite.",
+  "paths": {
+    "10": [
+      {
+        "target": "11",
+        "anchor": "engine",
+        "title": "生成好的寄存器代码如何执行",
+        "reason": "把 CASE 和三值逻辑的控制流落到 VDBE 指令循环。"
+      },
+      {
+        "target": "22",
+        "anchor": "matching",
+        "title": "表达式结构为什么影响索引匹配",
+        "reason": "关联编译器 AST、deterministic 函数与表达式索引。"
+      }
+    ],
+    "11": [
+      {
+        "target": "12",
+        "anchor": "key",
+        "title": "Cursor 是怎样定位一条记录的",
+        "reason": "把虚拟机游标与 B-Tree 的键、Cell 和页指针联系起来。"
+      },
+      {
+        "target": "25",
+        "anchor": "counters",
+        "title": "如何量化一段 VDBE 程序的工作",
+        "reason": "利用 stmt_status 观察步数、全表扫描与排序工作量。"
+      }
+    ],
+    "12": [
+      {
+        "target": "13",
+        "anchor": "states",
+        "title": "磁盘页怎样进入 Pager/PCache",
+        "reason": "文件格式与缓存状态属于两种层次，不能混为一谈。"
+      },
+      {
+        "target": "15",
+        "anchor": "journal",
+        "title": "修改 B-Tree 页后如何保证可恢复",
+        "reason": "旧页备份与 journal sync 才是回滚模式原子提交的关键。"
+      }
+    ],
+    "13": [
+      {
+        "target": "14",
+        "anchor": "objects",
+        "title": "缓存未命中时是谁执行真实 I/O",
+        "reason": "将 PCache 的抽象页操作接到 sqlite3_io_methods。"
+      },
+      {
+        "target": "16",
+        "anchor": "readers",
+        "title": "WAL 快照会怎样影响页的可见性",
+        "reason": "区分连接缓存命中与读者 end mark 所选择的数据库版本。"
+      }
+    ],
+    "14": [
+      {
+        "target": "15",
+        "anchor": "acid",
+        "title": "为什么文件同步决定事务持久性",
+        "reason": "xSync、锁与文件删除参与 rollback journal 的提交协议。"
+      },
+      {
+        "target": "28",
+        "anchor": "vfs",
+        "title": "何时需要写自定义 VFS 装饰器",
+        "reason": "从观察型 shim 走向完整 I/O 合同与安全审查。"
+      }
+    ],
+    "15": [
+      {
+        "target": "16",
+        "anchor": "format",
+        "title": "WAL 与 rollback journal 的提交对象不同",
+        "reason": "对照 WAL frame 追加和旧页日志，不混用两种提交时序。"
+      },
+      {
+        "target": "17",
+        "anchor": "rollback",
+        "title": "事务启动方式怎样改变锁争用",
+        "reason": "把 DEFERRED、IMMEDIATE 和 EXCLUSIVE 放回并发状态机。"
+      }
+    ],
+    "16": [
+      {
+        "target": "17",
+        "anchor": "wal",
+        "title": "旧读快照为何不能直接升级为写者",
+        "reason": "理解 SQLITE_BUSY_SNAPSHOT 与单写者限制的根源。"
+      },
+      {
+        "target": "26",
+        "anchor": "storage",
+        "title": "浏览器 OPFS 上的 WAL 为什么不同",
+        "reason": "无常规共享内存 API 时，WASM 的锁模式限制了 WAL 并发收益。"
+      }
+    ],
+    "17": [
+      {
+        "target": "16",
+        "anchor": "readers",
+        "title": "快照 end mark 如何造成写入升级失败",
+        "reason": "当其他连接已提交后，旧读者需要重新开启写事务。"
+      },
+      {
+        "target": "25",
+        "anchor": "pragmas",
+        "title": "锁冲突与 synchronous 参数如何取舍",
+        "reason": "将延迟、可靠性与重试策略放进可复现测量。"
+      }
+    ],
+    "18": [
+      {
+        "target": "22",
+        "anchor": "matching",
+        "title": "为什么函数表达式索引不一定命中",
+        "reason": "优化器按表达式结构匹配，并不做一般代数证明。"
+      },
+      {
+        "target": "25",
+        "anchor": "eqp",
+        "title": "如何验证索引选择是否真的更快",
+        "reason": "不要仅凭 SEARCH/SCAN 标签判断性能收益。"
+      }
+    ],
+    "19": [
+      {
+        "target": "22",
+        "anchor": "deterministic",
+        "title": "自定义函数能否进入索引",
+        "reason": "DETERMINISTIC 是正确性合同，不等于自动 memoization。"
+      },
+      {
+        "target": "20",
+        "anchor": "best",
+        "title": "函数和虚拟表有哪些不同扩展点",
+        "reason": "比较 scalar callback 与 xBestIndex/xFilter 的阶段和职责。"
+      }
+    ],
+    "20": [
+      {
+        "target": "18",
+        "anchor": "where",
+        "title": "虚拟表如何向 Planner 报告代价",
+        "reason": "xBestIndex 约束协商与 WhereLoop 路径选择互相影响。"
+      },
+      {
+        "target": "21",
+        "anchor": "tokenizer",
+        "title": "FTS5 如何把查询翻译成倒排检索",
+        "reason": "从普通虚拟表接口进入全文索引的特殊存储结构。"
+      }
+    ],
+    "21": [
+      {
+        "target": "22",
+        "anchor": "why",
+        "title": "FTS 倒排索引与表达式索引有何差异",
+        "reason": "两者优化完全不同的访问模式，不能用同一索引术语概括。"
+      },
+      {
+        "target": "25",
+        "anchor": "benchmark",
+        "title": "MATCH 与 LIKE 怎样做公平性能对照",
+        "reason": "记录 tokenizer、数据量、缓存热度及实际查询语义。"
+      }
+    ],
+    "22": [
+      {
+        "target": "27",
+        "anchor": "selfheal",
+        "title": "为什么 3.53.0 要处理 stale expression index",
+        "reason": "把表达式值漂移放进版本升级与错误修复的历史背景。"
+      },
+      {
+        "target": "18",
+        "anchor": "where",
+        "title": "表达式索引怎样参与 Planner 决策",
+        "reason": "回看 WhereLoop 与表达式结构匹配的优化限制。"
+      }
+    ],
+    "23": [
+      {
+        "target": "24",
+        "anchor": "tcl",
+        "title": "CLI 点命令如何进入自动化测试",
+        "reason": "区分 shell 工具行为与 SQLite 核心库 API。"
+      },
+      {
+        "target": "27",
+        "anchor": "features",
+        "title": "QRF 从哪个版本改变了交互展示",
+        "reason": "对比 3.53 CLI 格式化与批处理兼容策略。"
+      }
+    ],
+    "24": [
+      {
+        "target": "15",
+        "anchor": "recovery",
+        "title": "事务正确性怎样做故障注入",
+        "reason": "从 rollback journal 的恢复条件出发设计真实断言。"
+      },
+      {
+        "target": "25",
+        "anchor": "benchmark",
+        "title": "怎样把性能基准也做成回归实验",
+        "reason": "把固定数据、环境参数和测量误差写入测试合同。"
+      }
+    ],
+    "25": [
+      {
+        "target": "18",
+        "anchor": "lab",
+        "title": "Planner 输出如何与真实性能建立联系",
+        "reason": "先限制数据、统计信息和索引，再比较执行工作量。"
+      },
+      {
+        "target": "13",
+        "anchor": "measure",
+        "title": "缓存 HIT/MISS 为什么需要分开测",
+        "reason": "区分内存命中、VDBE 步数与磁盘同步耗时。"
+      }
+    ],
+    "26": [
+      {
+        "target": "14",
+        "anchor": "objects",
+        "title": "浏览器 VFS 与传统 VFS 的共性",
+        "reason": "SQLite core 仍使用文件方法合同，只是后端 API 改变。"
+      },
+      {
+        "target": "16",
+        "anchor": "checkpoint",
+        "title": "WASM 上的 WAL 能否复制桌面并发模型",
+        "reason": "比较共享内存能力、end mark 和独占锁要求。"
+      }
+    ],
+    "27": [
+      {
+        "target": "22",
+        "anchor": "selfheal",
+        "title": "版本升级为何暴露表达式索引旧键",
+        "reason": "从 stale index 的有限自修复回溯索引一致性问题。"
+      },
+      {
+        "target": "23",
+        "anchor": "qrf",
+        "title": "新版 CLI 的 QRF 为什么不属于 SQL 执行器",
+        "reason": "区分 SQL 查询结果与 shell 的终端排版层。"
+      }
+    ],
+    "28": [
+      {
+        "target": "02",
+        "anchor": "options",
+        "title": "为什么 OMIT 宏必须从构建链复核",
+        "reason": "源码生成器、编译选项和 amalgamation 要保持一致。"
+      },
+      {
+        "target": "14",
+        "anchor": "shims",
+        "title": "VFS 装饰器该遵守哪些 I/O 合同",
+        "reason": "用只观察 xOpen 的 shim 区分可诊断性与加密能力。"
+      }
+    ],
+    "01": [
+      {
+        "target": "02",
+        "anchor": "routes",
+        "title": "源码包如何变成可执行程序",
+        "reason": "比较 canonical source 与 amalgamation，避免从错误的构建产物寻找源码。"
+      },
+      {
+        "target": "03",
+        "anchor": "boundary",
+        "title": "从 prepare 走向整个内核",
+        "reason": "把第一条 SQL 的生命周期放进编译、执行和存储的整体结构中。"
+      }
+    ],
+    "02": [
+      {
+        "target": "09",
+        "anchor": "grammar",
+        "title": "Lemon 是怎样参与源码生成的",
+        "reason": "理解 parse.y 与生成的 parser C 代码不是同一种输入。"
+      },
+      {
+        "target": "28",
+        "anchor": "build",
+        "title": "定制编译何时会破坏兼容性",
+        "reason": "从可用构建选项延伸到 OMIT 宏、ABI 和交付验证。"
+      }
+    ],
+    "03": [
+      {
+        "target": "10",
+        "anchor": "tree",
+        "title": "表达式树如何进入寄存器",
+        "reason": "让 Compiler 与 VDBE 的边界对应到具体内部对象。"
+      },
+      {
+        "target": "12",
+        "anchor": "page",
+        "title": "数据最终落在哪种 B-Tree 页上",
+        "reason": "把抽象的存储访问与实际文件页布局连接起来。"
+      }
+    ],
+    "04": [
+      {
+        "target": "09",
+        "anchor": "grammar",
+        "title": "语法树从哪里产生",
+        "reason": "沿解析器的 shift/reduce 路径追踪 Expr 与 Select 的诞生。"
+      },
+      {
+        "target": "11",
+        "anchor": "lifecycle",
+        "title": "运行态对象为何需要独立生命周期",
+        "reason": "将一次 prepare 的对象状态与 step/reset/finalize 的资源管理分开。"
+      }
+    ],
+    "05": [
+      {
+        "target": "13",
+        "anchor": "measure",
+        "title": "页缓存的命中率如何观测",
+        "reason": "Lookaside 统计不等同于 PCache 的 HIT/MISS。"
+      },
+      {
+        "target": "25",
+        "anchor": "counters",
+        "title": "从内存计数走向完整性能诊断",
+        "reason": "使用同一版本的测量数据避免凭单一指标臆断加速。"
+      }
+    ],
+    "06": [
+      {
+        "target": "17",
+        "anchor": "busy",
+        "title": "锁冲突返回的错误意味着什么",
+        "reason": "比较 BUSY、LOCKED 和 BUSY_SNAPSHOT 的条件与恢复策略。"
+      },
+      {
+        "target": "24",
+        "anchor": "anomaly",
+        "title": "如何让错误路径成为回归测试",
+        "reason": "把异常路径纳入故障注入而不是只验证成功执行。"
+      }
+    ],
+    "07": [
+      {
+        "target": "18",
+        "anchor": "lab",
+        "title": "如何解读查询计划而不过度拟合",
+        "reason": "将 EQP 的访问路径与数据库版本、数据分布一起记录。"
+      },
+      {
+        "target": "25",
+        "anchor": "eqp",
+        "title": "诊断信息与性能指标有什么不同",
+        "reason": "EQP 不是执行时间；语句计数器补足可量化证据。"
+      }
+    ],
+    "08": [
+      {
+        "target": "09",
+        "anchor": "shift",
+        "title": "Token 如何驱动 Lemon 状态机",
+        "reason": "观察标识符和关键字被提交给 parser 后的归约。"
+      },
+      {
+        "target": "10",
+        "anchor": "tree",
+        "title": "Token 如何最终变成表达式计算",
+        "reason": "将扫描边界继续接到 AST、代码生成与 NULL 语义。"
+      }
+    ],
+    "09": [
+      {
+        "target": "10",
+        "anchor": "tree",
+        "title": "归约后的 AST 怎样生成 VDBE",
+        "reason": "区分 parse.y 的文法动作与 expr.c 的运行时代码生成。"
+      },
+      {
+        "target": "24",
+        "anchor": "fuzz",
+        "title": "怎样测试解析器异常输入",
+        "reason": "从语法错误和资源回收拓展到 fuzzing 与回归测试。"
+      }
+    ]
+  }
+}
