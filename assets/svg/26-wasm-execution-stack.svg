@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="560" viewBox="0 0 1000 560" role="img" aria-labelledby="svg-title svg-desc">
+<title id="svg-title">SQLite WASM 的执行栈</title><desc id="svg-desc">从 UI 或 Worker 到 JavaScript API、WebAssembly、SQLite 核心、VFS 和底层存储的调用分层。</desc>
+<defs>
+ <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#147f80"/></marker>
+ <marker id="arrow-rust" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#c76743"/></marker>
+ <style>
+ .bg{fill:#fffdf9}.teal{fill:#dff1eb;stroke:#147f80;stroke-width:2}.rust{fill:#fff0e8;stroke:#c76743;stroke-width:2}.violet{fill:#eeeafd;stroke:#7161b5;stroke-width:2}.gold{fill:#fbf1d9;stroke:#a77b28;stroke-width:2}.line{stroke:#147f80;stroke-width:3;fill:none;marker-end:url(#arrow)}.line-r{stroke:#c76743;stroke-width:3;fill:none;marker-end:url(#arrow-rust)}.dash{stroke:#8c9c98;stroke-width:2;stroke-dasharray:7 7;fill:none}.head{font:700 29px system-ui,sans-serif;fill:#153438}.label{font:700 21px system-ui,sans-serif;fill:#203035}.small{font:17px system-ui,sans-serif;fill:#53676d}.tiny{font:15px system-ui,sans-serif;fill:#53676d}
+ </style>
+</defs>
+<rect class="bg" width="1000" height="560" rx="22"/>
+<text x="48" y="52" class="head">SQLite WASM 的执行栈</text>
+<rect x="48" y="95" width="190" height="106" rx="16" class="teal"/><text x="143" y="136" text-anchor="middle" class="label">应用层</text><text x="143" y="166" text-anchor="middle" class="small">UI / 业务逻辑</text>
+<rect x="285" y="95" width="190" height="106" rx="16" class="violet"/><text x="380" y="136" text-anchor="middle" class="label">Worker（可选）</text><text x="380" y="166" text-anchor="middle" class="small">线程隔离边界</text>
+<rect x="522" y="95" width="190" height="106" rx="16" class="rust"/><text x="617" y="136" text-anchor="middle" class="label">JS API / OO1</text><text x="617" y="166" text-anchor="middle" class="small">DB · Stmt · bind</text>
+<rect x="759" y="95" width="190" height="106" rx="16" class="gold"/><text x="854" y="136" text-anchor="middle" class="label">WASM 模块</text><text x="854" y="166" text-anchor="middle" class="small">C 内核编译产物</text>
+<path d="M238 148 H278" class="line"/><path d="M475 148 H515" class="line"/><path d="M712 148 H752" class="line"/><path d="M854 201 V250" class="line"/>
+<rect x="255" y="250" width="690" height="106" rx="16" class="teal"/><text x="600" y="292" text-anchor="middle" class="label">SQLite 核心</text><text x="600" y="325" text-anchor="middle" class="small">Parser → Planner → VDBE → B-Tree / Pager</text>
+<path d="M600 356 V402" class="line"/><rect x="255" y="402" width="690" height="74" rx="14" class="violet"/><text x="600" y="447" text-anchor="middle" class="label">VFS：文件、同步与锁的抽象边界</text>
+<path d="M410 476 V505 H178 V520" class="line"/><path d="M600 476 V520" class="line"/><path d="M790 476 V505 H880 V520" class="line"/>
+<rect x="65" y="520" width="225" height="28" rx="8" class="gold"/><text x="178" y="541" text-anchor="middle" class="tiny">内存 / 临时存储</text><rect x="485" y="520" width="230" height="28" rx="8" class="teal"/><text x="600" y="541" text-anchor="middle" class="tiny">OPFS / Web Storage</text><rect x="805" y="520" width="150" height="28" rx="8" class="rust"/><text x="880" y="541" text-anchor="middle" class="tiny">自定义 VFS</text>
+<text x="48" y="245" class="tiny">主线程或 Worker 承载 JS；OPFS VFS 需要 Worker</text>
+</svg>

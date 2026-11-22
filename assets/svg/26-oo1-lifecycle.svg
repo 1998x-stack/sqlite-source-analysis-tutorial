@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="560" viewBox="0 0 1000 560" role="img" aria-labelledby="svg-title svg-desc">
+<title id="svg-title">OO1 的连接与语句生命周期</title><desc id="svg-desc">JS 初始化模块后创建 DB，执行 SQL 时内部管理 prepared statement，最终释放语句和数据库连接。</desc>
+<defs>
+ <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#147f80"/></marker>
+ <marker id="arrow-rust" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#c76743"/></marker>
+ <style>
+ .bg{fill:#fffdf9}.teal{fill:#dff1eb;stroke:#147f80;stroke-width:2}.rust{fill:#fff0e8;stroke:#c76743;stroke-width:2}.violet{fill:#eeeafd;stroke:#7161b5;stroke-width:2}.gold{fill:#fbf1d9;stroke:#a77b28;stroke-width:2}.line{stroke:#147f80;stroke-width:3;fill:none;marker-end:url(#arrow)}.line-r{stroke:#c76743;stroke-width:3;fill:none;marker-end:url(#arrow-rust)}.dash{stroke:#8c9c98;stroke-width:2;stroke-dasharray:7 7;fill:none}.head{font:700 29px system-ui,sans-serif;fill:#153438}.label{font:700 21px system-ui,sans-serif;fill:#203035}.small{font:17px system-ui,sans-serif;fill:#53676d}.tiny{font:15px system-ui,sans-serif;fill:#53676d}
+ </style>
+</defs>
+<rect class="bg" width="1000" height="560" rx="22"/>
+<text x="48" y="52" class="head">OO1 的连接与语句生命周期</text>
+<rect x="70" y="118" width="220" height="100" rx="16" class="teal"/><text x="180" y="158" text-anchor="middle" class="label">await initModule()</text><text x="180" y="188" text-anchor="middle" class="small">WASM + JS API ready</text><path d="M290 168 H355" class="line"/>
+<rect x="355" y="118" width="220" height="100" rx="16" class="violet"/><text x="465" y="158" text-anchor="middle" class="label">new oo1.DB()</text><text x="465" y="188" text-anchor="middle" class="small">一个 sqlite3* 连接</text><path d="M575 168 H640" class="line"/>
+<rect x="640" y="118" width="290" height="100" rx="16" class="rust"/><text x="785" y="158" text-anchor="middle" class="label">DB.exec / prepare</text><text x="785" y="188" text-anchor="middle" class="small">SQL → statement</text><path d="M785 218 V275" class="line"/>
+<rect x="630" y="275" width="310" height="75" rx="14" class="gold"/><text x="785" y="321" text-anchor="middle" class="label">bind → step → rows</text><path d="M785 350 V400" class="line"/>
+<rect x="630" y="400" width="310" height="75" rx="14" class="teal"/><text x="785" y="446" text-anchor="middle" class="label">finalize statement</text><path d="M630 438 H465 V475" class="line-r"/>
+<rect x="330" y="475" width="270" height="65" rx="14" class="violet"/><text x="465" y="515" text-anchor="middle" class="label">db.close()</text><path d="M465 218 V260 H180 V300" class="dash"/>
+<rect x="70" y="300" width="220" height="110" rx="14" class="gold"/><text x="180" y="342" text-anchor="middle" class="label">try / finally</text><text x="180" y="372" text-anchor="middle" class="small">statement 与 DB</text><text x="180" y="395" text-anchor="middle" class="small">按逆序释放</text><text x="48" y="82" class="small">推荐：DB.exec 管理短语句；手动 prepare 时必须显式 finalize</text>
+</svg>
