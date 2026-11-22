@@ -6,60 +6,55 @@
   "chapters": [
     {
       "num": "01",
-      "title": "概览与源码获取",
+      "title": "从一条 SQL 开始：SQLite 源码与获取",
       "topics": [
-        "历史演进",
-        "版本号体系",
-        "三种源码获取方式",
-        "目录结构鸟瞰"
+        "SQLite 源码发布方式",
+        "Canonical 与 Amalgamation",
+        "查找 src/ 和执行实验"
       ],
       "file": "chapters/01.html",
       "status": "revised"
     },
     {
       "num": "02",
-      "title": "编译体系深度解析",
+      "title": "SQLite 编译与源码生成链",
       "topics": [
-        "Autotools/Makefile.msc/CMake",
-        "SQLITE_* 编译选项",
-        "合并版生成内幕",
-        "自定义编译实战"
+        "Canonical 与合并版构建",
+        "编译宏的版本边界",
+        "Lemon 与源码生成工具"
       ],
       "file": "chapters/02.html",
       "status": "revised"
     },
     {
       "num": "03",
-      "title": "源码整体架构",
+      "title": "SQLite 内核分层架构",
       "topics": [
-        "10层架构管线",
-        "src/目录文件映射",
-        "核心头文件关系",
-        "生成文件的角色"
+        "编译期 / 执行期 / 存储期",
+        "Parser → VDBE → B-Tree",
+        "Pager 与 VFS 的职责边界"
       ],
       "file": "chapters/03.html",
       "status": "revised"
     },
     {
       "num": "04",
-      "title": "核心数据结构",
+      "title": "SQLite 内部对象与生命周期",
       "topics": [
-        "sqlite3连接对象",
-        "Parse编译上下文",
-        "Table/Index模式对象",
-        "Select/Expr查询树"
+        "sqlite3 连接级状态",
+        "Parse / Expr / Select 语义树",
+        "Vdbe / Op 与运行时资源"
       ],
       "file": "chapters/04.html",
       "status": "revised"
     },
     {
       "num": "05",
-      "title": "内存管理机制",
+      "title": "SQLite 内存管理：Lookaside 与页缓存",
       "topics": [
-        "Lookaside allocator",
-        "Page cache分配策略",
-        "Scratch pool",
-        "内存统计与调试"
+        "连接级 Lookaside",
+        "PCache 与内存统计",
+        "Scratch 的历史与当前边界"
       ],
       "file": "chapters/05.html",
       "status": "revised"

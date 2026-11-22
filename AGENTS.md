@@ -11,10 +11,10 @@
 ## 仓库边界
 - `index.html` 是 GitHub Pages 首页；`chapters/NN.html` 是章节唯一正文。
 - 根目录 `01.html` … `28.html` 只是旧链接兼容重定向，**不要在这里写文章内容**。
-- `chapters/26.html` … `28.html` 是尚待逐章技术审计的历史正文，不得标记为已验证。
-- 新版文章 CSS 只维护在 `assets/css/site.css`；旧版页面暂用 `chapters/theme.css`，下一轮迁移后可以逐步淘汰。
+- `chapters/01.html` … `28.html` 均已完成首轮重构；后续改动仍需对涉及的技术主张、源码版本和实验逐项重新验收。
+- 全部 28 篇的视觉系统统一维护在 `assets/css/site.css`；`chapters/theme.css` 只用于历史兼容，不得在新页面重新引入。
 - 每张原创 SVG 存在 `assets/svg/` 并登记到 `assets/svg/manifest.json`。示意箭头、单位与 caption 必须与真实执行关系一致。
-- `courses.json` 是章节清单的事实单源，章节状态字段取值 `revised`、`legacy`。新增、改名、迁移同步修改首页链接。
+- `courses.json` 是章节清单的事实单源，目前全部状态为 `revised`。新增、改名、迁移必须同步首页链接、站内知识路径、SEO 元数据、章节导航与审计报告。
 - `evidence/NN.json` 为每篇文章的主张台账，`examples/` 为可复现实验，`scripts/` 为质量门禁，`.github/workflows/` 为 CI 和部署。
 
 ## 每篇文章强制叙事顺序
@@ -100,3 +100,10 @@
 - VFS：区分 sqlite3_vfs、sqlite3_file 与 sqlite3_io_methods。VFS 装饰器必须保留父 VFS 合同。示例 tracing VFS 只截获 xOpen，不是加密实现，不得把它改名为 encryption VFS。
 - Encryption：禁止 AES-ECB、固定密钥、硬编码 IV/nonce 的教学代码作为生产方案。加密设计必须覆盖数据库、journal、WAL、临时文件、同步、锁、崩溃恢复、认证、nonce 唯一性、KDF、密钥轮换与备份。优先评估有独立安全维护记录的方案，不自行发明协议。
 - 新增 26–28 的 Node、Python、C 示例都要进入 CI；浏览器 QA 覆盖首页 + 28 章 × 1440/390/360，并检查图片、原生 details、打印和无横向溢出。
+
+## 2026-11 全站深度审计新增约束
+- 新文章或修改页面必须有唯一 SEO description、canonical URL，以及准确的交叉章节锚点；绝对不能把所有文章描述复制成同一条模板。
+- 知识关联应解释「为什么阅读这两个上下游机制」而非只重复“上一章 / 下一章”。关联链接应尽可能指向相关小节且被自动验收。
+- 可放大的 SVG 必须有独立可访问的链接；移动端保留清晰的矢量标签，不能以全图缩小到不可读为代价消除横向滚动。键盘用户应可触达 SVG 链接。
+- 全站审计程序至少验证：章节清单与首页状态同步、跨文档 fragment 锚点存在、章节首选 URL、双向前后页导航、evidence id 唯一且与章节一致、SVG manifest 唯一且图解实际使用、SVG 内没有危险的脚本或远程资源。
+- 任何审计数字应来自确定性脚本输出；审核报告必须区分“本地或 CI 实际检查通过”与“未执行的人工视觉和外部链接检查”。
