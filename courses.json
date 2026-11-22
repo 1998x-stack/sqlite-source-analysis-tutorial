@@ -269,13 +269,13 @@
       "num": "24",
       "title": "测试框架",
       "topics": [
-        "100%分支覆盖",
-        "TH3测试套件",
-        "TCL测试脚本",
-        "Fuzz测试"
+        "四套独立测试框架",
+        "branch 与 MC/DC 口径",
+        "异常测试与 OOM",
+        "OSS-Fuzz 与 dbsqlfuzz"
       ],
       "file": "chapters/24.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "25",

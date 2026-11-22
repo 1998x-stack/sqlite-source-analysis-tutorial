@@ -499,6 +499,20 @@
       "source": [
         "https://sqlite.org/cli.html"
       ]
+    },
+    {
+      "file": "24-harnesses.svg",
+      "chapter": "24",
+      "source": [
+        "https://sqlite.org/testing.html"
+      ]
+    },
+    {
+      "file": "24-coverage.svg",
+      "chapter": "24",
+      "source": [
+        "https://sqlite.org/testing.html"
+      ]
     }
   ]
 }
