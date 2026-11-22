@@ -12,6 +12,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: examples/26_wasm/package.json
       - name: Verify chapters, source links, and SVGs
         run: python scripts/check_site.py
       - name: Test SQL and C examples
@@ -73,6 +78,8 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Verify responsive reading and native interactions
         run: python scripts/browser_smoke.py
+      - name: Verify SQLite WASM Worker and OPFS persistence
+        run: python scripts/wasm_browser_smoke.py
       - name: Upload browser screenshots
         if: always()
         uses: actions/upload-artifact@v4
