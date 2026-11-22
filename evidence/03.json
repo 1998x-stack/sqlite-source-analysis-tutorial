@@ -1,0 +1,43 @@
+{
+  "chapter": "03",
+  "scope": "SQLite 官方文档现行叙述；每个源码内部字段仍应绑定具体 check-in",
+  "reviewed_at": "2026-11-22",
+  "claims": [
+    {
+      "id": "03-01",
+      "claim": "SQLite 编译 SQL 为虚拟机指令并执行",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/arch.html",
+      "locator": "Overview",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "03-02",
+      "claim": "Tokenizer 主动调用 Lemon 生成的 parser",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/arch.html",
+      "locator": "Tokenizer and Parser",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "03-03",
+      "claim": "Page cache 与 Pager 协调页访问、回滚与 WAL",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/arch.html",
+      "locator": "Page Cache",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "03-04",
+      "claim": "Bytecode 操作代码可能随 SQLite 版本发生变化",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/opcode.html",
+      "locator": "The SQLite Bytecode Engine",
+      "status": "verified",
+      "notes": ""
+    }
+  ]
+}

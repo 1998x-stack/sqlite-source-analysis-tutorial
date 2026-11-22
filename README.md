@@ -1,67 +1,86 @@
-# 🗄️ SQLite源码分析 · 从入门到精通
+# SQLite 源码解剖：从一条 SQL 理解数据库内核
 
-> 📘 28章 实战体系
+> 28 章 SQLite 内核原理与源码分析的中文阅读路线。首批重构 **01–05**；**06–28 保留原版**，后续将逐章核对、绘制可解释的 SVG，并补充可复现实验。
 
-一套完整的 **SQLite源码分析 · 从入门到精通** 全中文实战课程体系，共 **28 章**。本课程以 HTML 可视化的形式呈现，从基础原理到工程实践循序渐进，适合系统性学习与复习。
+**课程首页**（GitHub Pages 配置完成后）：https://1998x-stack.github.io/sqlite-source-analysis-tutorial/
 
-## 🚀 快速开始
+## 路线
+| 章节 | 主题 | 维护状态 |
+|---|---|---|
+| 01 | 从 SQL 出发：获取源码与路径 | 深度重构 |
+| 02 | 编译体系：canonical / amalgamation / 宏 | 深度重构 |
+| 03 | SQL 编译与存储层完整架构 | 深度重构 |
+| 04 | sqlite3、Parse、Expr、Select、Vdbe | 深度重构 |
+| 05 | Lookaside / 通用分配 / Page Cache | 深度重构 |
+| 06–28 | 错误码、解析、VDBE、B-Tree、Pager、WAL、优化器、扩展、CLI、WASM 等 | 原版迁移，待复核 |
 
-无需安装任何依赖，直接用浏览器打开 `index.html` 即可在线阅读全部章节：
+章节清单和真实相对路径以 [courses.json](courses.json) 为准。首页既是学习入口，也清楚标记哪些章节还未完成技术复审。
 
-```bash
-open index.html   # macOS
-# 或在浏览器中直接打开 index.html
-```
-
-## 📖 章节目录
-
-| # | 章节 | 核心主题 |
-|---|------|----------|
-| 01 | 概览与源码获取 | 历史演进、版本号体系、三种源码获取方式、目录结构鸟瞰 |
-| 02 | 编译体系深度解析 | Autotools/Makefile.msc/CMake、SQLITE_* 编译选项、合并版生成内幕、自定义编译实战 |
-| 03 | 源码整体架构 | 10层架构管线、src/目录文件映射、核心头文件关系、生成文件的角色 |
-| 04 | 核心数据结构 | sqlite3连接对象、Parse编译上下文、Table/Index模式对象、Select/Expr查询树 |
-| 05 | 内存管理机制 | Lookaside allocator、Page cache分配策略、Scratch pool、内存统计与调试 |
-| 06 | 错误处理与断言 | 错误码体系、rc传播链、assert使用哲学、日志与诊断 |
-| 07 | 调试基础设施 | SQLITE_DEBUG模式、AST可视化打印、VDBE跟踪、gdb调试技巧 |
-| 08 | 词法分析器 | tokenize.c概览、关键词完美哈希、Token类型系统、词法错误恢复 |
-| 09 | Lemon解析器与语法 | LALR(1)解析器、parse.y文件结构、Shift/Reduce过程、Parse上下文 |
-| 10 | 表达式编译 | Expr树构建、递归代码生成、类型推导与Affinity、IN/CASE/CAST编译 |
-| 11 | VDBE虚拟机 | 虚拟机设计哲学、主执行循环、寄存器模型、191个opcode详解 |
-| 12 | B-Tree存储引擎 | B+Tree与B-Tree、数据库文件格式、页面内部布局、分裂与合并算法 |
-| 13 | Pager与页缓存 | Pager状态机、PCache LRU缓存、脏页管理与回刷、I/O聚合与延迟写 |
-| 14 | VFS抽象层 | 可插拔VFS设计、sqlite3_io_methods、Unix/Windows实现、自定义VFS实战 |
-| 15 | 原子提交与事务 | ACID实现、Rollback journal格式、事务类型选择、崩溃恢复流程 |
-| 16 | WAL模式深度解析 | WAL文件格式、Checkpoint算法、读写并发模型、3.51.3 WAL bug修复 |
-| 17 | 锁机制与并发 | 五级文件锁、POSIX锁实现、Windows SRWL新锁、死锁预防策略 |
-| 18 | 查询规划器 | WhereLoop构建、Cost估算模型、连接顺序优化、3.53星型JOIN改进 |
-| 19 | 内置函数实现 | 函数注册机制、标量与聚合函数、Window函数框架、日期时间函数 |
-| 20 | 虚拟表与扩展 | sqlite3_module接口、虚拟表生命周期、carray扩展示例、实现KV存储虚拟表 |
-| 21 | FTS全文搜索 | FTS3/4/5演进、倒排索引结构、分词器实现、FTS5 ranking |
-| 22 | 表达式索引与自修复 | 表达式索引原理、索引到期原因、3.53自修复机制、REINDEX EXPRESSIONS |
-| 23 | CLI shell源码 | shell.c.in架构、点命令分发表、QRF格式化库、自定义点命令 |
-| 24 | 测试框架 | 100%分支覆盖、TH3测试套件、TCL测试脚本、Fuzz测试 |
-| 25 | 性能分析与优化 | EXPLAIN解读、PRAGMA调优、编译时剪裁、批处理优化实战 |
-| 26 | SQLite WASM与JS绑定 | WASM编译流程、OPFS/opfs-wl VFS、浏览器端SQLite、ext/wasm目录 |
-| 27 | 2026新特性源码解读 | 自修复索引、浮点数17位精度、SRWL锁迁移、O_TMPFILE支持 |
-| 28 | 实战：定制SQLite | 功能剪裁、加密VFS实现、Extension编写、课程总结 |
-
-## 📂 项目结构
+## 项目结构
 
 ```text
-sqlite-source-analysis-tutorial/
-├── index.html      # 课程主入口（在线阅读全部章节）
-├── 01.html ~ 28.html   # 各章节正文
-├── courses.json    # 课程元数据（标题/章节/主题）
-└── theme.css       # 统一主题样式
+.
+├── index.html                 # GitHub Pages 首页（根目录发布）
+├── chapters/
+│   ├── 01.html ... 05.html   # 首批新叙事 + 图解 + 实验
+│   ├── 06.html ... 28.html   # 从根目录迁移的原版
+│   ├── index.html            # 旧章内“返回首页”兼容跳转
+│   └── theme.css             # 原版页面暂用的兼容主题
+├── assets/
+│   ├── css/site.css          # 重构版视觉系统
+│   └── svg/*.svg             # 11 张原创可访问的独立 SVG
+├── evidence/01.json ... 05.json
+├── examples/                 # SQL / C 实验（不复制上游 SQLite）
+├── scripts/                  # 静态检查、浏览器 QA、部署打包
+├── courses.json              # 28 章导航数据和重构状态
+├── AGENTS.md                 # 内容技术标准和维护约束
+├── .github/workflows/        # 质量门禁和 Pages 部署
+└── 01.html ... 28.html       # 兼容旧外部链接的重定向存根
 ```
 
-## ✨ 课程特色
+## 本地阅读
 
-- **全中文实战体系**：面向中文读者，由浅入深，覆盖原理与工程实践
-- **28 章完整内容**：系统化章节编排，形成完整知识闭环
-- **可视化呈现**：HTML 图文并茂，适合快速浏览与重点回顾
-- **即开即用**：无需构建、无需服务器，纯静态页面随开随看
+纯静态站点，无 Node、Jekyll、数据库后端或在线脚本依赖。直接打开 `index.html` 即可阅读。建议用本地服务器模拟 Pages 路径：
 
----
-*本课程由 `sqlite-source-analysis-tutorial/` 项目维护。*
+```bash
+python3 -m http.server 8000
+# 浏览 http://localhost:8000
+python3 scripts/check_site.py
+```
+
+要运行 SQLite 实验，需要本机 SQLite CLI；C 程序需有 C 编译器、SQLite 的 `sqlite3.c` 或对应的系统开发库。
+
+```bash
+sqlite3 :memory: < examples/01_sql_path.sql
+sqlite3 :memory: < examples/03_explain.sql
+# 下载 SQLite amalgamation 后，在其含 sqlite3.c/sqlite3.h 的目录中
+cc examples/05_lookaside_status.c sqlite3.c -I. -ldl -lpthread -lm -o lookaside-demo
+./lookaside-demo
+```
+
+上述 C 命令是 Unix-like 示例，需确保 `examples/05_lookaside_status.c` 的路径正确；其他平台链接参数不同。
+
+## 质量与维护
+
+```bash
+python3 scripts/check_site.py
+pip install playwright
+python -m playwright install chromium
+python3 scripts/browser_smoke.py
+python3 scripts/build_site.py
+```
+
+浏览器 QA 输出到 `qa-local/`（不提交），部署输出在 `dist/`。CI 将校验链接、章节完整性、SVG XML 可解析性、证据台账、响应式布局和交互。Pages 工作流已预置；**是否上线以仓库 Pages 设置和部署结果为准**。
+
+请优先参照 [AGENTS.md](AGENTS.md) 改写章节；不要把旧页对特定版本的新特性或固定性能指标的断言误认为已复核。
+
+## 主要上游资料
+
+- SQLite 规范源码（Fossil）：https://sqlite.org/src
+- 官方源码镜像：https://github.com/sqlite/sqlite
+- 官方架构：https://sqlite.org/arch.html
+- 官方编译：https://sqlite.org/howtocompile.html
+- 内存分配：https://sqlite.org/malloc.html
+- 字节码引擎：https://sqlite.org/opcode.html
+
+站点图解与文章为独立撰写；教学编排参考 [Olah-style-posts](https://github.com/1998x-stack/Olah-style-posts) 中的渐进解释和证据审核方法，不复制其图像或文本。

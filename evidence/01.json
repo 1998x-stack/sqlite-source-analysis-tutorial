@@ -1,0 +1,43 @@
+{
+  "chapter": "01",
+  "scope": "SQLite 官方文档现行叙述；每个源码内部字段仍应绑定具体 check-in",
+  "reviewed_at": "2026-11-22",
+  "claims": [
+    {
+      "id": "01-01",
+      "claim": "SQL 先经 prepare 编译为字节码，step 执行字节码",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/arch.html",
+      "locator": "Overview",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "01-02",
+      "claim": "SQLite canonical source 由 Fossil 管理，可通过 GitHub 镜像访问",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/getthecode.html",
+      "locator": "Obtaining Code Directly From the Version Control System",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "01-03",
+      "claim": "amalgamation 是通过构建工具生成的 C 分发形态",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/amalg-v-canon.html",
+      "locator": "Amalgamation versus canonical source",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "01-04",
+      "claim": "EXPLAIN 字节码依 SQLite 版本变化",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/opcode.html",
+      "locator": "The SQLite Bytecode Engine",
+      "status": "verified",
+      "notes": ""
+    }
+  ]
+}
