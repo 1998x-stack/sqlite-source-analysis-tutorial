@@ -257,13 +257,13 @@
       "num": "23",
       "title": "CLI shell源码",
       "topics": [
-        "shell.c.in架构",
-        "点命令分发表",
-        "QRF格式化库",
-        "自定义点命令"
+        "CLI 与库的两层边界",
+        "点命令与便捷查询",
+        ".mode 与 QRF 格式化",
+        "shell.c 生成与编译"
       ],
       "file": "chapters/23.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "24",

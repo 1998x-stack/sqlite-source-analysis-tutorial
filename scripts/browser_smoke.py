@@ -7,7 +7,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-PAGES = ["index.html"] + [f"chapters/{i:02}.html" for i in range(1, 23)]
+PAGES = ["index.html"] + [f"chapters/{i:02}.html" for i in range(1, 24)]
 VIEWPORTS = [(1440, 900), (390, 844), (360, 800)]
 
 def main() -> None:

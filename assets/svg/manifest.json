@@ -485,6 +485,20 @@
       "source": [
         "https://sqlite.org/staleexpridx.html"
       ]
+    },
+    {
+      "file": "23-cli-layers.svg",
+      "chapter": "23",
+      "source": [
+        "https://sqlite.org/cli.html"
+      ]
+    },
+    {
+      "file": "23-shell-build.svg",
+      "chapter": "23",
+      "source": [
+        "https://sqlite.org/cli.html"
+      ]
     }
   ]
 }
