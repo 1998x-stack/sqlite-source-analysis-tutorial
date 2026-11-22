@@ -3,6 +3,7 @@ import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
 self.addEventListener('message', async (event) => {
   if (event.data?.type !== 'run') return;
   let db;
+  let inTransaction = false;
   try {
     const sqlite3 = await sqlite3InitModule();
     const useOpfs = typeof sqlite3.oo1.OpfsDb === 'function'
@@ -13,16 +14,19 @@ self.addEventListener('message', async (event) => {
       ? new sqlite3.oo1.OpfsDb('/sqlite-course-worker-demo.sqlite3', 'c')
       : new sqlite3.oo1.DB(':memory:');
 
+    db.exec('BEGIN IMMEDIATE');
+    inTransaction = true;
     db.exec(`
-      CREATE TABLE IF NOT EXISTS note(
-        id INTEGER PRIMARY KEY,
-        body TEXT NOT NULL
+      CREATE TABLE IF NOT EXISTS run_counter(
+        id INTEGER PRIMARY KEY CHECK(id=1),
+        count INTEGER NOT NULL
       );
-      INSERT INTO note(id, body)
-      VALUES(1, 'A transaction completed inside one Worker message')
-      ON CONFLICT(id) DO UPDATE SET body=excluded.body;
+      INSERT INTO run_counter(id, count) VALUES(1, 1)
+      ON CONFLICT(id) DO UPDATE SET count=run_counter.count+1;
     `);
-    const rows = db.selectObjects('SELECT id, body FROM note ORDER BY id');
+    db.exec('COMMIT');
+    inTransaction = false;
+    const rows = db.selectObjects('SELECT id, count FROM run_counter');
     self.postMessage({
       type: 'success',
       mode: useOpfs ? 'opfs' : 'memory fallback',
@@ -30,6 +34,9 @@ self.addEventListener('message', async (event) => {
       rows,
     });
   } catch (error) {
+    if (db && inTransaction) {
+      try { db.exec('ROLLBACK'); } catch {}
+    }
     self.postMessage({ type: 'error', error: String(error?.stack || error) });
   } finally {
     if (db) db.close();
