@@ -198,3 +198,23 @@ python scripts/check_site.py
 python scripts/browser_smoke.py
 python scripts/wasm_browser_smoke.py
 ```
+
+## 第七轮：28 篇全文站精细化审计（2026-11-22）
+
+本轮不新增章节，重点修复“已经重构但系统元数据仍留在旧进度”的缺陷，并建立可重复运行的工程审计。
+
+- **知识依赖导航**：`data/reading_paths.json` 保存 28 篇的 56 条人工策划的机制级关系。文章文末“知识关联”说明为什么关联，并指向另一章的准确小节锚点；首页增加编译、执行、存储、事务链路导航。
+- **高清 SVG**：文章内 SVG 图解均可通过图片链接单独打开矢量原图；360px/390px 屏幕优先保持标签可读并允许局部横向滚动。
+- **独立网页身份**：每章含 canonical、独立 description、Open Graph 元数据以及上一章 / 下一章的 head 关系。28 个旧路径重定向页面使用有效 HTML，并指定正式 canonical。
+- **质量门禁**：`scripts/audit_content.py` 检查首页数据同步、全站链接 fragment、知识图谱、独立 SVG、evidence claim id、元数据唯一性及历史 URL；`scripts/check_site.py` 仍负责基础 HTML/SVG 和本地文件检查。两者均在 Actions 执行。
+- **真实实验验证**：既有 SQL/Python/C/Node/Chromium 和 GitHub Pages 验收流程继续保留，旧路径也纳入回归测试。详见 `audits/2026-11-22.md`。
+
+```bash
+python scripts/check_site.py
+python scripts/audit_content.py --output qa-local/editorial-audit.json
+python scripts/test_examples.py
+python scripts/browser_smoke.py
+python scripts/wasm_browser_smoke.py
+```
+
+**验证边界**：静态审计只保证链接、结构和证据记录的一致性；它不自动证明每个 SQLite 技术主张正确，也不等同于人工逐像素视觉检查或实时校验全部外部网站。外部事实仍须以版本化 SQLite 官方资料复核。
