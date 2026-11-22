@@ -51,7 +51,7 @@
 │   ├── css/site.css          # 重构版视觉系统
 │   └── svg/*.svg             # 83 张原创可访问的独立 SVG
 ├── evidence/01.json ... 28.json
-├── examples/                 # SQL / C 实验（不复制上游 SQLite）
+├── examples/                 # SQL / Python / C / JavaScript 实验（不复制上游 SQLite）
 ├── scripts/                  # 静态检查、浏览器 QA、部署打包
 ├── courses.json              # 28 章导航数据和重构状态
 ├── AGENTS.md                 # 内容技术标准和维护约束
