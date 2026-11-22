@@ -1,0 +1,12 @@
+SELECT 1 + 2 * 3 AS result;
+SELECT typeof('42'), typeof(CAST('42' AS INTEGER));
+SELECT 42 = '42' AS no_column_affinity;
+CREATE TABLE t(n NUMERIC);
+INSERT INTO t VALUES('42');
+SELECT typeof(n), n = '42' FROM t;
+SELECT CAST('123e+5' AS INTEGER);
+SELECT (5 IN (1, NULL)) IS NULL AS in_unknown;
+SELECT (5 NOT IN (1, NULL)) IS NULL AS not_in_unknown;
+SELECT 5 IN () AS in_empty;
+SELECT 5 NOT IN () AS not_in_empty;
+SELECT CASE WHEN NULL THEN 'yes' ELSE 'no' END;
