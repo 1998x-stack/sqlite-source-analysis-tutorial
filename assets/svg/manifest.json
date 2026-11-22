@@ -749,6 +749,16 @@
         "https://www.zetetic.net/sqlcipher/",
         "https://csrc.nist.gov/pubs/sp/800/38/a/final"
       ]
+    },
+    {
+      "file": "27-release-354-map.svg",
+      "chapter": "27",
+      "source": [
+        "https://sqlite.org/changes.html",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/where.c",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/mutex_w32.c",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/os_unix.c"
+      ]
     }
   ]
 }
