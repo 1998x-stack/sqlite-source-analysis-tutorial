@@ -17,6 +17,12 @@ jobs:
           node-version: '22'
       - name: Verify chapters, source links, and SVGs
         run: python scripts/check_site.py
+      - name: Audit all 28 HTML articles, evidence, SVGs and deep links
+        run: python scripts/audit_content.py --output qa-local/editorial-audit.json
+      - name: Build and verify full GitHub Pages payload
+        run: |
+          python scripts/build_site.py
+          python scripts/audit_deployment.py
       - name: Test SQL and C examples
         run: |
           python scripts/test_examples.py
@@ -74,6 +80,8 @@ jobs:
         run: |
           python -m pip install playwright
           python -m playwright install --with-deps chromium
+      - name: Verify SVG text bounds in Chromium
+        run: python scripts/svg_visual_audit.py
       - name: Verify responsive reading and native interactions
         run: python scripts/browser_smoke.py
       - name: Verify SQLite WASM Worker and OPFS persistence
