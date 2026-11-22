@@ -293,13 +293,13 @@
       "num": "26",
       "title": "SQLite WASM与JS绑定",
       "topics": [
-        "WASM编译流程",
-        "OPFS/opfs-wl VFS",
-        "浏览器端SQLite",
-        "ext/wasm目录"
+        "capi/oo1/Worker1 接口",
+        "内存与 OPFS 持久化 VFS",
+        "opfs-wl 与 Web Locks",
+        "Emscripten 构建与 npm 分发"
       ],
       "file": "chapters/26.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "27",

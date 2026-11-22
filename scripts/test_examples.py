@@ -37,7 +37,7 @@ def main() -> None:
         print("PASS: 10 SQL scripts and deterministic query results; sqlite3", sqlite3.sqlite_version)
     finally:
         conn.close()
-    for extra in ("21_fts.py", "22_expr_index.py", "24_anomaly.py", "25_perf.py"):
+    for extra in ("21_fts.py", "22_expr_index.py", "24_anomaly.py", "25_perf.py", "26_demo_sql.py"):
         rc = subprocess.call([sys.executable, str(ROOT / "examples" / extra)])
         assert rc == 0, f"{extra} exited {rc}"
     print("PASS: FTS chapter example verified")

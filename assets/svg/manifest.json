@@ -528,6 +528,21 @@
         "https://sqlite.org/lang_transaction.html",
         "https://sqlite.org/pragma.html"
       ]
+    },
+    {
+      "file": "26-js-stack.svg",
+      "chapter": "26",
+      "source": [
+        "https://sqlite.org/wasm/doc/trunk/api-index.md",
+        "https://sqlite.org/wasm/doc/trunk/persistence.md"
+      ]
+    },
+    {
+      "file": "26-vfs-choice.svg",
+      "chapter": "26",
+      "source": [
+        "https://sqlite.org/wasm/doc/trunk/persistence.md"
+      ]
     }
   ]
 }

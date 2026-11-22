@@ -1,0 +1,15 @@
+{
+  "chapter": "26",
+  "reviewed_at": "2026-11-22",
+  "scope": "SQLite official WebAssembly/JavaScript documentation (api-index, persistence, npm, building) and 3.53.0 release notes",
+  "claims": [
+    {"id": "26-01", "claim": "The sqlite3 WASM/JS API is exposed in several variants: sqlite3.capi (a wrapper over the C API), oo1 (the object-oriented API), Worker1 (a dedicated worker), and a virtual-table helper", "kind": "technical", "source_url": "https://sqlite.org/wasm/doc/trunk/api-index.md", "locator": "API Index", "status": "verified", "notes": ""},
+    {"id": "26-02", "claim": "OPFS is available only in Worker-thread contexts, not the main UI thread", "kind": "technical", "source_url": "https://sqlite.org/wasm/doc/trunk/persistence.md", "locator": "OPFS VFS", "status": "verified", "notes": ""},
+    {"id": "26-03", "claim": "Persistent/session storage options include kvvfs (localStorage/sessionStorage), JsStorageDb, opfs, opfs-wl, opfs-sahpool, WAL mode with OPFS, and OPFS over WASMFS", "kind": "technical", "source_url": "https://sqlite.org/wasm/doc/trunk/persistence.md", "locator": "Persistent Storage Options", "status": "verified", "notes": "The earlier chapter's three-row VFS table was incomplete"},
+    {"id": "26-04", "claim": "The opfs-wl VFS was added in 3.53.0; it works like opfs but uses Web Locks instead of a bespoke protocol, requires Atomics.waitAsync(), shares over 90% of its code with opfs, has an OO1 wrapper sqlite3.oo1.OpfsWlDb, and shows no clear performance winner over opfs", "kind": "technical", "source_url": "https://sqlite.org/wasm/doc/trunk/persistence.md", "locator": "OPFS with Web Locks", "status": "verified", "notes": "Cross-checked with changes.html 3.53.0"},
+    {"id": "26-05", "claim": "For multi-tab concurrency use opfs or opfs-wl; clients that value performance over concurrency, or cannot set COOP/COEP headers, should use opfs-sahpool", "kind": "technical", "source_url": "https://sqlite.org/wasm/doc/trunk/persistence.md", "locator": "OPFS VFS", "status": "verified", "notes": ""},
+    {"id": "26-06", "claim": "The project is distributed as the npm module @sqlite.org/sqlite-wasm, with prerelease snapshots updated periodically", "kind": "technical", "source_url": "https://sqlite.org/wasm/doc/trunk/npm.md", "locator": "npm module", "status": "verified", "notes": ""},
+    {"id": "26-07", "claim": "OPFS VFS has a caveat for Safari versions before 17 and depends on COOP/COEP HTTP headers in some configurations", "kind": "technical", "source_url": "https://sqlite.org/wasm/doc/trunk/persistence.md", "locator": "Caveat: Safari versions < 17 / COOP/COEP HTTP Headers", "status": "verified", "notes": ""},
+    {"id": "26-08", "claim": "The WASM build uses the Emscripten toolchain; build specifics are documented in the project's building/emscripten pages", "kind": "technical", "source_url": "https://sqlite.org/wasm/doc/trunk/building.md", "locator": "Building sqlite3 WASM", "status": "derived", "notes": "The earlier chapter's exact emcc flags and ext/wasm file listing/line counts were removed as unverifiable"}
+  ]
+}
