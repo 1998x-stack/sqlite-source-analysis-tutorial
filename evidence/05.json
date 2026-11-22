@@ -1,0 +1,52 @@
+{
+  "chapter": "05",
+  "scope": "SQLite 官方文档现行叙述；每个源码内部字段仍应绑定具体 check-in",
+  "reviewed_at": "2026-11-22",
+  "claims": [
+    {
+      "id": "05-01",
+      "claim": "Lookaside 为每个连接提供池化小对象分配",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/malloc.html",
+      "locator": "3.3 Lookaside memory allocator",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "05-02",
+      "claim": "SQLite 3.31.0 起使用双尺寸 lookaside slot 布局",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/malloc.html",
+      "locator": "3.3.1 Two-Size Lookaside",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "05-03",
+      "claim": "LOOKASIDE_HIT / MISS_SIZE / MISS_FULL 只有 high-water 输出有意义",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/c_dbstatus_options.html",
+      "locator": "LOOKASIDE_HIT/MISS_SIZE/MISS_FULL",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "05-04",
+      "claim": "Pager 通过 pcache.c/pcache1.c 完成内存缓存、处理页访问",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/arch.html",
+      "locator": "Page Cache",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "05-05",
+      "claim": "模拟的 5–10% 或 99% hit rate 未经测量，不应作为事实引用",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/malloc.html",
+      "locator": "Memory allocation and lookaside performance context",
+      "status": "illustrative",
+      "notes": "示意或反例，不能当成实验指标"
+    }
+  ]
+}

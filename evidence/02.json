@@ -1,0 +1,43 @@
+{
+  "chapter": "02",
+  "scope": "SQLite 官方文档现行叙述；每个源码内部字段仍应绑定具体 check-in",
+  "reviewed_at": "2026-11-22",
+  "claims": [
+    {
+      "id": "02-01",
+      "claim": "Unix 可通过 configure/make 构建，Windows 使用 Makefile.msc",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/howtocompile.html",
+      "locator": "Overview",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "02-02",
+      "claim": "sqlite3.c、sqlite3.h 与 shell.c 组成常见 CLI 合并版编译输入",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/howtocompile.html",
+      "locator": "Compiling The Command-Line Interface",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "02-03",
+      "claim": "Amalgamation 包含核心库代码而非 CLI 的 main",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/amalgamation.html",
+      "locator": "The Amalgamation",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "02-04",
+      "claim": "可用 SQLITE_* 宏配置编译特性，但组合依实际版本而异",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/compile.html",
+      "locator": "Compile-Time Options",
+      "status": "verified",
+      "notes": ""
+    }
+  ]
+}

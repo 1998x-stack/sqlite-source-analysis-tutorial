@@ -1,0 +1,43 @@
+{
+  "chapter": "04",
+  "scope": "SQLite 官方文档现行叙述；每个源码内部字段仍应绑定具体 check-in",
+  "reviewed_at": "2026-11-22",
+  "claims": [
+    {
+      "id": "04-01",
+      "claim": "sqlite3_stmt 是外部预编译语句接口",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/prepare.html",
+      "locator": "SQL Statement Object",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "04-02",
+      "claim": "sqlite3 连接句柄管理跨语句的连接状态",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/intro.html",
+      "locator": "Introduction to C/C++ Interface",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "04-03",
+      "claim": "Parse/Expr/Select 的关系图是教学抽象，不是对具体字段的断言",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/arch.html",
+      "locator": "Parser and Code Generator",
+      "status": "illustrative",
+      "notes": "示意或反例，不能当成实验指标"
+    },
+    {
+      "id": "04-04",
+      "claim": "Table/Index 描述 schema 元数据，而存储由 B-Tree 实现",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/arch.html",
+      "locator": "B-Tree",
+      "status": "verified",
+      "notes": ""
+    }
+  ]
+}

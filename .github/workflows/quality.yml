@@ -1,0 +1,36 @@
+name: Site quality
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify chapters, source links, and SVGs
+        run: python scripts/check_site.py
+      - name: Test SQL and C examples
+        run: |
+          python scripts/test_examples.py
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libsqlite3-dev
+          cc -std=c11 -Wall -Wextra -Werror -O2 examples/05_lookaside_status.c -lsqlite3 -o /tmp/sqlite-lookaside-status
+          /tmp/sqlite-lookaside-status
+      - name: Install Chromium for visual smoke tests
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Verify responsive reading and native interactions
+        run: python scripts/browser_smoke.py
+      - name: Upload browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sqlite-site-qa
+          path: qa-local/
+          if-no-files-found: ignore

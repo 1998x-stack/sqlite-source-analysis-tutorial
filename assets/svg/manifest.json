@@ -1,0 +1,104 @@
+{
+  "description": "第一轮 5 篇教程的原创 SVG 资产；图中示意路径未省略事实边界，所有配图须配文章内的解释和官方来源。",
+  "figures": [
+    {
+      "file": "01-sql-path.svg",
+      "chapter": "01",
+      "source": [
+        "https://sqlite.org/arch.html",
+        "https://sqlite.org/howtocompile.html",
+        "https://sqlite.org/malloc.html"
+      ]
+    },
+    {
+      "file": "01-source-choice.svg",
+      "chapter": "01",
+      "source": [
+        "https://sqlite.org/arch.html",
+        "https://sqlite.org/howtocompile.html",
+        "https://sqlite.org/malloc.html"
+      ]
+    },
+    {
+      "file": "02-build-pipeline.svg",
+      "chapter": "02",
+      "source": [
+        "https://sqlite.org/arch.html",
+        "https://sqlite.org/howtocompile.html",
+        "https://sqlite.org/malloc.html"
+      ]
+    },
+    {
+      "file": "02-flags.svg",
+      "chapter": "02",
+      "source": [
+        "https://sqlite.org/arch.html",
+        "https://sqlite.org/howtocompile.html",
+        "https://sqlite.org/malloc.html"
+      ]
+    },
+    {
+      "file": "03-layers.svg",
+      "chapter": "03",
+      "source": [
+        "https://sqlite.org/arch.html",
+        "https://sqlite.org/howtocompile.html",
+        "https://sqlite.org/malloc.html"
+      ]
+    },
+    {
+      "file": "03-prepare-step.svg",
+      "chapter": "03",
+      "source": [
+        "https://sqlite.org/arch.html",
+        "https://sqlite.org/howtocompile.html",
+        "https://sqlite.org/malloc.html"
+      ]
+    },
+    {
+      "file": "04-objects.svg",
+      "chapter": "04",
+      "source": [
+        "https://sqlite.org/arch.html",
+        "https://sqlite.org/howtocompile.html",
+        "https://sqlite.org/malloc.html"
+      ]
+    },
+    {
+      "file": "04-ast.svg",
+      "chapter": "04",
+      "source": [
+        "https://sqlite.org/arch.html",
+        "https://sqlite.org/howtocompile.html",
+        "https://sqlite.org/malloc.html"
+      ]
+    },
+    {
+      "file": "05-memory.svg",
+      "chapter": "05",
+      "source": [
+        "https://sqlite.org/arch.html",
+        "https://sqlite.org/howtocompile.html",
+        "https://sqlite.org/malloc.html"
+      ]
+    },
+    {
+      "file": "05-lookaside.svg",
+      "chapter": "05",
+      "source": [
+        "https://sqlite.org/arch.html",
+        "https://sqlite.org/howtocompile.html",
+        "https://sqlite.org/malloc.html"
+      ]
+    },
+    {
+      "file": "05-observe.svg",
+      "chapter": "05",
+      "source": [
+        "https://sqlite.org/arch.html",
+        "https://sqlite.org/howtocompile.html",
+        "https://sqlite.org/malloc.html"
+      ]
+    }
+  ]
+}
