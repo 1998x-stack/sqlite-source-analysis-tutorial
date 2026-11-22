@@ -155,7 +155,7 @@
       "source_url": "https://sqlite.org/changes.html",
       "locator": "2026-04-09 (3.53.0), item 8",
       "status": "verified",
-      "notes": "Includes change_begin, change_blob, change_double, change_int64, change_null, change_text, change_finish and changegroup_config."
+      "notes": "Includes sqlite3changegroup_change_begin/blob/double/int64/null/text/finish and sqlite3changegroup_config."
     },
     {
       "id": "27-18",
