@@ -123,61 +123,56 @@
       "num": "11",
       "title": "VDBE虚拟机",
       "topics": [
-        "虚拟机设计哲学",
-        "主执行循环",
-        "寄存器模型",
-        "191个opcode详解"
+        "指令与寄存器",
+        "Cursor / B-Tree",
+        "step / reset 运行态"
       ],
       "file": "chapters/11.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "12",
       "title": "B-Tree存储引擎",
       "topics": [
-        "B+Tree与B-Tree",
-        "数据库文件格式",
-        "页面内部布局",
-        "分裂与合并算法"
+        "Table / Index B-Tree",
+        "页头与 Cell Offset",
+        "平衡与文件格式"
       ],
       "file": "chapters/12.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "13",
       "title": "Pager与页缓存",
       "topics": [
-        "Pager状态机",
-        "PCache LRU缓存",
-        "脏页管理与回刷",
-        "I/O聚合与延迟写"
+        "Pager 状态与事务",
+        "PCache Hit/Miss",
+        "cache_size / dirty page"
       ],
       "file": "chapters/13.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "14",
       "title": "VFS抽象层",
       "topics": [
-        "可插拔VFS设计",
-        "sqlite3_io_methods",
-        "Unix/Windows实现",
-        "自定义VFS实战"
+        "sqlite3_vfs / sqlite3_file",
+        "xRead / xSync / xLock",
+        "VFS Shim 与文件 I/O"
       ],
       "file": "chapters/14.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "15",
       "title": "原子提交与事务",
       "topics": [
-        "ACID实现",
-        "Rollback journal格式",
-        "事务类型选择",
-        "崩溃恢复流程"
+        "Rollback Journal",
+        "Hot Journal 恢复",
+        "BEGIN / 锁冲突 / COMMIT"
       ],
       "file": "chapters/15.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "16",
@@ -336,5 +331,5 @@
       "status": "legacy"
     }
   ],
-  "description": "01–10 已完成独立可视化重构；11–28 是迁移保留的原版正文，尚需版本化源码复核。"
+  "description": "01–15 已深度重构并配有独立 SVG、原始资料和可复现实验；16–28 保留原版页面，待版本化源码复核。"
 }

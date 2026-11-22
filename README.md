@@ -1,6 +1,6 @@
 # SQLite 源码解剖：从一条 SQL 理解数据库内核
 
-> 28 章 SQLite 内核原理与源码分析的中文阅读路线。已重构 **01–10**；**11–28 保留原版**，后续将逐章核对、绘制可解释的 SVG，并补充可复现实验。
+> 28 章 SQLite 内核原理与源码分析的中文阅读路线。已重构 **01–15**；**16–28 保留原版**，后续将逐章核对、绘制可解释的 SVG，并补充可复现实验。
 
 **课程首页**（GitHub Pages 已部署）：https://1998x-stack.github.io/sqlite-source-analysis-tutorial/
 
@@ -17,7 +17,12 @@
 | 08 | 手写词法扫描、Token、fallback | 深度重构 |
 | 09 | Lemon、parse.y、shift/reduce | 深度重构 |
 | 10 | Expr 代码生成、NULL、CAST 和 affinity | 深度重构 |
-| 11–28 | VDBE、B-Tree、Pager、WAL、优化器、扩展、CLI、WASM 等 | 原版迁移，待复核 |
+| 11 | VDBE 程序、寄存器、Cursor、step/reset | 深度重构 |
+| 12 | SQLite B-Tree 页格式、rowid/index 区别与平衡 | 深度重构 |
+| 13 | Pager 状态、PCache 与缓存观测 | 深度重构 |
+| 14 | VFS 对象、I/O 方法表、sync/lock 与文件实验 | 深度重构 |
+| 15 | Rollback commit、hot journal、事务锁与可见性 | 深度重构 |
+| 16–28 | WAL、锁机制、优化器、扩展、CLI、WASM 等 | 原版迁移，待复核 |
 
 章节清单和真实相对路径以 [courses.json](courses.json) 为准。首页既是学习入口，也清楚标记哪些章节还未完成技术复审。
 
@@ -27,14 +32,14 @@
 .
 ├── index.html                 # GitHub Pages 首页（根目录发布）
 ├── chapters/
-│   ├── 01.html ... 10.html   # 已完成独立叙事 + 图解 + 实验
-│   ├── 11.html ... 28.html   # 从根目录迁移的原版
+│   ├── 01.html ... 15.html   # 已完成独立叙事 + 图解 + 实验
+│   ├── 16.html ... 28.html   # 从根目录迁移的原版
 │   ├── index.html            # 旧章内“返回首页”兼容跳转
 │   └── theme.css             # 原版页面暂用的兼容主题
 ├── assets/
 │   ├── css/site.css          # 重构版视觉系统
-│   └── svg/*.svg             # 26 张原创可访问的独立 SVG
-├── evidence/01.json ... 10.json
+│   └── svg/*.svg             # 41 张原创可访问的独立 SVG
+├── evidence/01.json ... 15.json
 ├── examples/                 # SQL / C 实验（不复制上游 SQLite）
 ├── scripts/                  # 静态检查、浏览器 QA、部署打包
 ├── courses.json              # 28 章导航数据和重构状态
@@ -107,3 +112,18 @@ done
 ```
 
 注意 `examples/07_debug.sql` 包含 `.eqp` / `.echo` 等 CLI 点命令，不能用 Python 的 `executescript()` 来运行；调试专用 `TREETRACE` / `WHERETRACE` 功能需配套编译宏。命令示例以 Linux 为基线，Windows/macOS 需按工具链调整。
+
+## 第三轮：11–15 存储内核与事务
+
+新增 15 张图解（累计 41 张），五章分别沿 VDBE 执行器、B-Tree page bytes、Pager/PCache、VFS methods 与 rollback journal 崩溃恢复分层解释。严禁把“教学用指令表”“B-Tree 平衡演示”“Pager 状态箭头”“rollback 提交序列”冒充固定源码指令或跨日志模式的统一轨迹。
+
+```bash
+python3 examples/12_file_inspect.py
+python3 examples/15_transactions.py
+python3 scripts/test_examples.py
+cc -std=c11 -Wall -Wextra -Werror -O2 examples/11_vdbe_steps.c -lsqlite3 -o /tmp/11-vdbe && /tmp/11-vdbe
+cc -std=c11 -Wall -Wextra -Werror -O2 examples/13_cache_stats.c -lsqlite3 -o /tmp/13-cache && /tmp/13-cache
+cc -std=c11 -Wall -Wextra -Werror -O2 examples/14_vfs_select.c -lsqlite3 -o /tmp/14-vfs && /tmp/14-vfs /tmp/sqlite-14-vfs-demo.sqlite
+```
+
+C 程序的链接参数为 Unix-like 示例；页面检查和事务测试使用 Python 标准库，不需要下载 SQLite 私有 C 文件。事务脚本只验证回滚和锁冲突，**不是实际断电模拟**。

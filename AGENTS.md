@@ -11,7 +11,7 @@
 ## 仓库边界
 - `index.html` 是 GitHub Pages 首页；`chapters/NN.html` 是章节唯一正文。
 - 根目录 `01.html` … `28.html` 只是旧链接兼容重定向，**不要在这里写文章内容**。
-- `chapters/11.html` … `28.html` 是尚待逐章技术审计的历史正文，不得标记为已验证。
+- `chapters/16.html` … `28.html` 是尚待逐章技术审计的历史正文，不得标记为已验证。
 - 新版文章 CSS 只维护在 `assets/css/site.css`；旧版页面暂用 `chapters/theme.css`，下一轮迁移后可以逐步淘汰。
 - 每张原创 SVG 存在 `assets/svg/` 并登记到 `assets/svg/manifest.json`。示意箭头、单位与 caption 必须与真实执行关系一致。
 - `courses.json` 是章节清单的事实单源，章节状态字段取值 `revised`、`legacy`。新增、改名、迁移同步修改首页链接。
@@ -65,3 +65,11 @@
 - Lemon：构建期 parse.y → parse.c/h 与运行期 token 驱动的 parser 必须区分。玩具 reduce 模型需明确标注非真实 SQLite 状态栈。
 - Expr：区分 AST/寄存器/控制流；NULL 三值逻辑、CASE 惰性、列 affinity 和 CAST 要有固定 SQL 测例。
 - 静态检查与浏览器检查覆盖 `chapters/01.html` 到 `chapters/10.html`；所有新增 C 程序需在 CI 实际编译并运行。
+
+## 11–15 存储与事务专项规则
+- VDBE：用 EXPLAIN 解释职责，严禁固定 opcode 数量、指令地址或把伪指令称为 SQLite 真实指令。
+- B-Tree：按照官方 fileformat2.html 区分 rowid table / index / WITHOUT ROWID；page1 的 100 字节头、8/12 字节 B-tree 头和 cell pointer offsets 必须说明。
+- Pager：PCache 的缓存命中与提交/持久化分开；rollback 与 WAL 不能共享一个精确写事务时序；不把 Pager 描述成无条件 COW。
+- VFS：分清 sqlite3_vfs（打开文件）、sqlite3_file（实例）、sqlite3_io_methods（每文件方法）。同步与锁的合同不能为教学方便省略。
+- 原子提交：DELETE rollback journal 的日志和同步顺序、hot journal 的判定、WAL 机制差异都必须说明。不能未经许可实施真实文件损坏/强制掉电实验。
+- CI 跟随 revised 状态扩展，Python 文件格式、事务测试和 C API 实验均必须真实执行。
