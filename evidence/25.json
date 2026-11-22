@@ -1,0 +1,15 @@
+{
+  "chapter": "25",
+  "reviewed_at": "2026-11-22",
+  "scope": "SQLite official pragma.html, limits.html and lang_explain.html; defaults and timings are version- and platform-dependent",
+  "claims": [
+    {"id": "25-01", "claim": "PRAGMA cache_size is a suggestion of the maximum number of pages held in memory; the built-in default is -2000 (about 2MB), and a negative N means KiB rather than pages (behavior of negative N changed in 3.7.10)", "kind": "technical", "source_url": "https://sqlite.org/pragma.html", "locator": "pragma cache_size", "status": "verified", "notes": "Replaces the earlier chapter's invented pagerFixCache() LRU description"},
+    {"id": "25-02", "claim": "PRAGMA synchronous accepts OFF(0)/NORMAL(1)/FULL(2)/EXTRA(3); NORMAL syncs less often, is corruption-safe in WAL mode but can lose a committed transaction after power loss", "kind": "technical", "source_url": "https://sqlite.org/pragma.html", "locator": "pragma synchronous", "status": "verified", "notes": ""},
+    {"id": "25-03", "claim": "PRAGMA mmap_size sets the maximum number of bytes for memory-mapped I/O on a database", "kind": "technical", "source_url": "https://sqlite.org/pragma.html", "locator": "pragma mmap_size", "status": "verified", "notes": ""},
+    {"id": "25-04", "claim": "PRAGMA temp_store accepts DEFAULT(0)/FILE(1)/MEMORY(2) and controls where temporary tables and indices are stored", "kind": "technical", "source_url": "https://sqlite.org/pragma.html", "locator": "pragma temp_store", "status": "verified", "notes": ""},
+    {"id": "25-05", "claim": "PRAGMA page_size must be a power of two between 512 and 65536 and is assigned when the database is created", "kind": "technical", "source_url": "https://sqlite.org/pragma.html", "locator": "pragma page_size", "status": "verified", "notes": ""},
+    {"id": "25-06", "claim": "A database may have at most 4294967294 pages; at the maximum 65536-byte page size that is about 281 TB, and this upper bound is untested by the developers", "kind": "technical", "source_url": "https://sqlite.org/limits.html", "locator": "Maximum Database Size", "status": "verified", "notes": "Corrects the earlier chapter's 140TB figure, which only holds at a smaller page size"},
+    {"id": "25-07", "claim": "EXPLAIN outputs the VDBE instruction listing for a prepared statement while EXPLAIN QUERY PLAN outputs a higher-level description of the strategy; the CLI .eqp toggles automatic query-plan output", "kind": "technical", "source_url": "https://sqlite.org/lang_explain.html", "locator": "EXPLAIN / EXPLAIN QUERY PLAN", "status": "verified", "notes": "Earlier chapter's fixed opcode/address listing removed; exact opcodes are version-dependent"},
+    {"id": "25-08", "claim": "Wrapping many INSERTs in a single transaction avoids per-statement commit work (such as disk synchronization), which is the main reason batched inserts are much faster", "kind": "derived", "source_url": "https://sqlite.org/lang_transaction.html", "locator": "Transactions / pragma synchronous", "status": "derived", "notes": "Mechanistic explanation; the earlier chapter's 30s->0.5s story and 10-100x figures were removed as unverifiable"}
+  ]
+}

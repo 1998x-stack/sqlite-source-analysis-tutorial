@@ -513,6 +513,21 @@
       "source": [
         "https://sqlite.org/testing.html"
       ]
+    },
+    {
+      "file": "25-pragmas.svg",
+      "chapter": "25",
+      "source": [
+        "https://sqlite.org/pragma.html"
+      ]
+    },
+    {
+      "file": "25-batch-fsync.svg",
+      "chapter": "25",
+      "source": [
+        "https://sqlite.org/lang_transaction.html",
+        "https://sqlite.org/pragma.html"
+      ]
     }
   ]
 }

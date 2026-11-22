@@ -281,13 +281,13 @@
       "num": "25",
       "title": "性能分析与优化",
       "topics": [
-        "EXPLAIN解读",
-        "PRAGMA调优",
-        "编译时剪裁",
-        "批处理优化实战"
+        "EXPLAIN 与查询计划",
+        "关键 PRAGMA 语义",
+        "批量事务与同步",
+        "性能边界"
       ],
       "file": "chapters/25.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "26",
