@@ -138,6 +138,15 @@
       "locator": "2026-10-09 (3.54.0), item 2d Query planner improvements",
       "status": "verified",
       "notes": "Distinct from the 3.53.0 sort-and-merge changes."
+    },
+    {
+      "id": "27-16",
+      "claim": "As of 2026-11-22, official chronology lists 3.54.1 as the highest released version while draft chronology marks 3.55.0 as pending; 3.53.6 is a later patch on an older branch",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/draft/chronology.html",
+      "locator": "Pending 3.55.0 and dated release entries",
+      "status": "verified",
+      "notes": "Do not report the pending draft version as released."
     }
   ]
 }
