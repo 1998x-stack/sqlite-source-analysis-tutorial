@@ -63,6 +63,22 @@ def main() -> None:
                         details.locator("summary").click()
                         if details.get_attribute("open") is None:
                             problems.append("summary control did not open")
+                if file != "index.html":
+                    zooms = page.locator("article figure a.svg-zoom")
+                    figures = page.locator("article figure")
+                    if zooms.count() != figures.count():
+                        problems.append("every SVG figure must have a keyboard-focusable original-link")
+                    related = page.locator("aside.related-reading a.related-item")
+                    if related.count() != 2:
+                        problems.append("two conceptual deep links should be present")
+                    if width == 360 and zooms.count():
+                        zooms.first.focus()
+                        if not zooms.first.evaluate("(el) => document.activeElement === el"):
+                            problems.append("SVG original link is not keyboard focusable")
+                        first_figure = figures.first
+                        scroll = first_figure.evaluate("(el) => ({content: el.scrollWidth, width: el.clientWidth})")
+                        if scroll["content"] <= scroll["width"]:
+                            problems.append("narrow-screen diagram lost its scrollable readable width")
                 page.screenshot(path=str(out / f"{file.replace('/', '-')}-{width}.png"), full_page=True)
                 result["pages"].append({"file": file, "viewport": width, "pass": not problems, "errors": problems})
                 result["errors"].extend([f"{file} {width}: {x}" for x in problems])
@@ -103,6 +119,24 @@ def main() -> None:
             printpage.emulate_media(media="print")
             printpage.screenshot(path=str(out / f"chapter{chapter:02}-print.png"), full_page=True)
             printpage.close()
+        # Exercise real navigation, not only static href strings.
+        for source, dest in [("01", "03"), ("14", "15"), ("26", "14")]:
+            ppage = browser.new_page(viewport={"width": 1280, "height": 840})
+            ppage.goto((ROOT / f"chapters/{source}.html").as_uri())
+            hrefs = ppage.locator("aside.related-reading a.related-item")
+            if hrefs.count() != 2:
+                result["errors"].append(f"chapter {source}: navigation links not rendered")
+            else:
+                candidate = hrefs.filter(has=ppage.locator("span.related-kicker")).first
+                if source == "01":
+                    candidate = hrefs.nth(1)
+                candidate.click()
+                page_num = ppage.url.split("/")[-1].split("#", 1)[0][:2]
+                if page_num != dest:
+                    result["errors"].append(f"chapter {source}: expected link to {dest}, got {ppage.url}")
+                if not ppage.evaluate("() => !!document.querySelector(location.hash)"):
+                    result["errors"].append(f"chapter {source}: target anchor missing after navigation")
+            ppage.close()
         browser.close()
     (out / "report.json").write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps({"views": len(result["pages"]), "failures": result["errors"]}, ensure_ascii=False, indent=2))
