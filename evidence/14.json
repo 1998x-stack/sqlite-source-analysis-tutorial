@@ -1,0 +1,52 @@
+{
+  "chapter": "14",
+  "reviewed_at": "2026-11-22",
+  "scope": "SQLite official pager/pragma/VFS docs",
+  "claims": [
+    {
+      "id": "14-01",
+      "claim": "sqlite3_vfs implements OS interface and xOpen initializes sqlite3_file",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/vfs.html",
+      "locator": "VFS introduction",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "14-02",
+      "claim": "sqlite3_io_methods defines operations on a file instance",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/io_methods.html",
+      "locator": "Interface reference",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "14-03",
+      "claim": "pMethods non-null on failed xOpen can still imply xClose",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/io_methods.html",
+      "locator": "xOpen exception handling",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "14-04",
+      "claim": "VFS shim can wrap an underlying VFS but must preserve sync/lock semantics",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/vfs.html",
+      "locator": "VFS shims",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "14-05",
+      "claim": "SELECT may be served by SQLite cache without fresh xRead",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/mmap.html",
+      "locator": "Overview",
+      "status": "verified",
+      "notes": ""
+    }
+  ]
+}

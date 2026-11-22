@@ -1,0 +1,52 @@
+{
+  "chapter": "13",
+  "reviewed_at": "2026-11-22",
+  "scope": "SQLite official pager/pragma/VFS docs",
+  "claims": [
+    {
+      "id": "13-01",
+      "claim": "The pager is responsible for caching pages and coordinating journaling",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/arch.html",
+      "locator": "Page cache",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "13-02",
+      "claim": "cache_size positive pages / negative approximately KiB and does not preallocate",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/pragma.html",
+      "locator": "cache_size",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "13-03",
+      "claim": "cache hits do not equal operating-system disk reads",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/pragma.html",
+      "locator": "cache_size",
+      "status": "derived",
+      "notes": ""
+    },
+    {
+      "id": "13-04",
+      "claim": "Pager rollback states depend on mode and error path",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/lockingv3.html",
+      "locator": "Pager locking",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "13-05",
+      "claim": "State diagram is conceptual, not a guaranteed exact transition log",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/lockingv3.html",
+      "locator": "Pager states",
+      "status": "illustrative",
+      "notes": "Teaching diagram"
+    }
+  ]
+}
