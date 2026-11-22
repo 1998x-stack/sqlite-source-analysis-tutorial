@@ -456,6 +456,20 @@
         "https://sqlite.org/vtab.html",
         "https://sqlite.org/c3ref/index_info.html"
       ]
+    },
+    {
+      "file": "21-inverted-index.svg",
+      "chapter": "21",
+      "source": [
+        "https://sqlite.org/fts3.html"
+      ]
+    },
+    {
+      "file": "21-segments.svg",
+      "chapter": "21",
+      "source": [
+        "https://sqlite.org/fts3.html"
+      ]
     }
   ]
 }

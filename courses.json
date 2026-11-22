@@ -233,13 +233,13 @@
       "num": "21",
       "title": "FTS全文搜索",
       "topics": [
-        "FTS3/4/5演进",
-        "倒排索引结构",
-        "分词器实现",
-        "FTS5 ranking"
+        "倒排索引与 doclist",
+        "segment 合并与 optimize",
+        "分词器边界",
+        "FTS5 与 FTS3/4 差异"
       ],
       "file": "chapters/21.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "22",

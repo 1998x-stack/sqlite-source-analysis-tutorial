@@ -1,0 +1,13 @@
+{
+  "chapter": "21",
+  "reviewed_at": "2026-11-22",
+  "scope": "SQLite official FTS3/FTS4 and FTS5 documentation; internal details vary with source version and build options",
+  "claims": [
+    {"id": "21-01", "claim": "FTS3 has been available since SQLite 3.5.0 (2007-09-04); the FTS4 enhancements were added in 3.7.4 (2010-12-07)", "kind": "technical", "source_url": "https://sqlite.org/fts3.html", "locator": "1. Overview", "status": "verified", "notes": "Corrects the earlier page dates (3.6.0/2009 and 3.7.4/2011)"},
+    {"id": "21-02", "claim": "An FTS3/FTS4 index is a set of b-tree segments; each segment entry has a term key and a doclist of (docid, term-offset list) pairs", "kind": "technical", "source_url": "https://sqlite.org/fts3.html", "locator": "Full-Text Indexes", "status": "verified", "notes": ""},
+    {"id": "21-03", "claim": "The unicode61 tokenizer is available beginning with SQLite 3.7.13 (2012-06-11); simple, porter and icu are the other bundled tokenizers", "kind": "technical", "source_url": "https://sqlite.org/fts3.html", "locator": "8. Tokenizers", "status": "verified", "notes": ""},
+    {"id": "21-04", "claim": "FTS3/FTS4 expose special commands optimize, rebuild, integrity-check, merge=X,Y and automerge=N; merge Y must be between 2 and 16 with a recommended value of 8", "kind": "technical", "source_url": "https://sqlite.org/fts3.html", "locator": "7. Special Commands For FTS3 and FTS4", "status": "verified", "notes": ""},
+    {"id": "21-05", "claim": "FTS5 is a separate module (added in 3.9.0) with its own index format, a built-in rank column and its own tokenizer options; it does not share the fts3.c implementation", "kind": "technical", "source_url": "https://sqlite.org/fts5.html", "locator": "FTS5 Overview", "status": "derived", "notes": "Pointer for readers; not independently re-read this session, treat exact API surface as version-scoped"},
+    {"id": "21-06", "claim": "A MATCH query should drive the full-text lookup directly; wrapping it in rowid IN (SELECT ...) can bypass the FTS index and force per-row checks", "kind": "illustrative", "source_url": "https://sqlite.org/fts3.html", "locator": "3. Full-Text Index Queries", "status": "illustrative", "notes": "Teaching guidance; actual plan depends on the query and SQLite version"}
+  ]
+}

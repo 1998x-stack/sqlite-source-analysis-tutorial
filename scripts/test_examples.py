@@ -2,6 +2,8 @@
 """Exercise SQL syntax and deterministic examples with the stdlib SQLite binding."""
 from __future__ import annotations
 import sqlite3
+import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -35,6 +37,10 @@ def main() -> None:
         print("PASS: 9 SQL scripts and deterministic query results; sqlite3", sqlite3.sqlite_version)
     finally:
         conn.close()
+    for extra in ("21_fts.py",):
+        rc = subprocess.call([sys.executable, str(ROOT / "examples" / extra)])
+        assert rc == 0, f"{extra} exited {rc}"
+    print("PASS: FTS chapter example verified")
 
 if __name__ == "__main__":
     main()
