@@ -25,12 +25,16 @@ def sample():
     result = db.execute(query, params).fetchone()[0]
     return time.perf_counter() - start, result
 
+for _ in range(5):
+    sample()
 baseline = [sample() for _ in range(REPEATS)]
 expected = baseline[0][1]
 assert all(row[1] == expected for row in baseline)
 
 db.execute("CREATE INDEX event_device_ts ON event(device_id,ts)")
 db.execute("PRAGMA optimize")
+for _ in range(5):
+    sample()
 indexed = [sample() for _ in range(REPEATS)]
 assert all(row[1] == expected for row in indexed)
 
@@ -41,6 +45,7 @@ def report(name, rows):
           f"p95_ms={p95*1000:.4f} result={rows[0][1]}")
 
 print("SQLite:", sqlite3.sqlite_version)
+print("Source id:", db.execute("SELECT sqlite_source_id()").fetchone()[0])
 print("Platform:", platform.platform())
 print("Rows:", ROWS, "repeats:", REPEATS, "cache: warm in-memory")
 report("scan", baseline)
