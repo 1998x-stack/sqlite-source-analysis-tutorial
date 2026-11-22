@@ -1,0 +1,52 @@
+{
+  "chapter": "20",
+  "reviewed_at": "2026-11-22",
+  "scope": "SQLite public virtual table interface; C module example executes in CI",
+  "claims": [
+    {
+      "id": "20-01",
+      "claim": "Virtual table API separates module table and cursor objects",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/vtab.html",
+      "locator": "Virtual Table Objects",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "20-02",
+      "claim": "xBestIndex argvIndex determines xFilter inputs",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/index_info.html",
+      "locator": "aConstraintUsage argvIndex",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "20-03",
+      "claim": "Setting omit permits SQLite to skip rechecking a WHERE constraint",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/index_info.html",
+      "locator": "aConstraintUsage omit",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "20-04",
+      "claim": "generate_series is source-tree extension compiled into CLI",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/series.html",
+      "locator": "Overview",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "20-05",
+      "claim": "json_each is a table-valued JSON function where available",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/json1.html",
+      "locator": "json_each and json_tree",
+      "status": "verified",
+      "notes": ""
+    }
+  ]
+}
