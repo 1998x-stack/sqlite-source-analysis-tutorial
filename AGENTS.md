@@ -11,7 +11,7 @@
 ## 仓库边界
 - `index.html` 是 GitHub Pages 首页；`chapters/NN.html` 是章节唯一正文。
 - 根目录 `01.html` … `28.html` 只是旧链接兼容重定向，**不要在这里写文章内容**。
-- `chapters/16.html` … `28.html` 是尚待逐章技术审计的历史正文，不得标记为已验证。
+- `chapters/21.html` … `28.html` 是尚待逐章技术审计的历史正文，不得标记为已验证。
 - 新版文章 CSS 只维护在 `assets/css/site.css`；旧版页面暂用 `chapters/theme.css`，下一轮迁移后可以逐步淘汰。
 - 每张原创 SVG 存在 `assets/svg/` 并登记到 `assets/svg/manifest.json`。示意箭头、单位与 caption 必须与真实执行关系一致。
 - `courses.json` 是章节清单的事实单源，章节状态字段取值 `revised`、`legacy`。新增、改名、迁移同步修改首页链接。
@@ -73,3 +73,11 @@
 - VFS：分清 sqlite3_vfs（打开文件）、sqlite3_file（实例）、sqlite3_io_methods（每文件方法）。同步与锁的合同不能为教学方便省略。
 - 原子提交：DELETE rollback journal 的日志和同步顺序、hot journal 的判定、WAL 机制差异都必须说明。不能未经许可实施真实文件损坏/强制掉电实验。
 - CI 跟随 revised 状态扩展，Python 文件格式、事务测试和 C API 实验均必须真实执行。
+
+## 16–20 WAL / Planner / Extension 专项约束
+- WAL：严格区分 WAL header 32B、frame header 24B、page image 和 WAL-index；读者 end mark 不会随其他写者提交自动变化。checkpoint 是有安全条件的写回，不是保证立即 truncate。
+- Lock：rollback 的 NONE/SHARED/RESERVED/PENDING/EXCLUSIVE 不等价于 WAL 锁，不能承诺 WAL 读写完全无冲突。明确 SQLITE_BUSY、SQLITE_LOCKED、SQLITE_BUSY_SNAPSHOT 的差异。
+- Planner：N3/WhereLoop 的图只表示搜索概念，EQP 不是稳定接口；示例不能把某个 SCAN/SEARCH 字符串当必然结果。必须记录数据分布、索引、sqlite_stat1 与 SQLite 版本。
+- Functions：公开的 sqlite3_create_function_v2 与 sqlite3_create_window_function API 优先于私有 FuncDef 字段图；deterministic 是正确性契约，不是必然 memoization。
+- Virtual table：区分 sqlite3_module/vtab/cursor 的生命周期；xBestIndex 在 prepare，xFilter 在执行期。argvIndex/omit 语义严格，避免错误的类型过滤；普通核心库不保证 generate_series 可用。
+- 更新网页状态、证据台账、SVG manifest、单元实验及浏览器 1440/390/360 验收，才可合并发布。

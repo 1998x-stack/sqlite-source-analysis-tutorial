@@ -36,6 +36,16 @@ jobs:
           /tmp/sqlite-13-cache
           cc -std=c11 -Wall -Wextra -Werror -O2 examples/14_vfs_select.c -lsqlite3 -o /tmp/sqlite-14-vfs
           /tmp/sqlite-14-vfs /tmp/sqlite-14-vfs-demo.sqlite
+      - name: Verify WAL, concurrency, planner and extension experiments
+        run: |
+          python examples/16_wal_snapshot.py
+          python examples/16_wal_inspect.py
+          python examples/17_lock_matrix.py
+          python examples/18_plan_experiment.py
+          for name in 19_functions 20_vtab_rows; do
+            cc -std=c11 -Wall -Wextra -Werror -O2 "examples/${name}.c" -lsqlite3 -o "/tmp/sqlite-${name}"
+            "/tmp/sqlite-${name}"
+          done
       - name: Install Chromium for visual smoke tests
         run: |
           python -m pip install playwright

@@ -1,0 +1,61 @@
+{
+  "chapter": "18",
+  "reviewed_at": "2026-11-22",
+  "scope": "Source-linked SQLite query optimization docs; plans are version-sensitive",
+  "claims": [
+    {
+      "id": "18-01",
+      "claim": "Planner considers candidate scans / indexes instead of choosing every index mechanically",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/optoverview.html",
+      "locator": "Choosing Between Multiple Indexes",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "18-02",
+      "claim": "Composite indexes use prefix constraints with range rules",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/optoverview.html",
+      "locator": "WHERE Clause Analysis",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "18-03",
+      "claim": "NGQP uses N nearest neighbors path algorithm",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/queryplanner-ng.html",
+      "locator": "N3 Algorithm",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "18-04",
+      "claim": "ANALYZE stores statistics in sqlite_stat1",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/lang_analyze.html",
+      "locator": "ANALYZE",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "18-05",
+      "claim": "EQP output is not a stable programmatic interface",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/eqp.html",
+      "locator": "The EXPLAIN QUERY PLAN Command",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "18-06",
+      "claim": "Diagram of N3 candidate routes is conceptual rather than actual cost trace",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/queryplanner-ng.html",
+      "locator": "N3 Algorithm",
+      "status": "illustrative",
+      "notes": "Conceptual partial paths"
+    }
+  ]
+}

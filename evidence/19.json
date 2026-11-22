@@ -1,0 +1,52 @@
+{
+  "chapter": "19",
+  "reviewed_at": "2026-11-22",
+  "scope": "SQLite documented extension C API with runtime result tests",
+  "claims": [
+    {
+      "id": "19-01",
+      "claim": "sqlite3_create_function_v2 registers scalar or aggregate callback and destructor",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/appfunc.html",
+      "locator": "2.1 Common Parameters",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "19-02",
+      "claim": "sqlite3_aggregate_context provides per-aggregation accumulator state",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/aggregate_context.html",
+      "locator": "Aggregate context",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "19-03",
+      "claim": "Window user functions can use step/inverse/value/final",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/windowfunctions.html",
+      "locator": "5. User-Defined Aggregate Window Functions",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "19-04",
+      "claim": "Incorrect DETERMINISTIC marking may corrupt expression index consistency",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/deterministic.html",
+      "locator": "Application-defined deterministic functions",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "19-05",
+      "claim": "DETERMINISTIC is not guaranteed to memoize once per SQL query",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/deterministic.html",
+      "locator": "Overview",
+      "status": "derived",
+      "notes": "Not a runtime caching promise"
+    }
+  ]
+}

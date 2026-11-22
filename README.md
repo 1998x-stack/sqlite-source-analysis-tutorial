@@ -1,6 +1,6 @@
 # SQLite 源码解剖：从一条 SQL 理解数据库内核
 
-> 28 章 SQLite 内核原理与源码分析的中文阅读路线。已重构 **01–15**；**16–28 保留原版**，后续将逐章核对、绘制可解释的 SVG，并补充可复现实验。
+> 28 章 SQLite 内核原理与源码分析的中文阅读路线。已重构 **01–20**；**21–28 保留原版**，后续将逐章核对、绘制可解释的 SVG，并补充可复现实验。
 
 **课程首页**（GitHub Pages 已部署）：https://1998x-stack.github.io/sqlite-source-analysis-tutorial/
 
@@ -22,7 +22,12 @@
 | 13 | Pager 状态、PCache 与缓存观测 | 深度重构 |
 | 14 | VFS 对象、I/O 方法表、sync/lock 与文件实验 | 深度重构 |
 | 15 | Rollback commit、hot journal、事务锁与可见性 | 深度重构 |
-| 16–28 | WAL、锁机制、优化器、扩展、CLI、WASM 等 | 原版迁移，待复核 |
+| 16 | WAL frame、end mark、checkpoint 与 snapshot 实验 | 深度重构 |
+| 17 | Rollback/WAL 并发、BUSY_SNAPSHOT 实验 | 深度重构 |
+| 18 | Planner、N3、索引前缀、ANALYZE | 深度重构 |
+| 19 | 标量、聚合与窗口 C API | 深度重构 |
+| 20 | sqlite3_module 与可执行的 C 虚拟表 | 深度重构 |
+| 21–28 | 后续优化、扩展、CLI、WASM 等 | 原版迁移，待复核 |
 
 章节清单和真实相对路径以 [courses.json](courses.json) 为准。首页既是学习入口，也清楚标记哪些章节还未完成技术复审。
 
@@ -32,14 +37,14 @@
 .
 ├── index.html                 # GitHub Pages 首页（根目录发布）
 ├── chapters/
-│   ├── 01.html ... 15.html   # 已完成独立叙事 + 图解 + 实验
-│   ├── 16.html ... 28.html   # 从根目录迁移的原版
+│   ├── 01.html ... 20.html   # 已完成独立叙事 + 图解 + 实验
+│   ├── 21.html ... 28.html   # 从根目录迁移的原版
 │   ├── index.html            # 旧章内“返回首页”兼容跳转
 │   └── theme.css             # 原版页面暂用的兼容主题
 ├── assets/
 │   ├── css/site.css          # 重构版视觉系统
-│   └── svg/*.svg             # 41 张原创可访问的独立 SVG
-├── evidence/01.json ... 15.json
+│   └── svg/*.svg             # 56 张原创可访问的独立 SVG
+├── evidence/01.json ... 20.json
 ├── examples/                 # SQL / C 实验（不复制上游 SQLite）
 ├── scripts/                  # 静态检查、浏览器 QA、部署打包
 ├── courses.json              # 28 章导航数据和重构状态
@@ -127,3 +132,17 @@ cc -std=c11 -Wall -Wextra -Werror -O2 examples/14_vfs_select.c -lsqlite3 -o /tmp
 ```
 
 C 程序的链接参数为 Unix-like 示例；页面检查和事务测试使用 Python 标准库，不需要下载 SQLite 私有 C 文件。事务脚本只验证回滚和锁冲突，**不是实际断电模拟**。
+
+## 第四轮：16–20 快照、规划与扩展
+本批增加 15 张新的专业 SVG，累计 56 张。五篇分别从 WAL 帧与 end mark、锁错误、N3 路径搜索、SQL 函数回调和虚拟表约束协商切入。源码与实验均优先使用 SQLite 官方文档和公开 C API。
+
+```bash
+python examples/16_wal_snapshot.py
+python examples/16_wal_inspect.py
+python examples/17_lock_matrix.py
+python examples/18_plan_experiment.py
+cc -std=c11 -Wall -Wextra -Werror -O2 examples/19_functions.c -lsqlite3 -o /tmp/19-functions && /tmp/19-functions
+cc -std=c11 -Wall -Wextra -Werror -O2 examples/20_vtab_rows.c -lsqlite3 -o /tmp/20-vtab && /tmp/20-vtab
+python scripts/check_site.py
+```
+`generate_series` 是 SQLite CLI 常见扩展而非所有核心库默认函数。新增 `examples/20_json_virtual.sql` 为可选 JSON 表值函数练习，主 CI 则运行无需特定扩展安装的 C 模块实验。

@@ -1,0 +1,52 @@
+{
+  "chapter": "17",
+  "reviewed_at": "2026-11-22",
+  "scope": "SQLite official documentation; internal implementation may vary with source version",
+  "claims": [
+    {
+      "id": "17-01",
+      "claim": "Rollback locks have SHARED RESERVED PENDING EXCLUSIVE levels",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/lockingv3.html",
+      "locator": "3 Locking",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "17-02",
+      "claim": "In WAL mode a stale read transaction upgrading to writer can return SQLITE_BUSY_SNAPSHOT",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/isolation.html",
+      "locator": "Isolation And Concurrency",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "17-03",
+      "claim": "SQLite serializes writers on the same database",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/isolation.html",
+      "locator": "Isolation And Concurrency",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "17-04",
+      "claim": "Shared cache mode is discouraged for new apps",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/sharedcache.html",
+      "locator": "1.1 Use of shared-cache is discouraged",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "17-05",
+      "claim": "SQLITE_BUSY and SQLITE_LOCKED differ in circumstances and handling",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/rescode.html",
+      "locator": "Result code definitions",
+      "status": "verified",
+      "notes": ""
+    }
+  ]
+}

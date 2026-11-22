@@ -336,6 +336,126 @@
         "https://sqlite.org/atomiccommit.html",
         "https://sqlite.org/lang_transaction.html"
       ]
+    },
+    {
+      "file": "16-wal-layout.svg",
+      "chapter": "16",
+      "source": [
+        "https://sqlite.org/wal.html",
+        "https://sqlite.org/fileformat2.html"
+      ]
+    },
+    {
+      "file": "16-snapshot-endmark.svg",
+      "chapter": "16",
+      "source": [
+        "https://sqlite.org/wal.html",
+        "https://sqlite.org/fileformat2.html"
+      ]
+    },
+    {
+      "file": "16-checkpoint.svg",
+      "chapter": "16",
+      "source": [
+        "https://sqlite.org/wal.html",
+        "https://sqlite.org/fileformat2.html"
+      ]
+    },
+    {
+      "file": "17-rollback-locks.svg",
+      "chapter": "17",
+      "source": [
+        "https://sqlite.org/isolation.html",
+        "https://sqlite.org/lockingv3.html"
+      ]
+    },
+    {
+      "file": "17-snapshot-busy.svg",
+      "chapter": "17",
+      "source": [
+        "https://sqlite.org/isolation.html",
+        "https://sqlite.org/lockingv3.html"
+      ]
+    },
+    {
+      "file": "17-busy-locked.svg",
+      "chapter": "17",
+      "source": [
+        "https://sqlite.org/isolation.html",
+        "https://sqlite.org/lockingv3.html"
+      ]
+    },
+    {
+      "file": "18-planner-stages.svg",
+      "chapter": "18",
+      "source": [
+        "https://sqlite.org/queryplanner-ng.html",
+        "https://sqlite.org/optoverview.html"
+      ]
+    },
+    {
+      "file": "18-cost-path.svg",
+      "chapter": "18",
+      "source": [
+        "https://sqlite.org/queryplanner-ng.html",
+        "https://sqlite.org/optoverview.html"
+      ]
+    },
+    {
+      "file": "18-index-prefix.svg",
+      "chapter": "18",
+      "source": [
+        "https://sqlite.org/queryplanner-ng.html",
+        "https://sqlite.org/optoverview.html"
+      ]
+    },
+    {
+      "file": "19-scalar-callback.svg",
+      "chapter": "19",
+      "source": [
+        "https://sqlite.org/appfunc.html",
+        "https://sqlite.org/deterministic.html"
+      ]
+    },
+    {
+      "file": "19-aggregate-window.svg",
+      "chapter": "19",
+      "source": [
+        "https://sqlite.org/appfunc.html",
+        "https://sqlite.org/deterministic.html"
+      ]
+    },
+    {
+      "file": "19-determinism.svg",
+      "chapter": "19",
+      "source": [
+        "https://sqlite.org/appfunc.html",
+        "https://sqlite.org/deterministic.html"
+      ]
+    },
+    {
+      "file": "20-vtab-negotiation.svg",
+      "chapter": "20",
+      "source": [
+        "https://sqlite.org/vtab.html",
+        "https://sqlite.org/c3ref/index_info.html"
+      ]
+    },
+    {
+      "file": "20-vtab-lifecycle.svg",
+      "chapter": "20",
+      "source": [
+        "https://sqlite.org/vtab.html",
+        "https://sqlite.org/c3ref/index_info.html"
+      ]
+    },
+    {
+      "file": "20-vtab-vs-btree.svg",
+      "chapter": "20",
+      "source": [
+        "https://sqlite.org/vtab.html",
+        "https://sqlite.org/c3ref/index_info.html"
+      ]
     }
   ]
 }

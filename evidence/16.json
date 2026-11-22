@@ -1,0 +1,52 @@
+{
+  "chapter": "16",
+  "reviewed_at": "2026-11-22",
+  "scope": "SQLite official documentation; internal implementation may vary with source version",
+  "claims": [
+    {
+      "id": "16-01",
+      "claim": "WAL has a 32 byte header and frames with 24-byte headers",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fileformat2.html",
+      "locator": "WAL File Format",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "16-02",
+      "claim": "Readers use an end mark and can retain an older snapshot",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/wal.html",
+      "locator": "2.2 Concurrency",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "16-03",
+      "claim": "Checkpoint may be delayed by long-running readers",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/wal.html",
+      "locator": "2.1 Checkpointing",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "16-04",
+      "claim": "Reader writer concurrency in WAL does not eliminate SQLITE_BUSY",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/wal.html",
+      "locator": "9 Sometimes Queries Return SQLITE_BUSY",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "16-05",
+      "claim": "WAL-reset bug fix specifically released in 3.51.3",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/releaselog/3_51_3.html",
+      "locator": "Changes in this release",
+      "status": "verified",
+      "notes": ""
+    }
+  ]
+}
