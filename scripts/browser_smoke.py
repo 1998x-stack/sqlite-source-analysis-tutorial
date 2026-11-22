@@ -31,8 +31,11 @@ def main() -> None:
                     problems.append(f"horizontal overflow: {dims}")
                 images = page.locator("img")
                 for index in range(images.count()):
-                    if not images.nth(index).evaluate("(img) => img.complete && img.naturalWidth > 0"):
-                        problems.append(f"image {index} did not load")
+                    image = images.nth(index)
+                    image.scroll_into_view_if_needed()
+                    decoded = image.evaluate("(img) => img.decode().then(() => img.naturalWidth > 0).catch(() => false)")
+                    if not decoded:
+                        problems.append(f"image {index} did not load or decode")
                 if file == "index.html":
                     q = page.locator("#filter")
                     q.fill("Pager")
