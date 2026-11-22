@@ -12,6 +12,7 @@ on:
       - 'data/**'
       - 'audits/**'
       - 'scripts/audit_content.py'
+      - 'scripts/audit_deployment.py'
       - '[0-9][0-9].html'
       - 'scripts/build_site.py'
       - 'scripts/check_site.py'
@@ -40,6 +41,7 @@ jobs:
           python scripts/check_site.py
           python scripts/audit_content.py
           python scripts/build_site.py
+          python scripts/audit_deployment.py
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
