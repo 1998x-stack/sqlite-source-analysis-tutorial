@@ -11,7 +11,7 @@
 ## 仓库边界
 - `index.html` 是 GitHub Pages 首页；`chapters/NN.html` 是章节唯一正文。
 - 根目录 `01.html` … `28.html` 只是旧链接兼容重定向，**不要在这里写文章内容**。
-- `chapters/06.html` … `28.html` 是尚待逐章技术审计的历史正文，不得标记为已验证。
+- `chapters/11.html` … `28.html` 是尚待逐章技术审计的历史正文，不得标记为已验证。
 - 新版文章 CSS 只维护在 `assets/css/site.css`；旧版页面暂用 `chapters/theme.css`，下一轮迁移后可以逐步淘汰。
 - 每张原创 SVG 存在 `assets/svg/` 并登记到 `assets/svg/manifest.json`。示意箭头、单位与 caption 必须与真实执行关系一致。
 - `courses.json` 是章节清单的事实单源，章节状态字段取值 `revised`、`legacy`。新增、改名、迁移同步修改首页链接。
@@ -57,3 +57,11 @@
 
 ## 完成定义
 正确（版本/接口）＋好懂（读者可复述因果）＋可复现（实验/输出边界）＋可访问（页面/图/键盘）＋可维护（目录/台账/CI/兼容）。任何一项未完成都应在 PR 明示。
+
+## 06–10 新增专项检查
+- 错误码：区别返回值、扩展码、连接最近错误状态；ROW/DONE 是正常执行状态，错误信息读取时机必须正确。
+- 调试：说明 `.eqp full` 是 CLI 命令；`SQLITE_DEBUG` 与 TREETRACE/WHERETRACE 等内部开关需区分；不得编造性能数据。
+- Tokenizer：Token 边界、字符串转义、UTF-8 字节位置与 parser fallback 必须明确分层。
+- Lemon：构建期 parse.y → parse.c/h 与运行期 token 驱动的 parser 必须区分。玩具 reduce 模型需明确标注非真实 SQLite 状态栈。
+- Expr：区分 AST/寄存器/控制流；NULL 三值逻辑、CASE 惰性、列 affinity 和 CAST 要有固定 SQL 测例。
+- 静态检查与浏览器检查覆盖 `chapters/01.html` 到 `chapters/10.html`；所有新增 C 程序需在 CI 实际编译并运行。
