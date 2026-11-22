@@ -57,6 +57,15 @@
       "locator": "QRF public interface",
       "status": "verified",
       "notes": ""
+    },
+    {
+      "id": "23-07",
+      "claim": "QRF columnar styles evaluate the full query and buffer results in memory to calculate column widths",
+      "kind": "technical",
+      "source_url": "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/qrf/qrf.c#L2016-L2065",
+      "locator": "qrfColumnar and sqlite3_format_query_result",
+      "status": "verified",
+      "notes": "Streaming styles use a different output path."
     }
   ]
 }

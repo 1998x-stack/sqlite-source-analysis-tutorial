@@ -19,8 +19,8 @@
       "kind": "technical",
       "source_url": "https://sqlite.org/fts5.html#unicode61_tokenizer",
       "locator": "§4.3.1",
-      "status": "verified",
-      "notes": ""
+      "status": "derived",
+      "notes": "Inferred from unicode61 token-character rules and confirmed by the fts5vocab probe in examples/21_tokenizer_probe.py."
     },
     {
       "id": "21-03",

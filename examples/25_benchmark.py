@@ -46,6 +46,7 @@ def report(name, rows):
 
 print("SQLite:", sqlite3.sqlite_version)
 print("Source id:", db.execute("SELECT sqlite_source_id()").fetchone()[0])
+print("Compile options:", ", ".join(row[0] for row in db.execute("PRAGMA compile_options")))
 print("Platform:", platform.platform())
 print("Rows:", ROWS, "repeats:", REPEATS, "cache: warm in-memory")
 report("scan", baseline)
