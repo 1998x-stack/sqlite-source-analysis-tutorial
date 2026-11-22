@@ -286,40 +286,37 @@
     },
     {
       "num": "26",
-      "title": "SQLite WASM与JS绑定",
+      "title": "SQLite WASM：从 C 内核到浏览器持久化",
       "topics": [
-        "WASM编译流程",
-        "OPFS/opfs-wl VFS",
-        "浏览器端SQLite",
-        "ext/wasm目录"
+        "WebAssembly / ESM / OO1",
+        "Worker 线程与消息事务",
+        "OPFS / opfs-wl / sahpool VFS"
       ],
       "file": "chapters/26.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "27",
-      "title": "2026新特性源码解读",
+      "title": "SQLite 3.53–3.54：版本演进与源码变更",
       "topics": [
-        "自修复索引",
-        "浮点数17位精度",
-        "SRWL锁迁移",
-        "O_TMPFILE支持"
+        "3.52 撤回与 3.53 重发",
+        "浮点转换 / Stale Index",
+        "3.54 CLI / Planner / C API"
       ],
       "file": "chapters/27.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "28",
-      "title": "实战：定制SQLite",
+      "title": "定制 SQLite：编译、扩展与 VFS 安全边界",
       "topics": [
-        "功能剪裁",
-        "加密VFS实现",
-        "Extension编写",
-        "课程总结"
+        "Canonical source / compile options",
+        "Extension API / VFS 装饰器",
+        "加密威胁模型 / 测试发布"
       ],
       "file": "chapters/28.html",
-      "status": "legacy"
+      "status": "revised"
     }
   ],
-  "description": "01–25 已逐章独立图解重构并配有证据台账与可复现代码；26–28 保留原版，仍待版本化技术审计。"
+  "description": "01–28 全部章节均已逐章独立叙事重构，配有专业 SVG、版本化证据台账与可复现实验；所有章节纳入静态和浏览器质量门禁。"
 }

@@ -64,7 +64,7 @@
 - Tokenizer：Token 边界、字符串转义、UTF-8 字节位置与 parser fallback 必须明确分层。
 - Lemon：构建期 parse.y → parse.c/h 与运行期 token 驱动的 parser 必须区分。玩具 reduce 模型需明确标注非真实 SQLite 状态栈。
 - Expr：区分 AST/寄存器/控制流；NULL 三值逻辑、CASE 惰性、列 affinity 和 CAST 要有固定 SQL 测例。
-- 静态检查与浏览器检查覆盖 `chapters/01.html` 到 `chapters/25.html`；所有新增 C 程序需在 CI 实际编译并运行。
+- 静态检查与浏览器检查覆盖 `chapters/01.html` 到 `chapters/28.html`；所有新增 C 程序需在 CI 实际编译并运行。
 
 ## 11–15 存储与事务专项规则
 - VDBE：用 EXPLAIN 解释职责，严禁固定 opcode 数量、指令地址或把伪指令称为 SQLite 真实指令。
@@ -89,3 +89,14 @@
 - 测试：准确区分 TCL、TH3、SQL Logic Test、dbsqlfuzz；TH3/dbsqlfuzz 专有。fuzzcheck 是回放器，不验证 SQL 结果。覆盖率数字必须说明目标、配置和工具，不能泛化到所有扩展/平台。
 - 性能：EQP 输出不是稳定 API；stmt_status 是语句工作量计数器，不等于磁盘 I/O。PRAGMA optimize 依据连接生命周期使用；cache_size 正负单位不同；synchronous 的持久性风险必须说明。任何 benchmark 都不得设硬件无关速度承诺。
 - 本批源码内部引用固定 SQLite 3.54.1 快照，release note 解释 3.53+ 特性；示例运行时按实际 sqlite_version/sourceid 记录。新增 21–25 的 SQL/Python/C/CLI 示例必须在 CI 执行。
+
+## 26–28 WASM / Release / Customization 专项规则
+- WASM：区分 SQLite C 内核、Emscripten WASM 模块、JS 胶水层和 OO1/C API。Worker 只是线程边界，不自动等于持久化。Node.js 官方 WASM 包仅以内存数据库为支持范围，不得写成 Node 文件持久化。
+- OPFS：标准 OPFS VFS 仅在 Worker 可用并依赖 COOP/COEP；opfs-wl 需要 Web Locks / Atomics.waitAsync；sahpool 的多实例协调合同不同。WAL 在当前 WASM 共享内存限制下不能宣传为桌面多连接并发优化。浏览器存储必须区分能力检测、配额、锁冲突与持久性。
+- Worker：新应用不要继续推荐已 deprecated 的 Worker1 / Promiser API；消息协议要有 request id、错误路径和超时；同一连接的事务不可跨可交错消息拆分。
+- Release：每个版本主张都要对应 release notes、chronology 和版本固定源码。3.52 撤回、3.53 重发、3.54.1 的 32-bit heap-buffer overflow 修复必须正确交代。浮点 17 位是文本转换有效数字，不是 binary64 存储精度提升。sqlite3_result_str 签名以 sqlite3.h 为准。
+- Build：SQLITE_OMIT_* 多数不受支持；通常只在 canonical source 构建可靠，相关生成工具也要使用一致宏集合。不能宣称固定体积下降或安全收益，除非给出构建配置和测量数据。
+- Extensions：扩展加载默认关闭。若动态加载，只打开 SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION 对应的 C API，不要无必要开启 SQL load_extension。DETERMINISTIC / DIRECTONLY / INNOCUOUS 是不同语义，必须按函数实际行为标记。
+- VFS：区分 sqlite3_vfs、sqlite3_file 与 sqlite3_io_methods。VFS 装饰器必须保留父 VFS 合同。示例 tracing VFS 只截获 xOpen，不是加密实现，不得把它改名为 encryption VFS。
+- Encryption：禁止 AES-ECB、固定密钥、硬编码 IV/nonce 的教学代码作为生产方案。加密设计必须覆盖数据库、journal、WAL、临时文件、同步、锁、崩溃恢复、认证、nonce 唯一性、KDF、密钥轮换与备份。优先评估有独立安全维护记录的方案，不自行发明协议。
+- 新增 26–28 的 Node、Python、C 示例都要进入 CI；浏览器 QA 覆盖首页 + 28 章 × 1440/390/360，并检查图片、原生 details、打印和无横向溢出。
