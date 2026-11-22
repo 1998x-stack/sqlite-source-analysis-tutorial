@@ -1,0 +1,52 @@
+{
+  "chapter": "07",
+  "reviewed_at": "2026-11-22",
+  "scope": "SQLite canonical documentation; full source ABI not guaranteed",
+  "claims": [
+    {
+      "id": "07-01",
+      "claim": ".eqp full is a CLI diagnostic mode",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/debugging.html",
+      "locator": "1. Use the CLI",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "07-02",
+      "claim": "SQLITE_DEBUG enables debugging-specific features",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/compile.html",
+      "locator": "SQLITE_DEBUG",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "07-03",
+      "claim": "TREETRACE and WHERETRACE are unsupported internal debugging controls",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/debugging.html",
+      "locator": "5. Using treetrace and wheretrace",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "07-04",
+      "claim": "sqlite3_trace_v2 supports stmt, row and profile events",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/trace_v2.html",
+      "locator": "trace event bitmask",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "07-05",
+      "claim": "EXPLAIN opcode data can change across versions",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/opcode.html",
+      "locator": "overview",
+      "status": "verified",
+      "notes": ""
+    }
+  ]
+}

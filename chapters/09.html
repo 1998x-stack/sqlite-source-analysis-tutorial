@@ -1,268 +1,38 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-    <title>第9章 Lemon解析器与语法</title>
-    <link rel="stylesheet" href="theme.css">
-</head>
-<body>
-<div class="double-border">
-<div class="container">
-    <div class="sidebar">
-        <h3>🗄️ 课程目录</h3>
-        <ul class="chapter-list">
-            <li><a href="01.html">第1章 概览与源码获取</a></li>
-            <li><a href="02.html">第2章 编译体系深度解析</a></li>
-            <li><a href="03.html">第3章 源码整体架构</a></li>
-            <li><a href="04.html">第4章 核心数据结构</a></li>
-            <li><a href="05.html">第5章 内存管理机制</a></li>
-            <li><a href="06.html">第6章 错误处理与断言</a></li>
-            <li><a href="07.html">第7章 调试基础设施</a></li>
-            <li><a href="08.html">第8章 词法分析器</a></li>
-            <li><a href="09.html" class="active">第9章 Lemon解析器与语法</a></li>
-            <li><a href="10.html">第10章 表达式编译</a></li>
-            <li><a href="11.html">第11章 VDBE虚拟机</a></li>
-            <li><a href="12.html">第12章 B-Tree存储引擎</a></li>
-            <li><a href="13.html">第13章 Pager与页缓存</a></li>
-            <li><a href="14.html">第14章 VFS抽象层</a></li>
-            <li><a href="15.html">第15章 原子提交与事务</a></li>
-            <li><a href="16.html">第16章 WAL模式深度解析</a></li>
-            <li><a href="17.html">第17章 锁机制与并发</a></li>
-            <li><a href="18.html">第18章 查询规划器</a></li>
-            <li><a href="19.html">第19章 内置函数实现</a></li>
-            <li><a href="20.html">第20章 虚拟表与扩展</a></li>
-            <li><a href="21.html">第21章 FTS全文搜索</a></li>
-            <li><a href="22.html">第22章 表达式索引与自修复</a></li>
-            <li><a href="23.html">第23章 CLI shell源码</a></li>
-            <li><a href="24.html">第24章 测试框架</a></li>
-            <li><a href="25.html">第25章 性能分析与优化</a></li>
-            <li><a href="26.html">第26章 SQLite WASM与JS绑定</a></li>
-            <li><a href="27.html">第27章 2026新特性源码解读</a></li>
-            <li><a href="28.html">第28章 实战：定制SQLite</a></li>
-        </ul>
-    </div>
-    <div class="main-content">
-
-        <h1>第9章 Lemon解析器与语法</h1>
-
-        <p>大家好，我是你们的讲师。上一章我们看了 SQLite 的"分词器"是怎么把 SQL 文本拆成 token 的。但 token 只是一堆离散的碎片——谁来把这些碎片按语法规则组装成有意义的结构呢？答案就是这一章的主题：<strong>Lemon 解析器</strong>。</p>
-
-        <p>在编译器领域，YACC（Yet Another Compiler-Compiler）和 Bison 是解析器生成器的"行业标准"。但 SQLite 做了一个与众不同的选择——它使用了自己的自研解析器生成器 <strong>Lemon</strong>，也用同一工具生成自己的 SQL 文法解析器。</p>
-
-        <p>Lemon 是 Dr. Hipp 在 1990 年代早期开发的，比 SQLite 本身还要年长。它的设计目标非常明确：<strong>可重入（reentrant）、线程安全、零全局变量</strong>。这些特性恰好是 SQLite 需要的——因为 SQLite 要支持多线程环境下的并发数据库连接访问。</p>
-
-        <h2>为什么选择 Lemon</h2>
-
-        <p>你可能要问：既然 YACC/Bison 那么成熟、文档那么丰富，为什么 SQLite 非要另起炉灶？答案藏在编译器设计的几个"痛点"里。</p>
-
-        <table>
-            <thead>
-                <tr><th>特性</th><th>Lemon</th><th>YACC / Bison</th></tr>
-            </thead>
-            <tbody>
-                <tr><td>可重入性</td><td>原生支持，无全局变量</td><td>需要 <code>%pure-parser</code> 声明</td></tr>
-                <tr><td>内存分配</td><td>调用者提供 malloc，完全控制</td><td>内部 malloc，难以注入</td></tr>
-                <tr><td>代码风格</td><td>生成的 C 代码可读性强</td><td>紧凑但难读</td></tr>
-                <tr><td>错误处理</td><td>内置 error token 机制</td><td>需要手写 yyerror</td></tr>
-                <tr><td>模板引擎</td><td>最终 action 代码保留在生成文件中</td><td>宏展开，调试更难</td></tr>
-                <tr><td>依赖性</td><td>零外部依赖</td><td>需要配套运行时库</td></tr>
-            </tbody>
-        </table>
-
-        <p>最关键的一点是 <strong>可重入性</strong>。在 SQLite 中，同一个进程可能有多个线程同时执行 <code>sqlite3_prepare_v2()</code>。如果解析器使用全局变量来维护解析状态，就会出现竞态条件。Lemon 从一开始就设计为无全局状态——所有状态都存储在传入的 <code>yyParser</code> 指针中，解析器函数本身是纯函数的。</p>
-
-        <p>另外，Lemon 生成的 C 代码<strong>可读性相当不错</strong>。你打开 <code>src/parse.c</code> 看看会发现变量命名清晰、逻辑分段明确。这对于 SQLite 长期维护来说极其重要——毕竟如果生成的代码人类完全看不懂，那出了问题根本没法调试。</p>
-
-        <div class="tip">
-            💡 Lemon 的另一个特色是它的 <strong>fallback token 机制</strong>。你可以为某个 token 指定 fallback：当解析器遇到一个无法处理的 token 时，如果该 token 有 fallback 定义，解析器会尝试用 fallback token 来匹配文法。这为实现 SQL 的"关键字可以作为标识符"功能提供了优雅的解决方案。
-        </div>
-
-        <h2>parse.y 文件结构</h2>
-
-        <p>SQLite 的文法定义在 <code>src/parse.y</code> 中，这个文件约有 1500 行，是 Lemon 的输入源文件。它的结构遵循 Lemon 输入格式：</p>
-
-        <pre><code>/* 第一部分：类型声明和选项 */
-%token_prefix TK_
-%token_destructor { sqlite3FreeTokens(pParse, $$); }
-%name sqlite3Parser
-%include {
-    /* #include 头文件，类型定义 */
-}
-
-/* 第二部分：类型定义 */
-%type select {Select*}
-%type expr {Expr*}
-%type oneselect {Select*}
-%type id {Token}
-
-/* 第三部分：文法规则与 action 代码 */
-select(A) ::= SELECT select_opts selcollist from_clause(From) \
-              where_clause(Where) groupby_clause group_clause_opt \
-              having_clause orderby_clause limit_clause. {
-    A = sqlite3SelectNew(pParse, ...);
-}
-
-expr(A) ::= expr(X) PLUS expr(Y). {
-    A = sqlite3ExprAlloc(pParse, TK_PLUS, &X, &Y, 0);
-}
-
-cmd ::= CREATE TABLE ifnotexists nm(E) database_kw_opt . {
-    sqlite3StartTable(pParse, &E, 0);
-}</code></pre>
-
-        <p>文法规则的每个 production 后面跟着用大括号包裹的 <strong>action 代码</strong>——当这条规则被归约（reduce）时执行的 C 代码。action 代码中可以使用 <code>$$</code> 表示当前非终结符的值，<code>$1</code>、<code>$2</code> 表示各符号的值。Lemon 没有 YACC 的 <code>$$ = $1</code> 这种隐式赋值，而是要求你在 action 中显式赋值，这让生成的代码更清晰。</p>
-
-        <p>在 <code>parse.y</code> 中还定义了 token 的优先级和结合性，用于解决 Shift/Reduce 冲突：</p>
-
-        <pre><code>/* 优先级定义，从低到高 */
-%left OR.
-%left AND.
-%right NOT.
-%left EQ NE IS ISNULL NOTNULL IN LIKE GLOB BETWEEN REGSTR.
-%left GT GE LT LE.
-%left PLUS MINUS.
-%left STAR SLASH REM.
-%left CONCAT.
-%left UMINUS UPLUS.</code></pre>
-
-        <p>通过这样的优先级声明，Lemon 可以自动处理像 <code>1 + 2 * 3</code> 这样的运算符优先级问题——<code>STAR</code> 的优先级高于 <code>PLUS</code>，所以解析器知道要先归约乘法。</p>
-
-        <h2>Lemon 的工作流程</h2>
-
-        <p>Lemon 自身的代码在 <code>tool/lemon.c</code> 中，约 12000 行。它的工作可以概括为"三步走"：</p>
-
-        <ol>
-            <li><strong>读入 <code>.y</code> 文件</strong> — 解析文法定义，构建文法规则的内部表示</li>
-            <li><strong>构建 LALR(1) 分析表</strong> — 计算 First 集、Follow 集、构建 LR 状态机</li>
-            <li><strong>生成输出文件</strong> — 输出 <code>parse.c</code>（解析器实现）和 <code>parse.h</code>（token 枚举定义）</li>
-        </ol>
-
-        <p>构建过程由 Makefile 驱动。在源码树的根目录运行 <code>make</code> 时，<code>main.mk</code> 中的规则会先编译 Lemon，然后运行 Lemon 处理 <code>parse.y</code>：</p>
-
-        <pre><code># main.mk 中的相关规则
-lemon: $(TOP)/tool/lemon.c
-    $(CC) -o lemon $(TOP)/tool/lemon.c
-
-parse.c parse.h: $(TOP)/src/parse.y lemon
-    ./lemon $(OPTIONS) $(TOP)/src/parse.y</code></pre>
-
-        <p>输出文件 <code>parse.c</code> 是一个自包含的 LALR(1) 解析器，包含完整的分析表（action table + goto table）和解析引擎（<code>sqlite3Parser</code> 系列函数）。它不依赖 Lemon 运行时，可以直接编译进 SQLite 库。</p>
-
-        <div class="highlight">
-            Lemon 的代码生成能力很强——<code>parse.c</code> 中嵌入的分析表经过精心编码，使用压缩编码方式存储（利用 Lemon 的 <code>compress</code> 选项），使得生成的表大小最小化。对于嵌入式场景，这种省出来的几百 KB 可能是决定性的。
-        </div>
-
-        <h2>Shift/Reduce 解析过程</h2>
-
-        <p>Lemon 在运行时维护一个<strong>状态栈</strong>，栈上的每个元素代表一个 LR 状态。对于每个输入 token，解析器执行以下操作：</p>
-
-        <ol>
-            <li><strong>查表</strong> — 在当前状态下，根据输入 token 的类别查 action 表</li>
-            <li><strong>Shift</strong> — 如果查到的是 "shift"，将当前 token 和下一个状态压栈，继续读入下一个 token</li>
-            <li><strong>Reduce</strong> — 如果查到的是 "reduce"，弹出栈顶的 N 个符号（对应文法的右部），执行 action 代码，将左部非终结符和新状态压栈</li>
-            <li><strong>Accept</strong> — 解析成功。触发条件是归约到起始符号且输入结束。</li>
-            <li><strong>Error</strong> — 查表结果为错误，触发错误处理</li>
-        </ol>
-
-        <p>让我们用 <code>SELECT 1 + 2</code> 来走一遍解析过程：</p>
-
-        <pre><code>状态栈（栈顶在右）       输入 token            动作
-────────────────────────────────────────────────────
-0                        TK_SELECT              shift, goto 状态3
-0 3                      TK_INTEGER(1)          shift, goto 状态X
-0 3 X                    TK_PLUS                reduce: expr → INTEGER
-0 3                      TK_PLUS                shift, goto 状态Y
-0 3 Y                    TK_INTEGER(2)          shift, goto 状态Z
-0 3 Y Z                  (结束)                  reduce: expr → expr PLUS expr
-0 3                      (结束)                  reduce: select → SELECT expr
-0                        (结束)                  accept!</code></pre>
-
-        <p>每一步的 shift 或 reduce 动作都是由 Lemon 的分析表决定的。这个分析表在 <code>parse.c</code> 中以压缩形式存储，称为 ParseAction[] 和 ParseReduce[] 两个大数组。</p>
-
-        <div class="tip">
-            💡 SQLite 中有一个非常巧妙的优化：由于 SQL 语句通常很短，解析过程的递归深度很浅，Lemon 的默认栈大小（约 100 个元素）几乎从不溢出。这让 SQLite 避免了解析时的动态栈扩展开销。
-        </div>
-
-        <h2>Parse 上下文对象</h2>
-
-        <p>Lemon 解析器本身只负责"语法是否正确"的判断和语法树的初步构建。实际的语义动作（比如为 <code>SELECT</code> 创建 <code>Select</code> 结构体、为表达式创建 <code>Expr</code> 节点）是在 action 代码中通过 <code>Parse</code> 对象完成的。</p>
-
-        <p><code>Parse</code> 结构体定义在 <code>src/sqliteInt.h</code> 中，是整个编译前端的"上下文对象"。它包含了：</p>
-
-        <table>
-            <thead>
-                <tr><th>字段</th><th>用途</th></tr>
-            </thead>
-            <tbody>
-                <tr><td><code>db</code></td><td>数据库连接指针，用于内存分配和错误报告</td></tr>
-                <tr><td><code>pVdbe</code></td><td>当前正在构建的 VDBE 程序（字节码）</td></tr>
-                <tr><td><code>nErr</code></td><td>解析过程中的错误计数</td></tr>
-                <tr><td><code>zErrMsg</code></td><td>错误信息字符串</td></tr>
-                <tr><td><code>pNewTable</code></td><td>CREATE TABLE 时构建的表定义</td></tr>
-                <tr><td><code>pNewTrigger</code></td><td>CREATE TRIGGER 时构建的触发器定义</td></tr>
-                <tr><td><code>sLastToken</code></td><td>最后一个 token，用于错误定位</td></tr>
-                <tr><td><code>aLabel</code></td><td>VDBE label 表，用于跳转地址回填</td></tr>
-                <tr><td><code>nLabel</code></td><td>label 数量</td></tr>
-                <tr><td><code>ckptSave</code></td><td>错误恢复时的检查点状态</td></tr>
-            </tbody>
-        </table>
-
-        <p>当解析器进行 reduce 时，action 代码中调用 <code>sqlite3SelectNew()</code>、<code>sqlite3ExprAlloc()</code> 等函数，它们内部操作的就是 <code>pParse</code> 所指向的 Parse 对象。这些函数还会把生成的 VDBE 指令添加到 <code>pParse->pVdbe</code> 中，实现"一边解析一边生成字节码"的"单通道"编译模式。</p>
-
-        <p>这种设计有一个重要后果：<strong>如果你在解析器的 action 中写错了代码，会导致生成的字节码有问题，但解析过程本身可以顺利完成</strong>。这也是为什么 SQLite 有大量针对 VDBE 程序正确性的测试——解析器的"语法检查"和"代码生成"是紧密耦合的。</p>
-
-        <h2>实战：添加一条 SQL 语法</h2>
-
-        <p>现在我们来做一个极有实战价值的练习——尝试在 SQLite 中添加一条新的 SQL 语句。假设我们要添加一个 <code>SHOW TABLES</code> 命令（MySQL 风格，虽然 SQLite 没有原生支持）。</p>
-
-        <p>完整的实现路径如下：</p>
-
-        <ol>
-            <li><strong>在 <code>parse.y</code> 中添加文法规则：</strong></li>
-        </ol>
-
-        <pre><code>/* 在 parse.y 的 cmd 规则中加入新分支 */
-cmd ::= SHOW TABLES. {
-    sqlite3ShowTable(pParse);
-}</code></pre>
-
-        <ol start="2">
-            <li><strong>添加 token 定义：</strong> 由于 <code>SHOW</code> 已经是 SQL 的保留词（用于触发器等上下文），实际上 <code>TK_SHOW</code> 已经存在。但 <code>TABLES</code> 如果还不是关键词，需要添加。</li>
-        </ol>
-
-        <pre><code>/* 在 keywordhash.h 对应的生成脚本中 */
-/* 添加 TABLES 关键词，ID 为 TK_TABLES */</code></pre>
-
-        <ol start="3">
-            <li><strong>实现语义函数：</strong> 在 <code>src/build.c</code> 或合适的文件中添加：</li>
-        </ol>
-
-        <pre><code>void sqlite3ShowTable(Parse *pParse){
-    sqlite3 *db = pParse->db;
-    /* 生成 VDBE 字节码 */
-    sqlite3VdbeAddOp4(v, OP_ShowTable, 0, 0, 0, 0, 0);
-}</code></pre>
-
-        <ol start="4">
-            <li><strong>在 VDBE 中添加对应的 opcode：</strong> 在 <code>src/vdbe.c</code> 中实现 <code>OP_ShowTable</code> 的执行逻辑。</li>
-        </ol>
-
-        <p>从"定义文法"到"YACC 文件中写规则"到"实现 action"到"生成 VDBE 指令"——这就是一条完整的前端到后端链路。理解了这条链路，你就能在 SQLite 上做任何定制化的 SQL 扩展。</p>
-
-        <div class="warning">
-            ⚠️ 踩坑实录：我在尝试给 SQLite 添加自定义语法时踩过一个经典的坑——<strong>Shift/Reduce 冲突</strong>。新加的语法规则可能会与已有的规则产生歧义，比如 <code>SHOW TABLES</code> 中的 <code>TABLES</code> 如果也是合法的标识符，解析器不知道应该 shift 还是 reduce。解决方法是利用 Lemon 的优先级声明，或调整文法使其无歧义。记得每次修改 <code>parse.y</code> 后查看 Lemon 输出的冲突报告。
-        </div>
-
-        <p>好了，这一章我们从 Lemon 解析器的设计哲学入手，深入分析了 <code>parse.y</code> 的文法结构、Lemon 的工作流程、Shift/Reduce 解析过程，最后走了一遍"添加新语法"的完整流程。下一章我们将进入<strong>表达式编译</strong>——从解析器构建的 Expr 树出发，深入到 <code>sqlite3ExprCode()</code> 内部，看看 <code>WHERE</code> 子句中的条件表达式是怎么变成 VDBE 字节码的。准备好了吗？我们第 10 章见。</p>
-
-        <div class="footer-nav">
-            <a href="08.html">← 上一章</a>
-            <a href="index.html">📖 返回目录</a>
-            <a href="10.html">下一章 →</a>
-        </div>
-    </div>
-</div>
-</div>
-</body>
-</html>
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Lemon 不是运行 SQL 的虚拟机，而是把 parse.y 编译成 C 状态机的生成工具。理解规则、解析栈、归约动作和 fallback，才能找到一条 SQL 为什么在这个位置被接受。"><title>Lemon 解析器：从 Token 序列到 Shift / Reduce · SQLite 源码分析</title><link rel="stylesheet" href="../assets/css/site.css"></head><body><a class="skip" href="#content">跳转至正文</a><header class="sitebar"><div class="shell nav-inner"><a class="brand" href="../index.html"><span class="brand-icon">SQLite</span><span>SQLite 源码解剖<br><small>逐层理解数据库内核</small></span></a><nav class="navlinks" aria-label="站点导航"><a href="../index.html#chapters">章节目录</a><a href="../index.html#route">学习路线</a><a href="https://github.com/1998x-stack/sqlite-source-analysis-tutorial">GitHub</a></nav></div></header><div class="shell article-layout"><aside class="toc" aria-label="章节内目录"><h2>本章内容</h2><nav><a href="#need">1. 为什么 tokenizer 产出的 Token 还不能直接执行？</a><a href="#grammar">2. parse.y 到底是什么语言？</a><a href="#shift">3. Shift、Reduce 和状态栈究竟在干什么</a><a href="#precedence">4. 优先级为什么不是“算完乘法再算加法”的后期修补</a><a href="#fallback">5. Fallback、错误恢复与析构器为何必要</a><a href="#experiment">6. 自己推演一次归约，再与真实 SQLite 做区分</a><a href="#references">官方资料</a></nav></aside><main id="content" class="article"><article><div class="crumb"><a href="../index.html">课程首页</a><span>›</span><span>章节 09 / 28</span></div><header class="article-header"><span class="kicker">SQLite internals · 09</span><h1>Lemon 解析器：从 Token 序列到 Shift / Reduce</h1><p class="dek">Lemon 不是运行 SQL 的虚拟机，而是把 parse.y 编译成 C 状态机的生成工具。理解规则、解析栈、归约动作和 fallback，才能找到一条 SQL 为什么在这个位置被接受。</p><div class="meta"><span>阅读时间约 33 分钟</span><span>官方源码与可复现实验</span></div></header><section id="need" aria-labelledby="h-need"><h2 id="h-need">1. 为什么 tokenizer 产出的 Token 还不能直接执行？</h2><p>Tokenizer 已经把输入 <code>SELECT 1 + 2 * 3;</code> 分成 <code>SELECT</code>、数字、运算符和结束符等 token。然而“有这些词”不等于“能组成合法的 SQL”。解释器需要根据 <strong>语法规则</strong>知道 SELECT 后需要什么表达式、加法和乘法如何结合，以及一串合法 token 何时组成更大的语法成分。</p>
+<p>SQLite 用 Lemon 生成 LALR(1) 解析器。<code>parse.y</code> 写的是文法规则与 C 语义动作；Lemon 编译这些规则生成 <code>parse.c</code>/<code>parse.h</code>，随后与其他 SQLite 源文件一起构建。SQLite 运行时不会重新调用 Lemon 来处理每个 SQL 字符串。<a href="https://sqlite.org/lemon.html" target="_blank" rel="noopener noreferrer">官方 Lemon 资料</a></p>
+<figure><img loading="lazy" src="../assets/svg/09-lemon-build.svg" width="960" alt="parse.y 经 Lemon 生成 parse.c 和 parse.h，再由 tokenize.c 推送 token 到运行时解析器"><figcaption>图 1 · 把构建期的语法生成与运行期的解析操作分成两条边界；它们发生在完全不同的时间。</figcaption></figure></section><section id="grammar" aria-labelledby="h-grammar"><h2 id="h-grammar">2. parse.y 到底是什么语言？</h2><p>Lemon 的规则由左侧非终结符、右侧词法或非终结符序列组成，基本形态为 <code>lhs ::= rhs ... .</code>；C action 写在规则后面的花括号中，执行条件是该规则被<strong>归约</strong>。规则中可以给语义值起名字，比基于位置的 <code>$1</code>、<code>$$</code> 更容易检查。</p>
+<pre><code>/* Lemon 概念示例，不是 SQLite 官方 parse.y 的逐字摘录 */
+%type expr {int}
+%left PLUS.
+%left TIMES.
+expr(A) ::= INTEGER(X).          { A = X; }
+expr(A) ::= expr(B) PLUS expr(C).  { A = B + C; }
+expr(A) ::= expr(B) TIMES expr(C). { A = B * C; }</code></pre>
+<p>这段只演示别名、规则和动作，不是可单独构建的完整 Lemon grammar。真实 SQLite 的 <code>parse.y</code> 会引用 <code>Parse</code> 编译上下文，利用特殊析构规则处理出错时的资源，规则动作可能同时进行结构创建、语义检查或触发代码生成。<strong>因此不能把真实 SQLite 想象成“等整棵 AST 完全生成后才开始所有代码生成”的单一两阶段算法。</strong></p>
+<p>学习时区分三个实体：<code>parse.y</code> 是输入规则；<code>parse.c</code> 是通过 Lemon 生成的状态机代码；<code>Expr</code>/<code>Select</code>/<code>Parse</code> 是 SQLite 编译过程里的语义对象。它们不是三个不同解析器。</p></section><section id="shift" aria-labelledby="h-shift"><h2 id="h-shift">3. Shift、Reduce 和状态栈究竟在干什么</h2><p>简单起见，设玩具文法只有加法：<code>term ::= NUM</code>、<code>expr ::= term</code>、<code>expr ::= expr PLUS term</code>。当 parser 读取 <code>1 + 2</code> 的 token 序列，<strong>shift</strong> 表示把下一个输入 token/相关状态放到解析栈；<strong>reduce</strong> 表示发现栈顶符合某条规则，将若干符号合并成一个非终结符，并执行它的 action。</p>
+<figure><img loading="lazy" src="../assets/svg/09-shift-reduce.svg" width="960" alt="玩具算术文法的五步 shift/reduce 推演"><figcaption>图 2 · ① NUM 入栈；② 归约成 term、expr；③ 继续读取加号与第二个数字；④ 第二数字归约为 term；⑤ 将 expr PLUS term 归约成 expr。实际 SQLite LALR 解析栈的状态编号和精确动作并不等同此图。</figcaption></figure>
+<p>真正的 LALR(1) parser 还维护“状态”，它不仅看符号序列，还根据当前状态与一个 lookahead token 查生成的动作表，选择 shift、reduce、accept 或报错；有些分支由优先级解决冲突。<strong>不能直接把玩具教程输出的五个动作称作 SQLite 源码真实 trace</strong>。</p>
+<div class="callout"><strong>为何状态栈比单个递归函数有价值？</strong>通过在构建阶段计算文法的可达状态与转移，运行时可以把大量语法判断压缩到表驱动操作。对于 SQLite 的嵌入式实现，生成的代码可重入、状态独立和易于受控构建尤其重要。</div></section><section id="precedence" aria-labelledby="h-precedence"><h2 id="h-precedence">4. 优先级为什么不是“算完乘法再算加法”的后期修补</h2><p>SQL 的表达式优先级影响 parse tree 的结构。<code>1 + 2 * 3</code> 的正确组合是 <code>1 + (2 * 3)</code>，得到 7，而不是 <code>(1+2)*3</code> 得到 9。Lemon 允许在文法中声明运算符优先级/结合性，用于控制遇到潜在 shift/reduce 冲突时的选择。</p>
+<figure><img loading="lazy" src="../assets/svg/09-operator-precedence.svg" width="960" alt="1 + 2 * 3 的根节点是加法、乘法构成右子树的表达式树"><figcaption>图 3 · * 绑定得比 + 紧；乘法在语义树中成为加法的子表达式。实际 SQLite 的 Expr 节点还可能包含额外字段与标志。</figcaption></figure>
+<p>但不能把“通用算术优先级示例”误写成 <code>parse.y</code> 所有规则的精确形态。SQLite 还有 <code>IS</code>、<code>IN</code>、<code>BETWEEN</code>、<code>CASE</code>、<code>COLLATE</code> 和 JSON 相关运算符等；其行为应以当前 <a href="https://sqlite.org/lang_expr.html" target="_blank" rel="noopener noreferrer">SQL 表达式文档</a>与对应源码为准。</p>
+<pre><code>-- examples/09_parser_semantics.sql
+SELECT 1 + 2 * 3 AS result;       -- 7
+SELECT (1 + 2) * 3 AS result;     -- 9
+SELECT 10 - 3 - 2 AS result;      -- 5，左结合
+SELECT 1 + 2 * 3 = 7 AS is_seven; -- 1</code></pre>
+<p>这些 SQL 只验证表达式语义；它们不能直接证明 SQLite 在内核中执行了某个固定编号的 reduce。</p></section><section id="fallback" aria-labelledby="h-fallback"><h2 id="h-fallback">5. Fallback、错误恢复与析构器为何必要</h2><p>SQL 的关键字常与应用想要使用的标识符冲突。Lemon 的 <code>%fallback</code> 机制允许某些 token 在特定 parser 状态中按标识符处理，这是语法兼容性策略，不是词法层“忽略所有关键字”。</p>
+<p>另一个重要设计是<strong>非终结符析构器</strong>（destructor）：如果解析中途失败，先前构造的语义值可能持有动态内存；解析栈清理需要调用文法中的对应规则释放资源，否则长时间运行的嵌入式应用会累积泄漏。官方 <a href="https://sqlite.org/lemon.html" target="_blank" rel="noopener noreferrer">Lemon 说明</a>将可重入与 destructor 列为其关键特性。</p>
+<table><thead><tr><th>内部机制</th><th>读源码时观察什么</th><th>常见错误理解</th></tr></thead><tbody>
+<tr><td><code>%fallback</code></td><td>哪些 token 可回退以及生效状态</td><td>所有关键词都能被当作列名</td></tr>
+<tr><td>优先级声明</td><td>语法冲突怎样被消解</td><td>运行完 SQL 后再重新调整顺序</td></tr>
+<tr><td>Destructor</td><td>非法输入时如何回收语义值</td><td>解析失败只需 free(parser)</td></tr>
+<tr><td>Parse 上下文</td><td>归约动作在哪儿生成结构和指令</td><td>parser 自身等同完整虚拟机</td></tr>
+</tbody></table>
+<p>若要追 <code>SELECT FROM t;</code> 的失败，先找到 token 和文法状态如何无法匹配，再追错误处理和清理；不要在没有证据的情况下指认“某个唯一固定的状态编号”。</p></section><section id="experiment" aria-labelledby="h-experiment"><h2 id="h-experiment">6. 自己推演一次归约，再与真实 SQLite 做区分</h2><p>仓库新增 <code>examples/09_toy_reduce.py</code>。它是<strong>有意缩小语言的教学模型</strong>，只接受形式为数字加法链的输入（如 1+2+3），并打印自己模拟的 shift/reduce 步骤；它不是 Lemon，也不能接受全部 SQL 文法。</p>
+<pre><code>python3 examples/09_toy_reduce.py
+# 预期终值：6
+# 预期输出包含 shift NUM、reduce NUM→term、reduce expr + term</code></pre>
+<p>再运行前一节的 SQLite SQL，确认 SQL 实际运算语义。两项测试分别回答不同问题：一个观察玩具归约机制，一个在真实 SQLite 中验证表达式值。</p>
+<div class="exercise"><h3>版本化源码对照任务</h3><ol><li>在同一源码检出找到 <code>src/parse.y</code>、<code>tool/lemon.c</code> 和构建生成的 <code>parse.c</code>；</li><li>选一个简单规则，指出非终结符别名与 C action；</li><li>定位一处 <code>%fallback</code> 或 destructor 声明；</li><li>比较玩具推演与 SQLite 本身的语义结果，并明确它们不是同一种状态 trace。</li></ol></div>
+<details><summary>自测：Lemon 是在用户每次执行 SELECT 时运行的吗？</summary><p>不是。Lemon 在构建 SQLite 的时候从语法规则生成 C parser；用户 prepare SQL 时执行的是已经编译好的 parser 代码。</p></details>
+<p>下一章研究 parser 的语义结构如何转成 VDBE 指令，以及为什么类型转换、IN 和 CASE 需要特殊处理。</p></section><section id="references" aria-labelledby="refsh"><h2 id="refsh">来源与版本边界</h2><p>文法生成、解析栈和代码生成属于内部实现；重构示意图与玩具 parser 只提供心智模型，不能当作某个 SQLite 发布版本的真实状态编号或栈快照。</p><ol class="references"><li><a href="https://sqlite.org/lemon.html" target="_blank" rel="noopener noreferrer">The Lemon LALR(1) Parser Generator</a> · SQLite 官方原始资料</li><li><a href="https://sqlite.org/arch.html" target="_blank" rel="noopener noreferrer">Architecture of SQLite</a> · SQLite 官方原始资料</li><li><a href="https://sqlite.org/src/doc/trunk/doc/lemon.html" target="_blank" rel="noopener noreferrer">The original Lemon Manual</a> · SQLite 官方原始资料</li><li><a href="https://sqlite.org/lang_expr.html" target="_blank" rel="noopener noreferrer">SQL Language Expressions</a> · SQLite 官方原始资料</li><li><a href="https://sqlite.org/syntaxdiagrams.html" target="_blank" rel="noopener noreferrer">SQL Syntax Diagrams</a> · SQLite 官方原始资料</li></ol></section><nav class="article-nav" aria-label="章节导航"><a href="08.html">← 上一章</a><a href="10.html">下一章 →</a></nav></article></main></div><footer class="foot"><div class="shell foot-inner"><span>SQLite 源码解剖 · 先观测，再定位，再核验</span><a href="../index.html">返回全部章节</a></div></footer></body></html>

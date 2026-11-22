@@ -1,0 +1,61 @@
+{
+  "chapter": "10",
+  "reviewed_at": "2026-11-22",
+  "scope": "Current official SQL semantics; internal opcode details version-specific",
+  "claims": [
+    {
+      "id": "10-01",
+      "claim": "expr.c handles code generation for SQLite expressions",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/arch.html",
+      "locator": "Code generator",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "10-02",
+      "claim": "Sqlite bytecode and register assignments may change between versions",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/opcode.html",
+      "locator": "Overview",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "10-03",
+      "claim": "IN/NOT IN handle NULL with three-valued logic; empty list is special",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/lang_expr.html",
+      "locator": "IN and NOT IN operators",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "10-04",
+      "claim": "CASE expressions have lazy evaluation",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/lang_expr.html",
+      "locator": "CASE expression",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "10-05",
+      "claim": "SQLite affinity conversion differs from explicit CAST",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/datatype3.html",
+      "locator": "Type affinity and comparisons",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "10-06",
+      "claim": "Expression compilation illustration is not a claim of exact opcode emission",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/opcode.html",
+      "locator": "Implementation details",
+      "status": "illustrative",
+      "notes": "Not a literal opcode trace"
+    }
+  ]
+}

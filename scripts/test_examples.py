@@ -7,12 +7,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 def main() -> None:
-    for chapter in ("01_sql_path.sql", "03_explain.sql"):
+    for chapter in ("01_sql_path.sql", "03_explain.sql", "08_lexical.sql", "09_parser_semantics.sql", "10_expressions.sql"):
         conn = sqlite3.connect(":memory:")
         try:
             conn.executescript((ROOT / "examples" / chapter).read_text(encoding="utf-8"))
             count = conn.execute("SELECT COUNT(*) FROM sqlite_master").fetchone()[0]
-            assert count > 0, (chapter, "schema missing")
+            if chapter in ("01_sql_path.sql", "03_explain.sql", "10_expressions.sql"):
+                assert count > 0, (chapter, "schema missing")
+            else:
+                assert count == 0, (chapter, "expression-only script unexpectedly created schema")
         finally:
             conn.close()
     conn = sqlite3.connect(":memory:")
@@ -24,7 +27,12 @@ def main() -> None:
         assert conn.execute("SELECT name FROM users WHERE id=?", (7,)).fetchone() == ("Ada",)
         assert conn.execute("SELECT name FROM users WHERE id=?", (50,)).fetchone() is None
         assert conn.execute("SELECT 1+2").fetchone() == (3,)
-        print("PASS: SQL scripts parse and deterministic query results are correct; sqlite3", sqlite3.sqlite_version)
+        assert conn.execute("SELECT 5 IN (1, NULL), 5 NOT IN (1, NULL)").fetchone() == (None, None)
+        assert conn.execute("SELECT 5 IN (), 5 NOT IN ()").fetchone() == (0, 1)
+        assert conn.execute("SELECT 42 = '42'").fetchone() == (0,)
+        assert conn.execute("SELECT CAST('123e+5' AS INTEGER)").fetchone() == (123,)
+        assert conn.execute("SELECT 1 + 2 * 3, (1 + 2) * 3").fetchone() == (7, 9)
+        print("PASS: 5 SQL scripts and deterministic query results; sqlite3", sqlite3.sqlite_version)
     finally:
         conn.close()
 

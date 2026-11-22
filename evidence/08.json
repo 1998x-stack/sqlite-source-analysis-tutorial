@@ -1,0 +1,52 @@
+{
+  "chapter": "08",
+  "reviewed_at": "2026-11-22",
+  "scope": "Official SQLite documentation; tokenizer internals depend on source version",
+  "claims": [
+    {
+      "id": "08-01",
+      "claim": "Tokenizer is hand-coded and pushes tokens to Lemon parser",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/arch.html",
+      "locator": "Tokenizer",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "08-02",
+      "claim": "Quoted identifiers, SQL string literals and keyword handling differ",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/lang_keywords.html",
+      "locator": "Quoting identifiers",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "08-03",
+      "claim": "Lemon supports parser-state fallback for certain keywords",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/lemon.html",
+      "locator": "SQLite customizations for Lemon",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "08-04",
+      "claim": "sqlite3_complete checks statement completeness but not entire SQL validity",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/complete.html",
+      "locator": "Completeness of SQL statement",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "08-05",
+      "claim": "Token-state illustration is simplified rather than a version exact state machine",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/arch.html",
+      "locator": "Tokenizer",
+      "status": "illustrative",
+      "notes": "Teaching diagram"
+    }
+  ]
+}

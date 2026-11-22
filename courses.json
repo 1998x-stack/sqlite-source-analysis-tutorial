@@ -68,61 +68,56 @@
       "num": "06",
       "title": "错误处理与断言",
       "topics": [
-        "错误码体系",
-        "rc传播链",
-        "assert使用哲学",
-        "日志与诊断"
+        "基础/扩展结果码",
+        "sqlite3_step 状态",
+        "错误传播与 C API"
       ],
       "file": "chapters/06.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "07",
       "title": "调试基础设施",
       "topics": [
-        "SQLITE_DEBUG模式",
-        "AST可视化打印",
-        "VDBE跟踪",
-        "gdb调试技巧"
+        "EQP 与 EXPLAIN",
+        "生成期与执行期 Trace",
+        "调试构建与断点"
       ],
       "file": "chapters/07.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "08",
       "title": "词法分析器",
       "topics": [
-        "tokenize.c概览",
-        "关键词完美哈希",
-        "Token类型系统",
-        "词法错误恢复"
+        "Token 边界",
+        "引用与参数",
+        "关键词 Fallback"
       ],
       "file": "chapters/08.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "09",
       "title": "Lemon解析器与语法",
       "topics": [
-        "LALR(1)解析器",
-        "parse.y文件结构",
-        "Shift/Reduce过程",
-        "Parse上下文"
+        "parse.y 与 Lemon",
+        "Shift / Reduce",
+        "优先级与析构器"
       ],
       "file": "chapters/09.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "10",
       "title": "表达式编译",
       "topics": [
-        "Expr树构建",
-        "递归代码生成",
-        "类型推导与Affinity",
-        "IN/CASE/CAST编译"
+        "Expr 代码生成",
+        "VDBE 寄存器",
+        "NULL / Affinity / CAST"
       ],
       "file": "chapters/10.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "11",
@@ -341,5 +336,5 @@
       "status": "legacy"
     }
   ],
-  "description": "01–05 已深度重构；06–28 为迁移保留的原版正文，待逐章复核。"
+  "description": "01–10 已完成独立可视化重构；11–28 是迁移保留的原版正文，尚需版本化源码复核。"
 }

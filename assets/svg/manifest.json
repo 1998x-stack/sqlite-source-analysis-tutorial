@@ -99,6 +99,126 @@
         "https://sqlite.org/howtocompile.html",
         "https://sqlite.org/malloc.html"
       ]
+    },
+    {
+      "file": "06-error-hierarchy.svg",
+      "chapter": "06",
+      "source": [
+        "https://sqlite.org/rescode.html",
+        "https://sqlite.org/c3ref/errcode.html"
+      ]
+    },
+    {
+      "file": "06-step-states.svg",
+      "chapter": "06",
+      "source": [
+        "https://sqlite.org/rescode.html",
+        "https://sqlite.org/c3ref/errcode.html"
+      ]
+    },
+    {
+      "file": "06-error-propagation.svg",
+      "chapter": "06",
+      "source": [
+        "https://sqlite.org/rescode.html",
+        "https://sqlite.org/c3ref/errcode.html"
+      ]
+    },
+    {
+      "file": "07-observation.svg",
+      "chapter": "07",
+      "source": [
+        "https://sqlite.org/debugging.html",
+        "https://sqlite.org/opcode.html"
+      ]
+    },
+    {
+      "file": "07-trace-phases.svg",
+      "chapter": "07",
+      "source": [
+        "https://sqlite.org/debugging.html",
+        "https://sqlite.org/opcode.html"
+      ]
+    },
+    {
+      "file": "07-debug-decision.svg",
+      "chapter": "07",
+      "source": [
+        "https://sqlite.org/debugging.html",
+        "https://sqlite.org/opcode.html"
+      ]
+    },
+    {
+      "file": "08-token-sequence.svg",
+      "chapter": "08",
+      "source": [
+        "https://sqlite.org/arch.html",
+        "https://sqlite.org/lang_keywords.html"
+      ]
+    },
+    {
+      "file": "08-token-automaton.svg",
+      "chapter": "08",
+      "source": [
+        "https://sqlite.org/arch.html",
+        "https://sqlite.org/lang_keywords.html"
+      ]
+    },
+    {
+      "file": "08-keyword-fallback.svg",
+      "chapter": "08",
+      "source": [
+        "https://sqlite.org/arch.html",
+        "https://sqlite.org/lang_keywords.html"
+      ]
+    },
+    {
+      "file": "09-lemon-build.svg",
+      "chapter": "09",
+      "source": [
+        "https://sqlite.org/lemon.html",
+        "https://sqlite.org/arch.html"
+      ]
+    },
+    {
+      "file": "09-shift-reduce.svg",
+      "chapter": "09",
+      "source": [
+        "https://sqlite.org/lemon.html",
+        "https://sqlite.org/arch.html"
+      ]
+    },
+    {
+      "file": "09-operator-precedence.svg",
+      "chapter": "09",
+      "source": [
+        "https://sqlite.org/lemon.html",
+        "https://sqlite.org/arch.html"
+      ]
+    },
+    {
+      "file": "10-expression-compile.svg",
+      "chapter": "10",
+      "source": [
+        "https://sqlite.org/lang_expr.html",
+        "https://sqlite.org/datatype3.html"
+      ]
+    },
+    {
+      "file": "10-null-logic.svg",
+      "chapter": "10",
+      "source": [
+        "https://sqlite.org/lang_expr.html",
+        "https://sqlite.org/datatype3.html"
+      ]
+    },
+    {
+      "file": "10-affinity.svg",
+      "chapter": "10",
+      "source": [
+        "https://sqlite.org/lang_expr.html",
+        "https://sqlite.org/datatype3.html"
+      ]
     }
   ]
 }

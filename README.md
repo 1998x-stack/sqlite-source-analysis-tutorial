@@ -1,8 +1,8 @@
 # SQLite 源码解剖：从一条 SQL 理解数据库内核
 
-> 28 章 SQLite 内核原理与源码分析的中文阅读路线。首批重构 **01–05**；**06–28 保留原版**，后续将逐章核对、绘制可解释的 SVG，并补充可复现实验。
+> 28 章 SQLite 内核原理与源码分析的中文阅读路线。已重构 **01–10**；**11–28 保留原版**，后续将逐章核对、绘制可解释的 SVG，并补充可复现实验。
 
-**课程首页**（GitHub Pages 配置完成后）：https://1998x-stack.github.io/sqlite-source-analysis-tutorial/
+**课程首页**（GitHub Pages 已部署）：https://1998x-stack.github.io/sqlite-source-analysis-tutorial/
 
 ## 路线
 | 章节 | 主题 | 维护状态 |
@@ -12,7 +12,12 @@
 | 03 | SQL 编译与存储层完整架构 | 深度重构 |
 | 04 | sqlite3、Parse、Expr、Select、Vdbe | 深度重构 |
 | 05 | Lookaside / 通用分配 / Page Cache | 深度重构 |
-| 06–28 | 错误码、解析、VDBE、B-Tree、Pager、WAL、优化器、扩展、CLI、WASM 等 | 原版迁移，待复核 |
+| 06 | 错误码、step 状态与调用链传播 | 深度重构 |
+| 07 | EQP、VDBE 生成期/执行期调试 | 深度重构 |
+| 08 | 手写词法扫描、Token、fallback | 深度重构 |
+| 09 | Lemon、parse.y、shift/reduce | 深度重构 |
+| 10 | Expr 代码生成、NULL、CAST 和 affinity | 深度重构 |
+| 11–28 | VDBE、B-Tree、Pager、WAL、优化器、扩展、CLI、WASM 等 | 原版迁移，待复核 |
 
 章节清单和真实相对路径以 [courses.json](courses.json) 为准。首页既是学习入口，也清楚标记哪些章节还未完成技术复审。
 
@@ -22,14 +27,14 @@
 .
 ├── index.html                 # GitHub Pages 首页（根目录发布）
 ├── chapters/
-│   ├── 01.html ... 05.html   # 首批新叙事 + 图解 + 实验
-│   ├── 06.html ... 28.html   # 从根目录迁移的原版
+│   ├── 01.html ... 10.html   # 已完成独立叙事 + 图解 + 实验
+│   ├── 11.html ... 28.html   # 从根目录迁移的原版
 │   ├── index.html            # 旧章内“返回首页”兼容跳转
 │   └── theme.css             # 原版页面暂用的兼容主题
 ├── assets/
 │   ├── css/site.css          # 重构版视觉系统
-│   └── svg/*.svg             # 11 张原创可访问的独立 SVG
-├── evidence/01.json ... 05.json
+│   └── svg/*.svg             # 26 张原创可访问的独立 SVG
+├── evidence/01.json ... 10.json
 ├── examples/                 # SQL / C 实验（不复制上游 SQLite）
 ├── scripts/                  # 静态检查、浏览器 QA、部署打包
 ├── courses.json              # 28 章导航数据和重构状态
@@ -84,3 +89,21 @@ python3 scripts/build_site.py
 - 字节码引擎：https://sqlite.org/opcode.html
 
 站点图解与文章为独立撰写；教学编排参考 [Olah-style-posts](https://github.com/1998x-stack/Olah-style-posts) 中的渐进解释和证据审核方法，不复制其图像或文本。
+
+## 第二轮：06–10 技术深入
+
+本批在原来的 11 幅之外新增 15 张可独立打开的 SVG，重点解释：错误结果码层次、step 状态机、API 错误传播、调试输出层次、addoptrace / vdbe_trace 的时间界限、token 扫描与 fallback、Lemon shift/reduce、运算符优先级、表达式生成、三值逻辑与亲和性。每章配官方来源与独立实验。
+
+```bash
+python scripts/test_examples.py
+python examples/09_toy_reduce.py
+sqlite3 :memory: < examples/08_lexical.sql
+sqlite3 :memory: < examples/09_parser_semantics.sql
+sqlite3 :memory: < examples/10_expressions.sql
+for id in 06_error_codes 07_trace_events 08_token_boundary 10_expr_prepared; do
+  cc -std=c11 -Wall -Wextra -Werror -O2 "examples/${id}.c" -lsqlite3 -o "/tmp/sqlite-${id}"
+  "/tmp/sqlite-${id}"
+done
+```
+
+注意 `examples/07_debug.sql` 包含 `.eqp` / `.echo` 等 CLI 点命令，不能用 Python 的 `executescript()` 来运行；调试专用 `TREETRACE` / `WHERETRACE` 功能需配套编译宏。命令示例以 Linux 为基线，Windows/macOS 需按工具链调整。

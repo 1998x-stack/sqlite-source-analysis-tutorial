@@ -1,0 +1,52 @@
+{
+  "chapter": "09",
+  "reviewed_at": "2026-11-22",
+  "scope": "SQLite official syntax and Lemon docs",
+  "claims": [
+    {
+      "id": "09-01",
+      "claim": "Lemon generates parser C source from grammar and is not run at SQL preparation",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/lemon.html",
+      "locator": "Overview",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "09-02",
+      "claim": "Lemon is an LALR(1) generator used in SQLite for SQL grammar",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/lemon.html",
+      "locator": "Overview",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "09-03",
+      "claim": "Lemon has nonterminal destructors and fallback token feature",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/lemon.html",
+      "locator": "Lemon customizations",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "09-04",
+      "claim": "The toy shift/reduce trace is illustrative, not actual SQLite state trace",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/lemon.html",
+      "locator": "LALR(1) generated parser",
+      "status": "illustrative",
+      "notes": "Only pedagogical model"
+    },
+    {
+      "id": "09-05",
+      "claim": "Precedence of multiplication over addition in SQL expressions",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/lang_expr.html",
+      "locator": "Operators and Parse-Affecting Attributes",
+      "status": "verified",
+      "notes": ""
+    }
+  ]
+}

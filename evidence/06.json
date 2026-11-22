@@ -1,0 +1,52 @@
+{
+  "chapter": "06",
+  "reviewed_at": "2026-11-22",
+  "scope": "SQLite canonical documentation; full source ABI not guaranteed",
+  "claims": [
+    {
+      "id": "06-01",
+      "claim": "SQLITE_ROW/DONE are step control results",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/step.html",
+      "locator": "SQLITE_ROW and SQLITE_DONE",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "06-02",
+      "claim": "Extended error codes contain the primary error code in low eight bits",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/rescode.html",
+      "locator": "extended result code",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "06-03",
+      "claim": "sqlite3_errmsg is connection state and later API calls may overwrite it",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/errcode.html",
+      "locator": "error message lifetime",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "06-04",
+      "claim": "sqlite3_error_offset refers to UTF-8 byte offset or -1",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/errcode.html",
+      "locator": "sqlite3_error_offset",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "06-05",
+      "claim": "VFS error propagation diagram is conceptual",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/arch.html",
+      "locator": "pager and os interface",
+      "status": "illustrative",
+      "notes": "Conceptual diagram"
+    }
+  ]
+}
