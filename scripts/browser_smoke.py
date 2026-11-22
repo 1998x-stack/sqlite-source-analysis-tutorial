@@ -7,7 +7,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-PAGES = ["index.html"] + [f"chapters/{i:02}.html" for i in range(1, 16)]
+PAGES = ["index.html"] + [f"chapters/{i:02}.html" for i in range(1, 21)]
 VIEWPORTS = [(1440, 900), (390, 844), (360, 800)]
 
 def main() -> None:
@@ -70,6 +70,11 @@ def main() -> None:
         printpage.goto((ROOT / "chapters/15.html").as_uri())
         printpage.emulate_media(media="print")
         printpage.screenshot(path=str(out / "chapter15-print.png"), full_page=True)
+        printpage.close()
+        printpage = browser.new_page()
+        printpage.goto((ROOT / "chapters/20.html").as_uri())
+        printpage.emulate_media(media="print")
+        printpage.screenshot(path=str(out / "chapter20-print.png"), full_page=True)
         printpage.close()
         browser.close()
     (out / "report.json").write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")

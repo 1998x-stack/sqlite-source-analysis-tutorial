@@ -176,63 +176,58 @@
     },
     {
       "num": "16",
-      "title": "WAL模式深度解析",
+      "title": "WAL 模式深度解析",
       "topics": [
-        "WAL文件格式",
-        "Checkpoint算法",
-        "读写并发模型",
-        "3.51.3 WAL bug修复"
+        "Frame / End mark",
+        "快照隔离",
+        "Checkpoint 与长读者"
       ],
       "file": "chapters/16.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "17",
       "title": "锁机制与并发",
       "topics": [
-        "五级文件锁",
-        "POSIX锁实现",
-        "Windows SRWL新锁",
-        "死锁预防策略"
+        "Rollback 五级锁",
+        "BUSY / LOCKED",
+        "WAL BUSY_SNAPSHOT"
       ],
       "file": "chapters/17.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "18",
       "title": "查询规划器",
       "topics": [
-        "WhereLoop构建",
-        "Cost估算模型",
-        "连接顺序优化",
-        "3.53星型JOIN改进"
+        "WhereLoop / N3",
+        "索引前缀",
+        "ANALYZE / EXPLAIN"
       ],
       "file": "chapters/18.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "19",
       "title": "内置函数实现",
       "topics": [
-        "函数注册机制",
-        "标量与聚合函数",
-        "Window函数框架",
-        "日期时间函数"
+        "Scalar / Aggregate",
+        "Window Function",
+        "DETERMINISTIC"
       ],
       "file": "chapters/19.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "20",
       "title": "虚拟表与扩展",
       "topics": [
-        "sqlite3_module接口",
-        "虚拟表生命周期",
-        "carray扩展示例",
-        "实现KV存储虚拟表"
+        "xBestIndex / xFilter",
+        "sqlite3_module",
+        "可执行 C 虚拟表"
       ],
       "file": "chapters/20.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "21",
@@ -331,5 +326,5 @@
       "status": "legacy"
     }
   ],
-  "description": "01–15 已深度重构并配有独立 SVG、原始资料和可复现实验；16–28 保留原版页面，待版本化源码复核。"
+  "description": "01–20 已逐章独立图解重构并配有证据台账与可复现代码；21–28 为迁移保留的原版，仍待版本化技术审计。"
 }
