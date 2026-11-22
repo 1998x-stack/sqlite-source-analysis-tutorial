@@ -1,0 +1,71 @@
+{
+  "chapter": "22",
+  "reviewed_at": "2026-11-22",
+  "source_baseline": "SQLite 3.54.1 (2026-10-16)",
+  "scope": "Official SQLite documentation and version-pinned SQLite source; examples are independently authored",
+  "claims": [
+    {
+      "id": "22-01",
+      "claim": "Expression indexes are considered when query expressions match the CREATE INDEX expression, without general algebraic equivalence",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/expridx.html",
+      "locator": "§1",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "22-02",
+      "claim": "Expression index functions must be deterministic; application-defined functions need SQLITE_DETERMINISTIC",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/expridx.html",
+      "locator": "§2",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "22-03",
+      "claim": "Stale expression indexes can arise when deterministic calculations vary across platforms, OSes or library versions",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/staleexpridx.html",
+      "locator": "§2",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "22-04",
+      "claim": "SQLite 3.53.0 attempts to repair stale expression index entries during some UPDATE or DELETE operations",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/staleexpridx.html",
+      "locator": "§4",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "22-05",
+      "claim": "PRAGMA integrity_check can still report imprecise floating-point values in stale expression indexes",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/staleexpridx.html",
+      "locator": "§4",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "22-06",
+      "claim": "REINDEX EXPRESSIONS rebuilds expression indexes only",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/staleexpridx.html",
+      "locator": "§5",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "22-07",
+      "claim": "sqlite3VdbeFindIndexKey searches for matching primary-key fields and may widen its search",
+      "kind": "technical",
+      "source_url": "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/vdbeaux.c#L5480-L5550",
+      "locator": "sqlite3VdbeFindIndexKey, 3.54.1",
+      "status": "verified",
+      "notes": ""
+    }
+  ]
+}

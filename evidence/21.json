@@ -1,0 +1,71 @@
+{
+  "chapter": "21",
+  "reviewed_at": "2026-11-22",
+  "source_baseline": "SQLite 3.54.1 (2026-10-16)",
+  "scope": "Official SQLite documentation and version-pinned SQLite source; examples are independently authored",
+  "claims": [
+    {
+      "id": "21-01",
+      "claim": "FTS5 is a virtual table module providing full-text search",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fts5.html",
+      "locator": "§1 Overview",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "21-02",
+      "claim": "unicode61 treats each contiguous run of token characters as one token; it does not implement Chinese dictionary segmentation",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fts5.html#unicode61_tokenizer",
+      "locator": "§4.3.1",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "21-03",
+      "claim": "FTS5 writes transaction segments as B-trees; queries visit each segment and merge results",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fts5.html#the_automerge_configuration_option",
+      "locator": "§6.1 automerge",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "21-04",
+      "claim": "automerge work is normally performed within INSERT/UPDATE/DELETE operations, not by a background thread",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fts5.html#the_automerge_configuration_option",
+      "locator": "§6.1 automerge",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "21-05",
+      "claim": "optimize merges component B-trees and can take a long time; merge can divide work into steps",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fts5.html#the_optimize_command",
+      "locator": "§6.8–6.9",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "21-06",
+      "claim": "bm25 scores rank better matches with numerically lower values; rank defaults to bm25 and may be faster for ORDER BY",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fts5.html#sorting_by_auxiliary_function_results",
+      "locator": "§5.2",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "21-07",
+      "claim": "external content tables require application synchronization; rebuild recreates the index from the content table",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fts5.html#external_content_tables",
+      "locator": "§4.4.3 and §6.12",
+      "status": "verified",
+      "notes": ""
+    }
+  ]
+}

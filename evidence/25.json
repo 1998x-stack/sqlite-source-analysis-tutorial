@@ -1,0 +1,71 @@
+{
+  "chapter": "25",
+  "reviewed_at": "2026-11-22",
+  "source_baseline": "SQLite 3.54.1 (2026-10-16)",
+  "scope": "Official SQLite documentation and version-pinned SQLite source; examples are independently authored",
+  "claims": [
+    {
+      "id": "25-01",
+      "claim": "EXPLAIN QUERY PLAN is diagnostic output, not a stable application interface",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/eqp.html",
+      "locator": "§1",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "25-02",
+      "claim": "sqlite3_stmt_status exposes per-prepared-statement counters",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/stmt_status.html",
+      "locator": "Prepared Statement Status",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "25-03",
+      "claim": "PRAGMA optimize is the recommended periodic entry point for ANALYZE in most applications",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/lang_analyze.html",
+      "locator": "§2.1",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "25-04",
+      "claim": "negative cache_size values represent approximate KiB; positive values represent pages",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/pragma.html#pragma_cache_size",
+      "locator": "PRAGMA cache_size",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "25-05",
+      "claim": "page_size changes are applied on new database creation or the next VACUUM outside WAL mode",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/pragma.html#pragma_page_size",
+      "locator": "PRAGMA page_size",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "25-06",
+      "claim": "synchronous=NORMAL in WAL preserves consistency but can lose recent commit durability after power loss; OFF risks corruption",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/pragma.html#pragma_synchronous",
+      "locator": "PRAGMA synchronous",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "25-07",
+      "claim": "speedtest1.c is an upstream SQLite performance test program",
+      "kind": "technical",
+      "source_url": "https://github.com/sqlite/sqlite/blob/version-3.54.1/test/speedtest1.c",
+      "locator": "file header",
+      "status": "verified",
+      "notes": ""
+    }
+  ]
+}
