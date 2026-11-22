@@ -12,7 +12,10 @@ def main() -> None:
         try:
             conn.executescript((ROOT / "examples" / chapter).read_text(encoding="utf-8"))
             count = conn.execute("SELECT COUNT(*) FROM sqlite_master").fetchone()[0]
-            assert count > 0, (chapter, "schema missing")
+            if chapter in ("01_sql_path.sql", "03_explain.sql", "10_expressions.sql"):
+                assert count > 0, (chapter, "schema missing")
+            else:
+                assert count == 0, (chapter, "expression-only script unexpectedly created schema")
         finally:
             conn.close()
     conn = sqlite3.connect(":memory:")
