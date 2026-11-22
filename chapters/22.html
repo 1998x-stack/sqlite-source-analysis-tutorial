@@ -1,213 +1,70 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-    <title>第22章 表达式索引与自修复</title>
-    <link rel="stylesheet" href="theme.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="LOWER(email)=? 为什么用不上普通索引？从确定性契约讲到过期表达式索引，以及 3.53.0 的自修复行为、REINDEX EXPRESSIONS 与 STORED 生成列替代方案。">
+<title>表达式索引与过期索引：确定性契约与自修复 · SQLite 源码分析</title>
+<link rel="stylesheet" href="../assets/css/site.css">
 </head>
 <body>
-<div class="double-border">
-<div class="container">
-    <div class="sidebar">
-        <h3>🗄️ 课程目录</h3>
-        <ul class="chapter-list">
-            <li><a href="01.html">第1章 概览与源码获取</a></li>
-            <li><a href="02.html">第2章 编译体系深度解析</a></li>
-            <li><a href="03.html">第3章 源码整体架构</a></li>
-            <li><a href="04.html">第4章 核心数据结构</a></li>
-            <li><a href="05.html">第5章 内存管理机制</a></li>
-            <li><a href="06.html">第6章 错误处理与断言</a></li>
-            <li><a href="07.html">第7章 调试基础设施</a></li>
-            <li><a href="08.html">第8章 词法分析器</a></li>
-            <li><a href="09.html">第9章 Lemon解析器与语法</a></li>
-            <li><a href="10.html">第10章 表达式编译</a></li>
-            <li><a href="11.html">第11章 VDBE虚拟机</a></li>
-            <li><a href="12.html">第12章 B-Tree存储引擎</a></li>
-            <li><a href="13.html">第13章 Pager与页缓存</a></li>
-            <li><a href="14.html">第14章 VFS抽象层</a></li>
-            <li><a href="15.html">第15章 原子提交与事务</a></li>
-            <li><a href="16.html">第16章 WAL模式深度解析</a></li>
-            <li><a href="17.html">第17章 锁机制与并发</a></li>
-            <li><a href="18.html">第18章 查询规划器</a></li>
-            <li><a href="19.html">第19章 内置函数实现</a></li>
-            <li><a href="20.html">第20章 虚拟表与扩展</a></li>
-            <li><a href="21.html">第21章 FTS全文搜索</a></li>
-            <li><a href="22.html" class="active">第22章 表达式索引与自修复</a></li>
-            <li><a href="23.html">第23章 CLI shell源码</a></li>
-            <li><a href="24.html">第24章 测试框架</a></li>
-            <li><a href="25.html">第25章 性能分析与优化</a></li>
-            <li><a href="26.html">第26章 SQLite WASM与JS绑定</a></li>
-            <li><a href="27.html">第27章 2026新特性源码解读</a></li>
-            <li><a href="28.html">第28章 实战：定制SQLite</a></li>
-        </ul>
-    </div>
-    <div class="main-content">
-
-        <h1>第22章 表达式索引与自修复</h1>
-
-        <p>大家好，我是你们的讲师。上一章我们探索了 FTS 全文搜索，这一章来聊一个较为"小众"但极其强大的特性——<strong>表达式索引</strong> 和 3.53.0 引入的 <strong>自修复索引（Self-healing Index）</strong>。</p>
-
-        <p>考虑一个常见场景：你的表中有 <code>name</code> 列，想做大写不敏感搜索。<code>WHERE LOWER(name) = 'john'</code> 能工作但无法利用普通索引。表达式索引 <code>CREATE INDEX i ON users(LOWER(name))</code> 解决了这个问题——它把表达式的结果作为索引 key，让查询规划器能在 <code>LOWER(name) = 'john'</code> 上使用索引。</p>
-
-        <div class="highlight">
-            <strong>表达式索引 = 索引列是一个表达式，而不是原字段。</strong> 它的实现涉及索引创建、存储、查询匹配和自修复等多个子系统。3.53.0 的自修复机制在数据库领域开创了"索引自我诊断"的先河。
-        </div>
-
-        <h2>表达式索引的原理</h2>
-
-        <p>表达式索引的创建入口是 <code>sqlite3CreateIndex()</code>（<code>src/build.c</code>）。当解析器遇到 <code>CREATE INDEX ON t(expr)</code> 时，它识别出索引列不是普通列名而是一个表达式：</p>
-
-        <pre><code>/* build.c — 表达式索引的判断逻辑 */
-void sqlite3CreateIndex(Parse *pParse, ...){
-  Index *pIndex;
-  for(i=0; i&lt;pList-&gt;nExpr; i++){
-    Expr *pExpr = pList-&gt;a[i].pExpr;
-    if( pExpr-&gt;op==TK_COLUMN ){
-      pIndex-&gt;aiColumn[i] = pExpr-&gt;iColumn; /* 普通列 */
-    }else{
-      pIndex-&gt;aiColumn[i] = -2;             /* 表达式！ */
-      pIndex-&gt;aColExpr[i] = pExpr;          /* 记录表达式定义 */
-    }
-  }
-  /* 禁止非确定性函数 */
-  if( sqlite3ExprContainsNonDeterministicFunction(pExpr) ){
-    sqlite3ErrorMsg(pParse, "expressions in index must be deterministic");
-  }
-}</code></pre>
-
-        <p><code>aiColumn[i] = -2</code> 是关键标记：SQLite 的普通索引用 <code>aiColumn[i]</code> 存储列号，而表达式索引用 <code>-2</code> 标记"请到 <code>aColExpr</code> 查找表达式定义"。</p>
-
-        <p>在查询阶段，规划器通过 <code>sqlite3ExprCompare()</code> 做<strong>语法树结构匹配</strong>——比较的是表达式树的拓扑结构，而非字符串。所以 <code>LOWER(name) = 'john'</code> 和索引 <code>LOWER(name)</code> 能匹配上，即使写法不同。</p>
-
-        <h2>表达式索引的存储</h2>
-
-        <p>表达式索引的数据存储在 B-Tree 中，与普通索引使用同一存储引擎。区别在于 key 的生成方式——普通索引直接读列值，表达式索引需要<strong>执行表达式计算</strong>。在 VDBE 层面，表达式索引的插入操作在执行 OP_MakeRecord 之前先调用 OP_Function 计算表达式值。</p>
-
-        <p>这个额外计算在大多数场景下可以接受，但如果表达式中包含昂贵的函数（如复杂 JSON 操作），写性能会显著下降。</p>
-
-        <table>
-            <thead>
-                <tr><th>索引类型</th><th>Key 来源</th><th>更新代价</th></tr>
-            </thead>
-            <tbody>
-                <tr><td>普通索引</td><td>直接读列值</td><td>低</td></tr>
-                <tr><td>部分索引</td><td>列值（有条件）</td><td>低</td></tr>
-                <tr><td>表达式索引</td><td>表达式计算结果</td><td>中（需计算表达式）</td></tr>
-                <tr><td>自修复索引</td><td>表达式 + 版本戳</td><td>稍高（加 4 字节校验）</td></tr>
-            </tbody>
-        </table>
-
-        <h2>索引到期的原因</h2>
-
-        <p>普通索引不会"过期"，但表达式索引可能不一致。虽然 SQLite 禁止非确定性函数（<code>random()</code>、<code>current_timestamp</code> 等），但以下灰色地带仍可能导致索引过期：</p>
-        <ul>
-            <li>用户自定义函数暗含外部依赖（如全局变量或配置表）</li>
-            <li>排序规则（collation）变更影响索引顺序</li>
-            <li>ICU 扩展更新改变字符串比较行为</li>
-        </ul>
-
-        <div class="warning">
-            ⚠️ <strong>真实踩坑：</strong> 一个同事编写了自定义函数 <code>calc_discount(price, region)</code>，它根据外部配置表计算折扣，被标记为 <code>SQLITE_DETERMINISTIC</code> 用于表达式索引。某天配置表更新了折扣规则，但索引中存储的还是旧值——查询返回了过期的折扣信息。教训是：<strong>不要给依赖外部状态的函数贴上 "确定性" 标签</strong>。
-        </div>
-
-        <h2>3.53.0 自修复索引机制</h2>
-
-        <p>SQLite 3.53.0 引入的自修复索引给每个索引条目附加一个 <strong>版本戳</strong>（4 字节）。每次重建索引时版本戳递增。查询时对比版本戳，发现不匹配时触发修复流程：</p>
-
-        <pre><code>/* Index 结构的新增字段 */
-struct Index {
-  u32 iSelfHealVersion;   /* 当前索引版本号 */
-  u8 bSelfHealing;        /* 是否启用自修复 */
-};
-
-/* 索引扫描时检测 */
-static int indexEntryIsValid(Index *pIdx, const unsigned char *pKey,
-                              int nKey, i64 rowid){
-  if( pIdx-&gt;bSelfHealing==0 ) return 1;
-  u32 iEntryVer;
-  memcpy(&amp;iEntryVer, pKey + nKey - sizeof(u32), sizeof(u32));
-  return (iEntryVer == pIdx-&gt;iSelfHealVersion);
-}
-
-/* 自修复路径 — 重新计算表达式并修正 */
-static int sqlite3IndexSelfHeal(Index *pIdx, i64 rowid, ...){
-  /* 1. 重新计算表达式值 */
-  /* 2. 与旧的索引条目对比 */
-  /* 3. 不一致则修正并递增版本戳 */
-  /* 4. 记录修复日志 */
-}</code></pre>
-
-        <p>这个机制在正常查询路径上只增加了一次 4 字节比较，开销几乎为零。修复流程只在检测到不一致时才触发——而这在实践中非常罕见。</p>
-
-        <p>自修复索引通过 <code>CREATE INDEX ... WITH selfhealing</code> 启用，或通过 <code>REINDEX idx WITH selfhealing</code> 对已有索引开启。</p>
-
-        <div class="highlight">
-            <strong>设计哲学：</strong> SQLite 没有采用"预防性"方案（锁定所有依赖），而是选择了"检测+修复"的轻量方案。这是一种"允许出错但自动纠错"的设计思路——与 ECC 内存、TCP 丢包重传一脉相承。
-        </div>
-
-        <h2>REINDEX EXPRESSIONS 语句</h2>
-
-        <p>3.53.0 还提供了 <code>REINDEX EXPRESSIONS</code> 语句，用于手动触发所有表达式索引重建。实现逻辑：遍历所有表的索引，检查 <code>aiColumn[i] == -2</code> 标记，对每个表达式索引执行完整重建并递增版本戳。</p>
-
-        <pre><code>-- 重建所有表达式索引
+<a class="skip" href="#content">跳转至正文</a>
+<header class="sitebar"><div class="shell nav-inner"><a class="brand" href="../index.html"><span class="brand-icon">SQLite</span><span>SQLite 源码解剖<br><small>逐层理解数据库内核</small></span></a><nav class="navlinks" aria-label="站点导航"><a href="../index.html#chapters">章节目录</a><a href="../index.html#route">学习路线</a><a href="https://github.com/1998x-stack/sqlite-source-analysis-tutorial">GitHub</a></nav></div></header>
+<div class="shell article-layout">
+<aside class="toc" aria-label="章节内目录"><h2>本章内容</h2><nav><a href="#misconception">1. LOWER(email)=? 为什么用不上普通索引？</a><a href="#determinism">2. 确定性是正确性契约</a><a href="#stale">3. 过期表达式索引从何而来？</a><a href="#selfheal">4. 3.53.0 的自修复行为</a><a href="#reindex">5. REINDEX EXPRESSIONS 与更稳的替代方案</a><a href="#lab">6. 可运行实验</a><a href="#references">官方资料</a></nav></aside>
+<main id="content" class="article"><article>
+<div class="crumb"><a href="../index.html">课程首页</a><span>›</span><span>章节 22 / 28</span></div>
+<header class="article-header"><span class="kicker">SQLite internals · 22</span><h1>表达式索引与过期索引：确定性契约与自修复</h1><p class="dek">LOWER(email)=? 为什么用不上普通索引？从确定性契约讲到过期表达式索引，以及 3.53.0 的自修复行为、REINDEX EXPRESSIONS 与 STORED 生成列替代方案。</p><div class="meta"><span>阅读时间约 32 分钟</span><span>SQLite 官方资料与可运行实验</span></div></header>
+<section id="misconception" aria-labelledby="h-misconception"><h2 id="h-misconception">1. LOWER(email)=? 为什么用不上普通索引？</h2>
+<p>如果对 <code>email</code> 列建了普通索引，查询 <code>WHERE email = 'a@b.com'</code> 能走索引；但改成大小写不敏感匹配 <code>WHERE LOWER(email) = 'a@b.com'</code> 后，被比较的是<strong>函数结果</strong>，而不是索引里存的原列值，优化器无法用它，只能全表扫描。表达式索引解决的正是这一类问题：<strong>把一个表达式的计算结果存成索引键</strong>。</p>
+<figure><img loading="lazy" width="960" src="../assets/svg/22-expr-index.svg" alt="普通索引复制列值，表达式索引先计算 LOWER(email) 再把结果存成 B-Tree 键"><figcaption>图 1 · 索引键由“复制列值”变成“计算表达式结果”。于是 <code>LOWER(email)=?</code> 也能命中索引。</figcaption></figure>
+<pre><code>CREATE INDEX idx_email_lower ON users(LOWER(email));
+EXPLAIN QUERY PLAN
+SELECT * FROM users WHERE LOWER(email)='alice@example.com';
+-- SEARCH users USING INDEX idx_email_lower (&lt;expr&gt;=?)</code></pre>
+<p>官方定义：表达式索引是建立在 <strong>VIRTUAL 生成列</strong>或<strong>表列的表达式</strong>上的索引。它与部分索引（<code>WHERE</code> 限制）不是同一回事，后者只是在建索引时筛选参与的行。参见 <a href="https://sqlite.org/expridx.html" target="_blank" rel="noopener noreferrer">Indexes On Expressions</a> 与 <a href="https://sqlite.org/staleexpridx.html" target="_blank" rel="noopener noreferrer">Stale Expression Indexes</a>。</p>
+</section>
+<section id="determinism" aria-labelledby="h-determinism"><h2 id="h-determinism">2. 确定性是正确性契约</h2>
+<p>索引能正确工作的前提是：<strong>只要对应的表行不变，表达式的值就不能变</strong>。因此被索引的表达式只能使用<strong>确定性函数</strong>——同样输入总是得到同样输出，例如 <code>abs(X)</code>、<code>concat(X,Y)</code>。非确定性函数如 <code>random()</code>、<code>datetime('now')</code> 会被拒绝。</p>
+<pre><code>CREATE TABLE t(a);
+CREATE INDEX i ON t(random());
+-- Error: non-deterministic functions prohibited in index expressions</code></pre>
+<div class="callout warn"><strong>误区：贴了“确定性”标签就真确定</strong>官方文档把“确定性”定义为跨平台、跨配置、跨 SQLite 版本都应得到相同结果。而实际上一些标为确定性的函数<strong>并非 100% 确定</strong>：它们可能随 CPU 架构、操作系统、库版本而微幅变化。这个“契约会漏”的事实，正是下一节“过期表达式索引”的根源。</div>
+</section>
+<section id="stale" aria-labelledby="h-stale"><h2 id="h-stale">3. 过期表达式索引从何而来？</h2>
+<p>如果一个“确定性”函数在不同环境给出了极小的不同结果，那么在一个环境上建的表达式索引，换到另一个环境后就可能<strong>与重新计算的值对不上</strong>。官方把这种索引称为 <strong>stale expression index（过期表达式索引）</strong>，它并不常见，通常与<strong>浮点值</strong>相关，诱因包括：数据库从一种 CPU 架构搬到另一种（如 x86_64 → ARM）、换操作系统、或 SQLite 与外部库的版本变化。</p>
+<figure><img loading="lazy" width="960" src="../assets/svg/22-stale-selfheal.svg" alt="索引中存储的键与重新计算的键相差一两个 ULP，3.53.0 起在更新或删除该行时自动修复"><figcaption>图 2 · “过期”未必是逻辑错误，而是同一函数结果漂移了一两个 ULP。图中数值为教学示意。</figcaption></figure>
+<p>一个具体的引发点：SQLite 内部“文本→浮点”转换在不同版本会有微小差异（官方点名 3.42→3.43、3.51→3.52）。当表达式借助自动类型转换或 <code>-&gt;&gt;</code> 从 JSON 取浮点时，这种差异会体现在索引键上。另外，已弃用的 <code>PRAGMA case_sensitive_like</code> 也会让基于 <code>LIKE</code> 的索引失效。</p>
+</section>
+<section id="selfheal" aria-labelledby="h-selfheal"><h2 id="h-selfheal">4. 3.53.0 的自修复行为</h2>
+<p>自 <strong>SQLite 3.53.0（2026-04-09）</strong> 起，SQLite 会在某些情况下<strong>自动修复过期的表达式索引</strong>：当你试图 <code>DELETE</code> 或 <code>UPDATE</code> 一个与过期索引条目关联的表行时，SQLite 不再报错，而是<strong>顺手把索引修正</strong>。应用层不会被抛错，也不会感知到曾经出过问题。</p>
+<p>但它<strong>不是静默的</strong>：<code>PRAGMA integrity_check</code> 仍会在输出中报告这类条目。当过期条目是仅差一两个 ULP 的浮点数时，它不再笼统地说索引损坏，而是给出类似下面的信息：</p>
+<pre><code>index NAME stores an imprecise floating-point value for row N</code></pre>
+<div class="callout warn"><strong>修正旧版页面的一处编造</strong>本章旧文声称自修复索引靠“每个条目附加 4 字节版本戳”、用 <code>CREATE INDEX … WITH selfhealing</code> 启用，并列出 <code>iSelfHealVersion</code>、<code>bSelfHealing</code>、<code>sqlite3IndexSelfHeal()</code> 等字段与函数。这些<strong>均无官方依据</strong>：在 SQLite 3.54.0 上 <code>WITH selfhealing</code> 直接是语法错误。真正被官方文档描述的是本节所述的行为——在 DELETE/UPDATE 时修复过期条目，而不是一套带版本戳的开关。</div>
+</section>
+<section id="reindex" aria-labelledby="h-reindex"><h2 id="h-reindex">5. REINDEX EXPRESSIONS 与更稳的替代方案</h2>
+<p>3.53.0 同时给了两个实用工具：<strong><code>REINDEX EXPRESSIONS</code></strong> 只重建表达式索引、保留其他索引不变（若库中本就没有表达式索引，它就是空操作）；在 CLI（3.53.0+）里用 <strong><code>.indexes --expr</code></strong> 可以列出哪些是表达式索引。</p>
+<pre><code>-- 只重建表达式索引（前提：版本 >= 3.53.0）
 REINDEX EXPRESSIONS;
-
--- 只重建特定表上的
-REINDEX EXPRESSIONS table_name;
-
--- 重建单个索引
-REINDEX index_name;</code></pre>
-
-        <h2>实战：创建和使用表达式索引</h2>
-
-        <p><strong>场景一：大小写不敏感搜索</strong></p>
-
-        <pre><code>CREATE TABLE users(id INTEGER PRIMARY KEY, name TEXT, email TEXT);
-INSERT INTO users VALUES (1, 'Alice', 'Alice@Example.com');
-
--- 无索引时全表扫描
-EXPLAIN QUERY PLAN
-SELECT * FROM users WHERE LOWER(email) = 'alice@example.com';
--- SCAN users
-
--- 创建表达式索引后使用索引查找
-CREATE INDEX idx_email_lower ON users(LOWER(email));
-EXPLAIN QUERY PLAN
-SELECT * FROM users WHERE LOWER(email) = 'alice@example.com';
--- SEARCH users USING INDEX idx_email_lower</code></pre>
-
-        <p><strong>场景二：JSON 字段查询加速</strong></p>
-
-        <pre><code>CREATE TABLE products(id INTEGER PRIMARY KEY, data JSON);
-CREATE INDEX idx_price ON products(JSON_EXTRACT(data, '$.price'));
-
--- 利用表达式索引加速范围查询
-SELECT * FROM products
-WHERE JSON_EXTRACT(data, '$.price') BETWEEN 500 AND 1000;
--- SEARCH products USING INDEX idx_price</code></pre>
-
-        <p><strong>场景三：函数结果排序</strong></p>
-
-        <pre><code>CREATE INDEX idx_body_len ON posts(LENGTH(body));
-
--- ORDER BY 表达式也使用索引！
-SELECT id, LENGTH(body) FROM posts ORDER BY LENGTH(body) DESC LIMIT 10;
-</code></pre>
-
-        <div class="tip">
-            💡 <strong>权衡：</strong> 表达式索引不是银弹。每次 INSERT/UPDATE 都增加表达式计算开销。如果写入量大且表达式复杂，可考虑"预计算列"——增加一个计算列并在其上建普通索引，避免每次写入都做表达式求值。
-        </div>
-
-        <p>好了，这一章我们从表达式索引的原理出发，深入了存储机制、可能过期的问题、3.53.0 的自修复方案，最后通过三个实战场景展示了表达式索引的完整用法。下一章我们将暂时离开 SQLite 内核，走进大家每天都在用的 <strong>CLI Shell 源码</strong>——<code>src/shell.c.in</code> 中藏着命令行工具的完整实现。我们第 23 章见。</p>
-
-        <div class="footer-nav">
-            <a href="21.html">← 上一章</a>
-            <a href="index.html">📖 返回目录</a>
-            <a href="23.html">下一章 →</a>
-        </div>
-    </div>
-</div>
-</div>
+-- CLI 中查看表达式索引
+.indexes --expr</code></pre>
+<table><thead><tr><th>做法</th><th>何时用</th><th>代价</th></tr></thead><tbody><tr><td><code>REINDEX EXPRESSIONS</code></td><td>怀疑因换了 ADF/平台导致过期</td><td>只重算表达式索引，I/O 小于全量 <code>REINDEX</code></td></tr><tr><td>STORED 生成列 + 普通索引</td><td>新建表、想从源头避开表达式索引</td><td>每行多存一列，但索引键就是列值</td></tr></tbody></table>
+<p><strong>最稳的替代方案</strong>是根本不用表达式索引：把表达式定义成 <strong>STORED 生成列</strong>，再在该列上建普通索引。官方给出的改写就是把 <code>CREATE INDEX doc_mtime ON docstore(doc-&gt;&gt;'mtime')</code> 换成生成列 <code>mtime AS (doc-&gt;&gt;'mtime') STORED</code> 再索引 <code>mtime</code>。</p>
+</section>
+<section id="lab" aria-labelledby="h-lab"><h2 id="h-lab">6. 可运行实验</h2>
+<p><code>examples/22_expr_index.py</code> 只用标准库 <code>sqlite3</code>，验证四条可固定断言：建索引前 <code>LOWER(email)=?</code> 不走索引、建索引后计划中出现 <code>idx_email_lower</code>、非确定性表达式建索引被拒、STORED 生成列上的索引可命中；并在版本 ≥ 3.53.0 时执行一次 <code>REINDEX EXPRESSIONS</code>。</p>
+<pre><code>python3 examples/22_expr_index.py
+# PASS: expression index used, non-deterministic refused, STORED column indexed, REINDEX EXPRESSIONS ran
+# 若版本 < 3.53.0，脚本打印 SKIPPED REINDEX EXPRESSIONS，其余断言仍执行。</code></pre>
+<div class="exercise"><h3>可重复练习</h3><ol><li>把 <code>idx_email_lower</code> 改成在 <code>email</code> 上的普通索引，比较两种查询的计划差异；</li><li>试着建一个使用 <code>datetime('now')</code> 的索引，记录错误文本；</li><li>用 <code>PRAGMA integrity_check</code> 在正常库上运行，确认未使用表达式索引时不会出现 imprecise 报告。</li></ol></div>
+<details><summary>自测：为什么“确定性”函数的索引也会过期？</summary><p>因为“确定性”是官方契约上的承诺（同输入同输出），但浮点与底层库在不同架构、系统或版本下可能给出一两个 ULP 的差异，于是索引里存的值与重新计算的值不再完全相等。</p></details>
+</section>
+<section id="references" aria-labelledby="h-references"><h2 id="h-references">原始资料与版本边界</h2>
+<p>本章的版本号、自修复行为、错误信息与替代方案均来自官方文档；旧版页面的结构体字段、<code>WITH selfhealing</code> 语法与版本戳机制无官方依据，已在正文标明。自修复只针对过期表达式索引条目，不应推广为“SQLite 会自动修复任意索引损坏”。</p>
+<ol class="references"><li><a href="https://sqlite.org/staleexpridx.html" target="_blank" rel="noopener noreferrer">Stale Expression Indexes</a> · SQLite 官方</li><li><a href="https://sqlite.org/expridx.html" target="_blank" rel="noopener noreferrer">Indexes On Expressions</a> · SQLite 官方</li><li><a href="https://sqlite.org/lang_reindex.html" target="_blank" rel="noopener noreferrer">REINDEX</a> · SQLite 官方</li><li><a href="https://sqlite.org/changes.html" target="_blank" rel="noopener noreferrer">SQLite Release History（3.53.0）</a> · SQLite 官方</li></ol>
+</section>
+<nav class="article-nav" aria-label="相邻章节"><a href="21.html">← 上一章</a><a href="23.html">下一章 →</a></nav>
+</article></main></div>
+<footer class="foot"><div class="shell foot-inner"><span>SQLite 源码解剖 · 先证据，后抽象</span><a href="../index.html">返回首页</a></div></footer>
 </body>
 </html>

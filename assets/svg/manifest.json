@@ -470,6 +470,21 @@
       "source": [
         "https://sqlite.org/fts3.html"
       ]
+    },
+    {
+      "file": "22-expr-index.svg",
+      "chapter": "22",
+      "source": [
+        "https://sqlite.org/expridx.html",
+        "https://sqlite.org/staleexpridx.html"
+      ]
+    },
+    {
+      "file": "22-stale-selfheal.svg",
+      "chapter": "22",
+      "source": [
+        "https://sqlite.org/staleexpridx.html"
+      ]
     }
   ]
 }

@@ -245,13 +245,13 @@
       "num": "22",
       "title": "表达式索引与自修复",
       "topics": [
-        "表达式索引原理",
-        "索引到期原因",
-        "3.53自修复机制",
+        "表达式索引与确定性契约",
+        "过期表达式索引成因",
+        "3.53.0 自修复行为",
         "REINDEX EXPRESSIONS"
       ],
       "file": "chapters/22.html",
-      "status": "legacy"
+      "status": "revised"
     },
     {
       "num": "23",
