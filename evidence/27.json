@@ -147,6 +147,15 @@
       "locator": "Pending 3.55.0 and dated release entries",
       "status": "verified",
       "notes": "Do not report the pending draft version as released."
+    },
+    {
+      "id": "27-17",
+      "claim": "SQLite 3.53.0 adds session extension APIs for incrementally adding individual column changes to sqlite3_changegroup",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/changes.html",
+      "locator": "2026-04-09 (3.53.0), item 8",
+      "status": "verified",
+      "notes": "Includes change_begin, change_blob, change_double, change_int64, change_null, change_text, change_finish and changegroup_config."
     }
   ]
 }
