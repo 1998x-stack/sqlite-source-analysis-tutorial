@@ -32,7 +32,7 @@ def main() -> None:
                         .filter(el => el.getBoundingClientRect().right > innerWidth + 1 ||
                                       el.getBoundingClientRect().left < -1)
                         .filter(el => {
-                          const p = el.parentElement;
+                          let p = el.parentElement;
                           while (p && p !== document.body) {
                             if (getComputedStyle(p).overflowX === 'auto' ||
                                 getComputedStyle(p).overflowX === 'scroll') return false;
