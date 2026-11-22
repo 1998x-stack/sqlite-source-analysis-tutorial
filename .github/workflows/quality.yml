@@ -56,6 +56,17 @@ jobs:
           grep -q "Mira" /tmp/sqlite-cli-output.txt
           cc -std=c11 -Wall -Wextra -Werror -O2 examples/25_stmt_status.c -lsqlite3 -o /tmp/sqlite-25-status
           /tmp/sqlite-25-status
+      - name: Verify WASM, release probes, extensions and custom VFS
+        run: |
+          python examples/27_release_probe.py
+          npm install --prefix examples/26_wasm --no-audit --no-fund
+          npm run --prefix examples/26_wasm test:node
+          npm run --prefix examples/26_wasm build
+          cc -std=c11 -Wall -Wextra -Werror -O2 examples/28_vfs_trace.c -lsqlite3 -o /tmp/sqlite-28-vfs
+          (cd /tmp && /tmp/sqlite-28-vfs)
+          cc -std=c11 -Wall -Wextra -Werror -O2 -fPIC -shared examples/28_course_ext.c -o /tmp/course_ext.so
+          cc -std=c11 -Wall -Wextra -Werror -O2 examples/28_extension_host.c -lsqlite3 -o /tmp/sqlite-28-extension-host
+          /tmp/sqlite-28-extension-host /tmp/course_ext.so
       - name: Install Chromium for visual smoke tests
         run: |
           python -m pip install playwright
