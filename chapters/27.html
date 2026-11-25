@@ -17,7 +17,7 @@
 <header class="article-header"><span class="kicker">SQLite internals · 27</span><h1>2026 新特性：3.53.0 与 3.54.0 的真实变更</h1><p class="dek">先把 2026 年三个发布的日期放对，再逐条核对 3.53.0/3.54.0 的真实变更：QRF、17 位浮点、复合查询改排序合并、CLI 与 Windows 平台调整。</p><div class="meta"><span>阅读时间约 30 分钟</span><span>SQLite 官方 changes.html 与可运行实验</span></div></header>
 <section id="misconception" aria-labelledby="h-misconception"><h2 id="h-misconception">1. 先把版本与日期放对</h2>
 <p>解读“新特性”最容易出错的地方不是代码，而是<strong>版本与时间线</strong>。官方发布说明写得很清楚：<strong>3.53.0 是 2026-04-09，3.54.0 是 2026-10-09，紧随其后的 3.54.1 是 2026-10-16</strong>。旧版页面把这些日期写成了“6 月 1 日发布”与“预计 10 月”，从第一句就错了。</p>
-<figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/27-timeline.svg" alt="3.53.0、3.54.0、3.54.1 三个发布节点与各自的代表变更"><figcaption>图 1 · 三个发布节点及代表性变更。条目与日期均来自官方 changes.html，不是推测。</figcaption></figure>
+<figure tabindex="0"><img loading="lazy" src="../assets/svg/27-timeline.svg" width="960" height="400" alt="3.53.0、3.54.0、3.54.1 三个发布节点与各自的代表变更"><figcaption>图 1 · 三个发布节点及代表性变更。条目与日期均来自官方 changes.html，不是推测。</figcaption></figure>
 <div class="callout warn"><strong>旧版页面还错了什么</strong>它把“自修复索引”描述成“统计信息不准时自动重建索引”，并引用了不存在的 <code>src/whence.c</code>、虚构的 <code>whereLoopAddBtree()</code> 伪代码、虚构的 <code>ext/misc/qrf.c</code> 与 <code>qrf_md()</code> 函数，以及一张虚构的“各文件变更行数”表。这些已删除；本章只保留官方发布说明能逐条核对的变更。</div></section>
 <section id="v353" aria-labelledby="h-v353"><h2 id="h-v353">2. 3.53.0：修复、语言与 API</h2>
 <p>3.53.0 既是修复版本，也是语言/API 版本。官方条目包括：</p>
@@ -26,7 +26,7 @@
 </section>
 <section id="planner" aria-labelledby="h-planner"><h2 id="h-planner">3. 3.53.0 查询规划器改进</h2>
 <p>官方在 3.53.0 列出了一组规划器改动，其中最容易解释的是集合操作：<strong>对 <code>EXCEPT</code>、<code>INTERSECT</code>、<code>UNION</code> 统一改用 sort-and-merge 算法，而不是哈希表</strong>，因为前者“几乎总是更快”。</p>
-<figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/27-planner.svg" alt="EXCEPT/INTERSECT/UNION 采用排序合并，两条有序流线性比较前进"><figcaption>图 2 · 复合查询改排序合并：比哈希表更省内存，也能复用已有顺序。图中为机制示意，具体计划仍依数据与索引而定。</figcaption></figure>
+<figure tabindex="0"><img loading="lazy" src="../assets/svg/27-planner.svg" width="960" height="360" alt="EXCEPT/INTERSECT/UNION 采用排序合并，两条有序流线性比较前进"><figcaption>图 2 · 复合查询改排序合并：比哈希表更省内存，也能复用已有顺序。图中为机制示意，具体计划仍依数据与索引而定。</figcaption></figure>
 <ul><li>大型多路 JOIN 在<strong>星型 schema</strong> 上的连接顺序选择得到改进；</li><li><code>EXISTS-to-JOIN</code> 优化放宽：插入的 JOIN 项不再必须位于最内层循环；</li><li><code>omit-noop-join</code> 优化可以略去一整条不影响输出的 JOIN 链；</li><li>当 <code>GROUP BY e1 ORDER BY e2</code> 中的 e1/e2 仅 ASC/DESC 不同时，可用单个索引优化；</li><li>在某些结果集与 ORDER BY 不完全匹配时，允许虚拟表优化 <code>DISTINCT</code>。</li></ul>
 <p>注意：这些都是<strong>规划器策略</strong>的改进，而不是稳定的 EXPLAIN 输出变化；不要把某串计划文本当成必须在某版本出现的结果。</p>
 </section>

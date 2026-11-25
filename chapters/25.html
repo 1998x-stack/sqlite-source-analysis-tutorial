@@ -28,12 +28,12 @@ SELECT b FROM t WHERE a = 1;
 <p>官方文档：<a href="https://sqlite.org/lang_explain.html" target="_blank" rel="noopener noreferrer">EXPLAIN 与 EXPLAIN QUERY PLAN</a>。</p></section>
 <section id="pragma" aria-labelledby="h-pragma"><h2 id="h-pragma">3. 关键 PRAGMA 与其语义</h2>
 <p>参数不少，但先抓这几个高频的。注意：<strong>它们的默认值与会随版本变化</strong>，下面是官方文档可核对的语义。</p>
-<figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/25-pragmas.svg" alt="cache_size、mmap_size、temp_store、synchronous、page_size 等 PRAGMA 各影响哪一层"><figcaption>图 1 · 不同 PRAGMA 作用在不同层：页缓存、内存映射、临时存储、提交同步与页粒度。参数多为“建议/上限”，是否被采纳取决于页缓存实现。</figcaption></figure>
+<figure tabindex="0"><img loading="lazy" src="../assets/svg/25-pragmas.svg" width="960" height="400" alt="cache_size、mmap_size、temp_store、synchronous、page_size 等 PRAGMA 各影响哪一层"><figcaption>图 1 · 不同 PRAGMA 作用在不同层：页缓存、内存映射、临时存储、提交同步与页粒度。参数多为“建议/上限”，是否被采纳取决于页缓存实现。</figcaption></figure>
 <table><thead><tr><th scope="col">PRAGMA</th><th scope="col">作用（官方语义）</th></tr></thead><tbody><tr><td><code>cache_size</code></td><td>建议的内存页上限；内置默认约为 -2000（约 2MB），负值 N 表示 KiB 而非页</td></tr><tr><td><code>mmap_size</code></td><td>单个数据库可用于内存映射 I/O 的最大字节数</td></tr><tr><td><code>temp_store</code></td><td>临时表/索引放 FILE 还是 MEMORY（DEFAULT/FILE/MEMORY）</td></tr><tr><td><code>synchronous</code></td><td>同步级别 OFF/NORMAL/FULL/EXTRA</td></tr><tr><td><code>page_size</code></td><td>页大小，512–65536 的 2 的幕，创库时确定</td></tr></tbody></table>
 <div class="callout"><strong>synchronous=NORMAL 的准确说法</strong>在 WAL 模式下，NORMAL 仍能保证<strong>不损坏</strong>，但会<strong>丢失已提交但未持久化的事务</strong>（掉电/崩溃后可能回滚）。它不是“绝对安全”也不是“不安全”，而是“一致但不持久”。</div></section>
 <section id="batch" aria-labelledby="h-batch"><h2 id="h-batch">4. 批处理事务与同步次数</h2>
 <p>最容易被忽略的优化不是索引，而是<strong>事务粒度</strong>。把 N 条 INSERT 各自提交，就产生 N 次提交开销（包括磁盘同步）；把它们放进一个事务，则只在提交时发生一次同步。写入的数据量完全一样，差别在提交/同步次数。</p>
-<figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/25-batch-fsync.svg" alt="逐条提交每行一次同步，批量事务只在提交时同步一次"><figcaption>图 2 · 同步次数与行数的关系：逐条提交随行数线性增长，批量事务为常数次。图中为机制示意，未测量具体耗时。</figcaption></figure>
+<figure tabindex="0"><img loading="lazy" src="../assets/svg/25-batch-fsync.svg" width="960" height="360" alt="逐条提交每行一次同步，批量事务只在提交时同步一次"><figcaption>图 2 · 同步次数与行数的关系：逐条提交随行数线性增长，批量事务为常数次。图中为机制示意，未测量具体耗时。</figcaption></figure>
 <pre><code>BEGIN;
 INSERT INTO t VALUES (1,'a');
 INSERT INTO t VALUES (2,'b');

@@ -21,7 +21,7 @@
 <div class="callout warn"><strong>修正旧版页面</strong>旧文给出了具体的 <code>emcc</code> 导出选项、<code>ext/wasm/</code> 文件清单与行数，以及好些无法核对的性能数字与迁移故事。这些已删除；本章只保留官方 WASM 文档能核对的接口、VFS 与注意事项。</div></section>
 <section id="variants" aria-labelledby="h-variants"><h2 id="h-variants">2. 三种 JS 接口：capi、oo1、Worker1</h2>
 <p>官方 API 不是把 C 函数一对一搬过来，而是提供了几个层次的封装，供不同习惯的客户选择：</p>
-<figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/26-js-stack.svg" alt="页面 JS 经 capi/oo1/Worker1 调用 sqlite3 WASM 模块，模块经 VFS 访问内存或 OPFS"><figcaption>图 1 · JS 接口层、WASM 模块与 VFS 层。SQLite 仍运行在 C 逻辑上；改变的是接口风格与存储后端。</figcaption></figure>
+<figure tabindex="0"><img loading="lazy" src="../assets/svg/26-js-stack.svg" width="960" height="400" alt="页面 JS 经 capi/oo1/Worker1 调用 sqlite3 WASM 模块，模块经 VFS 访问内存或 OPFS"><figcaption>图 1 · JS 接口层、WASM 模块与 VFS 层。SQLite 仍运行在 C 逻辑上；改变的是接口风格与存储后端。</figcaption></figure>
 <table><thead><tr><th scope="col">命名空间 / API</th><th scope="col">定位</th></tr></thead><tbody><tr><td><code>sqlite3.capi</code></td><td>对 C API 的包装，适合熟悉底层接口的使用者</td></tr><tr><td><code>sqlite3.oo1</code></td><td>面向对象的接口（OO API #1），如 <code>oo1.DB</code>、<code>oo1.OpfsWlDb</code></td></tr><tr><td>Worker1</td><td>让 sqlite3 完全运行在独立 Worker 线程中，并提供 Promise 风格的代理</td></tr></tbody></table>
 <pre><code>import sqlite3Init from '@sqlite.org/sqlite-wasm';
 const sqlite3 = await sqlite3Init();
@@ -30,7 +30,7 @@ const rows = db.exec('SELECT 1 AS n', { returnValue: 'resultRows' });</code></pr
 <p>接口名称与可用性以官方 <a href="https://sqlite.org/wasm/doc/trunk/api-index.md" target="_blank" rel="noopener noreferrer">API Index</a> 为准；不同变体的加载方式与导出符号并不相同。</p></section>
 <section id="persistence" aria-labelledby="h-persistence"><h2 id="h-persistence">3. 数据放哪：内存与 OPFS VFS 取舍</h2>
 <p>浏览器沙箱挡住了直接的文件系统访问，所以 SQLite 通过 VFS 接入浏览器提供的存储。官方列出了多种持久化/会话存储方案，选哪一个取决于<strong>是否要持久化、是否要多标签页并发、能否设置响应头</strong>。</p>
-<figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/26-vfs-choice.svg" alt="按是否需要持久化、多标签页并发、能否设 COOP/COEP 选择内存、opfs、opfs-wl 或 opfs-sahpool"><figcaption>图 2 · 选择依据：多标签页并发用 <code>opfs</code> 或 <code>opfs-wl</code>；更看重性能或无法设置 COOP/COEP 时用 <code>opfs-sahpool</code>。</figcaption></figure>
+<figure tabindex="0"><img loading="lazy" src="../assets/svg/26-vfs-choice.svg" width="960" height="400" alt="按是否需要持久化、多标签页并发、能否设 COOP/COEP 选择内存、opfs、opfs-wl 或 opfs-sahpool"><figcaption>图 2 · 选择依据：多标签页并发用 <code>opfs</code> 或 <code>opfs-wl</code>；更看重性能或无法设置 COOP/COEP 时用 <code>opfs-sahpool</code>。</figcaption></figure>
 <table><thead><tr><th scope="col">VFS</th><th scope="col">要点</th></tr></thead><tbody><tr><td>内存（如 <code>:memory:</code>）</td><td>数据在 WASM 线性内存，刷新即丢，无需存储权限</td></tr><tr><td><code>opfs</code></td><td>基于 OPFS 的持久化；只在 Worker 线程可用</td></tr><tr><td><code>opfs-wl</code></td><td>3.53.0 加入；用 Web Locks 加锁，需 <code>Atomics.waitAsync()</code></td></tr><tr><td><code>opfs-sahpool</code></td><td>SyncAccessHandle 池；并发能力有限，但性能导向</td></tr><tr><td><code>kvvfs</code> / <code>JsStorageDb</code></td><td>基于 localStorage/sessionStorage 等会话级存储</td></tr></tbody></table>
 <div class="callout"><strong>容易忽略的一点</strong><strong>OPFS 只在 Worker 线程可用，不在主 UI 线程</strong>。因此在主线程直接“打开一个 OPFS 数据库”需要经过 Worker 或异步代理。此外，OPFS VFS 对 Safari 17 以前的版本有兼容性注意，部分配置依赖 COOP/COEP 响应头。</div></section>
 <section id="build" aria-labelledby="h-build"><h2 id="h-build">4. 构建与分发</h2>

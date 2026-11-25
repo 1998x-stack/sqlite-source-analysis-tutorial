@@ -17,7 +17,7 @@
 <header class="article-header"><span class="kicker">SQLite internals · 22</span><h1>表达式索引与过期索引：确定性契约与自修复</h1><p class="dek">LOWER(email)=? 为什么用不上普通索引？从确定性契约讲到过期表达式索引，以及 3.53.0 的自修复行为、REINDEX EXPRESSIONS 与 STORED 生成列替代方案。</p><div class="meta"><span>阅读时间约 32 分钟</span><span>SQLite 官方资料与可运行实验</span></div></header>
 <section id="misconception" aria-labelledby="h-misconception"><h2 id="h-misconception">1. LOWER(email)=? 为什么用不上普通索引？</h2>
 <p>如果对 <code>email</code> 列建了普通索引，查询 <code>WHERE email = 'a@b.com'</code> 能走索引；但改成大小写不敏感匹配 <code>WHERE LOWER(email) = 'a@b.com'</code> 后，被比较的是<strong>函数结果</strong>，而不是索引里存的原列值，优化器无法用它，只能全表扫描。表达式索引解决的正是这一类问题：<strong>把一个表达式的计算结果存成索引键</strong>。</p>
-<figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/22-expr-index.svg" alt="普通索引复制列值，表达式索引先计算 LOWER(email) 再把结果存成 B-Tree 键"><figcaption>图 1 · 索引键由“复制列值”变成“计算表达式结果”。于是 <code>LOWER(email)=?</code> 也能命中索引。</figcaption></figure>
+<figure tabindex="0"><img loading="lazy" src="../assets/svg/22-expr-index.svg" width="960" height="400" alt="普通索引复制列值，表达式索引先计算 LOWER(email) 再把结果存成 B-Tree 键"><figcaption>图 1 · 索引键由“复制列值”变成“计算表达式结果”。于是 <code>LOWER(email)=?</code> 也能命中索引。</figcaption></figure>
 <pre><code>CREATE INDEX idx_email_lower ON users(LOWER(email));
 EXPLAIN QUERY PLAN
 SELECT * FROM users WHERE LOWER(email)='alice@example.com';
@@ -33,7 +33,7 @@ CREATE INDEX i ON t(random());
 </section>
 <section id="stale" aria-labelledby="h-stale"><h2 id="h-stale">3. 过期表达式索引从何而来？</h2>
 <p>如果一个“确定性”函数在不同环境给出了极小的不同结果，那么在一个环境上建的表达式索引，换到另一个环境后就可能<strong>与重新计算的值对不上</strong>。官方把这种索引称为 <strong>stale expression index（过期表达式索引）</strong>，它并不常见，通常与<strong>浮点值</strong>相关，诱因包括：数据库从一种 CPU 架构搬到另一种（如 x86_64 → ARM）、换操作系统、或 SQLite 与外部库的版本变化。</p>
-<figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/22-stale-selfheal.svg" alt="索引中存储的键与重新计算的键相差一两个 ULP，3.53.0 起在更新或删除该行时自动修复"><figcaption>图 2 · “过期”未必是逻辑错误，而是同一函数结果漂移了一两个 ULP。图中数值为教学示意。</figcaption></figure>
+<figure tabindex="0"><img loading="lazy" src="../assets/svg/22-stale-selfheal.svg" width="960" height="400" alt="索引中存储的键与重新计算的键相差一两个 ULP，3.53.0 起在更新或删除该行时自动修复"><figcaption>图 2 · “过期”未必是逻辑错误，而是同一函数结果漂移了一两个 ULP。图中数值为教学示意。</figcaption></figure>
 <p>一个具体的引发点：SQLite 内部“文本→浮点”转换在不同版本会有微小差异（官方点名 3.42→3.43、3.51→3.52）。当表达式借助自动类型转换或 <code>-&gt;&gt;</code> 从 JSON 取浮点时，这种差异会体现在索引键上。另外，已弃用的 <code>PRAGMA case_sensitive_like</code> 也会让基于 <code>LIKE</code> 的索引失效。</p>
 </section>
 <section id="selfheal" aria-labelledby="h-selfheal"><h2 id="h-selfheal">4. 3.53.0 的自修复行为</h2>

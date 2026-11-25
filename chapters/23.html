@@ -17,7 +17,7 @@
 <header class="article-header"><span class="kicker">SQLite internals · 23</span><h1>CLI shell 源码：点命令、结果格式化与编译路径</h1><p class="dek">sqlite3 命令行程序与原库是两层：点命令由 CLI 自己解析、结果由 .mode 与 QRF 格式化。理解这些边界，才知道哪些命令能进库接口、哪些不能。</p><div class="meta"><span>阅读时间约 28 分钟</span><span>SQLite 官方 CLI 文档与可运行实验</span></div></header>
 <section id="misconception" aria-labelledby="h-misconception"><h2 id="h-misconception">1. “SQLite”和“sqlite3 命令”是同一件事吗？</h2>
 <p>不是。官方文档明确指出：<strong>SQLite 库</strong>是实现数据库引擎的代码；<strong>sqlite3 命令行程序（CLI）</strong>是一个接收输入、把 SQL 交给库求值的应用。二者名字相近，但职责不同。当你写 <code>sqlite3_prepare()</code> 时面对的是库；当你敲 <code>.tables</code> 时面对的是 CLI。</p>
-<figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/23-cli-layers.svg" alt="终端输入进入 CLI 程序，点命令在 CLI 内部闭环，只有 SQL 经 prepare/step 交给 SQLite 库"><figcaption>图 1 · CLI 程序与 SQLite 库是两层。点命令由 CLI 解析，不经过 <code>sqlite3_prepare()</code>/<code>sqlite3_step()</code>。</figcaption></figure>
+<figure tabindex="0"><img loading="lazy" src="../assets/svg/23-cli-layers.svg" width="960" height="400" alt="终端输入进入 CLI 程序，点命令在 CLI 内部闭环，只有 SQL 经 prepare/step 交给 SQLite 库"><figcaption>图 1 · CLI 程序与 SQLite 库是两层。点命令由 CLI 解析，不经过 <code>sqlite3_prepare()</code>/<code>sqlite3_step()</code>。</figcaption></figure>
 <p>这个区分有实际后果：驱动、ORM、脚本使用的都是“库”的接口，因此它们天生看不懂点命令。你不应该把 <code>.mode box</code> 这种东西塞进 <code>sqlite3_exec()</code>——它只会被当成语法错误。</p></section>
 <section id="dot" aria-labelledby="h-dot"><h2 id="h-dot">2. 点命令由 CLI 解析，不进库接口</h2>
 <p>官方文档把点命令（dot-commands）定义为 CLI 的“特殊命令”，并强调它们<strong>不会被 SQL 解析器处理</strong>，也<strong>不能作为</strong> <code>sqlite3_prepare()</code> 或 <code>sqlite3_exec()</code> 的参数。它们面向的是“人”，不是“程序”。</p>
@@ -49,7 +49,7 @@ sqlite3 ex1 .dump | psql ex2               # 导出成其他引擎的 SQL</code>
 <pre><code>make shell.c
 # 或手工编译（依平台调整链接选项）
 gcc -o sqlite3 shell.c sqlite3.c -ldl -lpthread -lz -lm</code></pre>
-<figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/23-shell-build.svg" alt="shell.c.in 经 make shell.c 生成 shell.c，再与 sqlite3.c 一起编译成 sqlite3 可执行文件"><figcaption>图 2 · <code>shell.c</code> 是生成物；调制 CLI 的入口是 <code>src/shell.c.in</code>，而不是直接改一个手写源文件。</figcaption></figure>
+<figure tabindex="0"><img loading="lazy" src="../assets/svg/23-shell-build.svg" width="960" height="340" alt="shell.c.in 经 make shell.c 生成 shell.c，再与 sqlite3.c 一起编译成 sqlite3 可执行文件"><figcaption>图 2 · <code>shell.c</code> 是生成物；调制 CLI 的入口是 <code>src/shell.c.in</code>，而不是直接改一个手写源文件。</figcaption></figure>
 <p>官方还建议一组编译选项来得到功能完整的 CLI（如 <code>-DSQLITE_ENABLE_EXPLAIN_COMMENTS</code>、<code>-DSQLITE_ENABLE_FTS5</code>、<code>-DSQLITE_ENABLE_JSON1</code> 等），完整列表以官方文档为准。</p>
 <div class="callout warn"><strong>修正旧版页面的多处编造</strong>本章旧文列出了各代码段的“约行数”表、宣称点命令由 <code>aDotCommands[]</code> 回调数组分发、用私有函数 <code>sqlite3_import()</code> 实现 <code>.import</code>，以及“在 <code>shell_extra.c</code> 里追加自定义命令”的模式。这些<strong>均无官方依据</strong>，属于推测。可验证的事实只有：源码位于 <code>src/shell.c.in</code>，<code>shell.c</code> 由其生成后编译；其余内部函数名与行数不应被当成跨版本不变量。</div>
 </section>

@@ -21,12 +21,12 @@
 <div class="callout warn"><strong>修正旧版页面的编造</strong>本章旧文给出了一张 “单元/集成/回归/模糊…各占百分比” 的表，以及 “测试代码约是产品代码 10 倍” 的说法。这些<strong>没有官方出处</strong>；官方文档给的是每套框架的代码量、用例数与覆盖口径。图中的规模数字均来自文档快照，会随版本变化。</div></section>
 <section id="harnesses" aria-labelledby="h-harnesses"><h2 id="h-harnesses">2. 四套相互独立的测试框架</h2>
 <p>官方明确：核心库由<strong>四套各自独立设计、维护、管理的测试框架</strong>覆盖。它们各盯一类风险，而不是同一件事做四遍。</p>
-<figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/24-harnesses.svg" alt="TCL Tests、TH3、SLT、dbsqlfuzz 四套框架从不同角度覆盖 SQLite 核心库"><figcaption>图 1 · TCL 测试公开且是开发主力；TH3 专有且提供 100% branch/MC/DC；SLT 跨多个数据库引擎对比结果；dbsqlfuzz 同时变异 SQL 与数据库文件。</figcaption></figure>
+<figure tabindex="0"><img loading="lazy" src="../assets/svg/24-harnesses.svg" width="960" height="420" alt="TCL Tests、TH3、SLT、dbsqlfuzz 四套框架从不同角度覆盖 SQLite 核心库"><figcaption>图 1 · TCL 测试公开且是开发主力；TH3 专有且提供 100% branch/MC/DC；SLT 跨多个数据库引擎对比结果；dbsqlfuzz 同时变异 SQL 与数据库文件。</figcaption></figure>
 <table><thead><tr><th scope="col">框架</th><th scope="col">定位</th><th scope="col">可查证的规模（文档快照）</th></tr></thead><tbody><tr><td>TCL Tests</td><td>公开、开发主力</td><td>约 27.2 KSLOC C 接口；1390 个脚本文件；51445 个用例</td></tr><tr><td>TH3</td><td>专有，面向嵌入式平台</td><td>约 1055.4 KSLOC；50362 个用例；全量跑约 2.4M 实例</td></tr><tr><td>SLT</td><td>与 PostgreSQL/MySQL/SQL Server/Oracle 对比</td><td>7.2M 查询；1.12GB 测试数据</td></tr><tr><td>dbsqlfuzz</td><td>专有模糊测试器</td><td>基于 libFuzzer；336 个种子文件；约 10 亿次变异/天</td></tr></tbody></table>
 <p>特别要纠正一点：<strong>TH3 是专有产品，不在公开源码树里</strong>。旧文声称它的源码放在 <code>test/th3/</code> 供公众查看，这是错的；公开仓库里能找到的是 TCL 测试与其他辅助程序。</p></section>
 <section id="coverage" aria-labelledby="h-coverage"><h2 id="h-coverage">3. 100% branch 与 MC/DC 的口径</h2>
 <p>官方说的 “100% 覆盖” 有两种口径：<strong>语句覆盖</strong>（每行至少执行一次）与<strong>分支覆盖</strong>（每个分支方向都走到）。SQLite 声称在 <em>as-deployed</em> 配置下达到 100% 分支覆盖，并通过 TH3 达到 100% MC/DC。</p>
-<figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/24-coverage.svg" alt="语句覆盖、分支覆盖、MC/DC 的口径差异，以及错误处理分支必须真实执行"><figcaption>图 2 · 在 C 里 <code>&amp;&amp;</code>、<code>||</code> 是短路运算符，因此分支覆盖与 MC/DC 非常接近，差异主要在布尔向量测试上。</figcaption></figure>
+<figure tabindex="0"><img loading="lazy" src="../assets/svg/24-coverage.svg" width="960" height="400" alt="语句覆盖、分支覆盖、MC/DC 的口径差异，以及错误处理分支必须真实执行"><figcaption>图 2 · 在 C 里 <code>&amp;&amp;</code>、<code>||</code> 是短路运算符，因此分支覆盖与 MC/DC 非常接近，差异主要在布尔向量测试上。</figcaption></figure>
 <p><strong>MC/DC（修正条件/判定覆盖）</strong>额外要求：每个条件都取到所有结果，且每个条件都被证明能<strong>独立</strong>影响判定结果。为补齐布尔向量场景，SQLite 用 <code>testcase()</code> 宏标记位测试。</p>
 <p>官方的态度很克制：维护 100% MC/DC <strong>很费力，对大多数应用未必划算</strong>；只是对像 SQLite 这样被海量部署的基础库才值得。这也解释了一个常见误解——100% 覆盖率的价值不在 “数字好看”，而在让<strong>异常处理分支被真正执行</strong>。</p></section>
 <section id="anomaly" aria-labelledby="h-anomaly"><h2 id="h-anomaly">4. 异常测试：OOM、I/O 与崩溃</h2>
