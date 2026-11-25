@@ -17,7 +17,7 @@
 <header class="article-header"><span class="kicker">SQLite internals · 28</span><h1>实战定制 SQLite：剪裁、扩展与 VFS 加密的边界</h1><p class="dek">定制 SQLite 有三条杠杆：编译时选项剪裁、扩展注册、自定义 VFS。理解各自的边界，以及为什么官方加密产品是 SEE 而不是自研 AES 脚本。</p><div class="meta"><span>阅读时间约 30 分钟</span><span>SQLite 官方 compile/loadext 文档与可运行实验</span></div></header>
 <section id="misconception" aria-labelledby="h-misconception"><h2 id="h-misconception">1. 定制 SQLite 的三条杠杆</h2>
 <p>“定制一个自己的 SQLite”听起来很大，但实际上只有三条固定杠杆：<strong>编译时选项</strong>（在构建阶段决定包含哪些功能）、<strong>扩展</strong>（运行期或静态链接地添加函数/虚拟表）、<strong>自定义 VFS</strong>（改变文件 I/O，例如加密）。搞清楚每一条的边界，比背一堆宏名字更重要。</p>
-<figure><img loading="lazy" width="960" src="../assets/svg/28-levers.svg" alt="编译时选项、扩展、自定义 VFS 三类定制杠杆及其影响范围"><figcaption>图 1 · 三条杠杆与影响范围：编译选项是全局静态的，扩展可增量添加，VFS 改变存储层但门槛最高。</figcaption></figure>
+<figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/28-levers.svg" alt="编译时选项、扩展、自定义 VFS 三类定制杠杆及其影响范围"><figcaption>图 1 · 三条杠杆与影响范围：编译选项是全局静态的，扩展可增量添加，VFS 改变存储层但门槛最高。</figcaption></figure>
 <div class="callout warn"><strong>修正旧版页面</strong>旧文给出了一张“680KB → 310KB”的剪裁体积表、一张带 1.00x–1.25x 加速比的 PGO 对照表、一套使用 <strong>AES-ECB</strong> 的 <code>encrypt()/decrypt()</code> 示例（ECB 不安全且代码不完整），以及一段号称引自 D. Richard Hipp 的开场白。这些均无可靠出处或属安全反面教材，已删除。</div></section>
 <section id="trim" aria-labelledby="h-trim"><h2 id="h-trim">2. 编译时剪裁：真实存在的选项</h2>
 <p>功能剪裁靠的是官方文档里真实存在的宏。常见的“去掉”选项包括：</p>
@@ -26,7 +26,7 @@
 <div class="callout"><strong>剪裁后必须重跑测试</strong>不同宏之间存在依赖：某个功能被去掉后，引用了它的其它模块可能编不过或行为变化。官方 compile.html 是选项的权威清单；逐个启用、每改一次就重跑测试，是唯一可靠的做法。</div></section>
 <section id="extension" aria-labelledby="h-extension"><h2 id="h-extension">3. 扩展：注册函数与虚拟表</h2>
 <p>扩展是“不改核心库就能加能力”的机制。它可能是一个共享库/DLL，也可能静态链接进应用；入口函数名默认是 <code>sqlite3_extension_init</code>，在其中用 <code>SQLITE_EXTENSION_INIT1/INIT2</code> 取得 API 表，再用 <code>sqlite3_create_function()</code>、<code>sqlite3_create_module()</code> 等注册函数、排序规则或虚拟表。</p>
-<figure><img loading="lazy" width="960" src="../assets/svg/28-extension.svg" alt="扩展被加载后调用入口函数 sqlite3_extension_init，在其中注册函数/虚拟表，SQL 再使用它们"><figcaption>图 2 · 扩展的加载与注册流程。静态链接时入口函数要改名以避免重名；运行期加载需显式开启，属安全敏感操作。</figcaption></figure>
+<figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/28-extension.svg" alt="扩展被加载后调用入口函数 sqlite3_extension_init，在其中注册函数/虚拟表，SQL 再使用它们"><figcaption>图 2 · 扩展的加载与注册流程。静态链接时入口函数要改名以避免重名；运行期加载需显式开启，属安全敏感操作。</figcaption></figure>
 <pre><code>-- 运行期加载（需应用先开启扩展加载）
 .load ./myext
 SELECT myfunc(x) FROM t;

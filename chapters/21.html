@@ -17,13 +17,13 @@
 <header class="article-header"><span class="kicker">SQLite internals · 21</span><h1>FTS 全文搜索：倒排索引、segment 与 FTS5</h1><p class="dek">LIKE 与 MATCH 差在哪？从 segment 与 doclist、分词器边界开始，理解 FTS 索引为何能支持短语与排序，以及 FTS5 与 FTS3/4 的真实差异。</p><div class="meta"><span>阅读时间约 30 分钟</span><span>SQLite 官方资料与可运行 FTS 实验</span></div></header>
 <section id="misconception" aria-labelledby="h-misconception"><h2 id="h-misconception">1. 为什么 LIKE '%关键词%' 不够？</h2>
 <p>想找出所有包含“SQLite 性能优化”的文章，最直接的办法是 <code>WHERE body LIKE '%SQLite%性能%优化%'</code>。这条 SQL 有两个问题：它必须<strong>逐行读取并比较整段文本</strong>，成本随行数线性增长；而且 <code>%</code> 之间的通配符无法表达“这三个词按此顺序相邻”，更谈不上按相关性排序。<code>LIKE</code> 解决的是“子串是否出现”，不是“哪些文档最匹配”。</p>
-<figure><img loading="lazy" width="960" src="../assets/svg/21-inverted-index.svg" alt="左侧 LIKE 逐行比较文本，右侧倒排索引以词为键直接得到 doclist"><figcaption>图 1 · 两种检索路径。倒排索引先定位词条，再只回表读取命中的少量文档；图中的 docid 与位置是教学示意值。</figcaption></figure>
+<figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/21-inverted-index.svg" alt="左侧 LIKE 逐行比较文本，右侧倒排索引以词为键直接得到 doclist"><figcaption>图 1 · 两种检索路径。倒排索引先定位词条，再只回表读取命中的少量文档；图中的 docid 与位置是教学示意值。</figcaption></figure>
 <p>FTS 是 SQLite 的<strong>扩展模块</strong>，通过 <code>CREATE VIRTUAL TABLE … USING fts3/fts4/fts5</code> 建表。它内部维护一份独立的倒排索引，所以同样的检索可以走 <code>… WHERE docs MATCH '性能优化'</code>，由索引直接给出候选文档。参考 <a href="https://sqlite.org/fts3.html" target="_blank" rel="noopener noreferrer">FTS3/FTS4 官方文档</a> 与 <a href="https://sqlite.org/fts5.html" target="_blank" rel="noopener noreferrer">FTS5 官方文档</a>。</p>
 <div class="callout"><strong>时点修正</strong>旧版页面把 FTS3 记作 3.6.0（2009 年）、FTS4 记作 2011 年，二者都不准确。官方文档写明：<strong>FTS3 自 3.5.0（2007-09-04）起可用，FTS4 的增强在 3.7.4（2010-12-07）加入</strong>，<code>unicode61</code> 分词器自 3.7.13（2012-06-11）起可用。</div>
 </section>
 <section id="index" aria-labelledby="h-index"><h2 id="h-index">2. FTS 索引到底是什么结构？</h2>
 <p>FTS3/FTS4 的倒排索引不是一棵全局 B-Tree，而是<strong>一组 B-Tree segment</strong>。每个 segment 的键是<strong>词条（term）</strong>，键对应的值是 <strong>doclist</strong>：它由零到多个条目组成，每个条目包含一个 <code>docid</code> 和该词在该文档中的<strong>词位置列表</strong>。正是位置列表让短语查询和短语邻近判断成为可能——只存“出现过”是不够的。</p>
-<figure><img loading="lazy" width="960" src="../assets/svg/21-segments.svg" alt="新文档写成小 segment，后台按层级合并，optimize 把全部 segment 合并为一个"><figcaption>图 2 · 写入产生小 segment，后台合并成更大的 segment。层级数和触发阈值由 <code>merge=X,Y</code>、<code>automerge=N</code> 等命令与默认策略共同决定，不是一个固定层数。</figcaption></figure>
+<figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/21-segments.svg" alt="新文档写成小 segment，后台按层级合并，optimize 把全部 segment 合并为一个"><figcaption>图 2 · 写入产生小 segment，后台合并成更大的 segment。层级数和触发阈值由 <code>merge=X,Y</code>、<code>automerge=N</code> 等命令与默认策略共同决定，不是一个固定层数。</figcaption></figure>
 <p>这种“先追加、再合并”的结构解释了常见现象：批量写入时查询会同时命中许多小 segment，因此先慢后快；大量写入后做一次 <code>optimize</code> 可以合并索引、让查询更快，但合并本身要花时间和临时空间。</p>
 <table><thead><tr><th>层次</th><th>含义</th></tr></thead><tbody><tr><td>segment</td><td>一棵以词条为键的 B-Tree，属于某个合并层级</td></tr><tr><td>doclist 条目</td><td>一个 docid 加上该词在该文档中的词位置列表</td></tr><tr><td>合并层级</td><td>多个小 segment 归并成更大的 segment，减少查询需读取的 segment 数</td></tr></tbody></table>
 </section>
