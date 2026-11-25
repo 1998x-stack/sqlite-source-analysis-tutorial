@@ -14,7 +14,7 @@ while (has_input) {
 }
 // 真正的 tokenizer/parser 还需要补完语句尾、字节编码与错误清理</code></pre>
 <p>token 长度按 UTF-8 字节计算时，不能把 Python 字符串长度或 Unicode 码点数直接替代源码中的 byte offset。例如 <code>name</code> 为 4 个 ASCII 字节；中文标识符可能跨越多个 UTF-8 字节。SQL 的空白/注释边界和非法字节序列需要单独处理。</p>
-<figure tabindex="0"><img loading="lazy" src="../assets/svg/08-token-automaton.svg" alt="标识符路径、单引号字符串路径与非法未闭合路径的示意图" width="960"><figcaption>图 2 · 首字符决定扫描分支，字符串中的两个连续单引号通常表示转义的单引号。未闭合的字符串不能被当作一个普通 TK_ID；图是词法规则抽象，不是源码 switch 的逐分支重绘。</figcaption></figure></section><section id="categories" aria-labelledby="h-categories"><h2 id="h-categories">3. 识别关键字、标识符、字面量和参数</h2><table><thead><tr><th>输入示例</th><th>词法角色</th><th>语义边界</th></tr></thead><tbody>
+<figure tabindex="0"><img loading="lazy" src="../assets/svg/08-token-automaton.svg" alt="标识符路径、单引号字符串路径与非法未闭合路径的示意图" width="960"><figcaption>图 2 · 首字符决定扫描分支，字符串中的两个连续单引号通常表示转义的单引号。未闭合的字符串不能被当作一个普通 TK_ID；图是词法规则抽象，不是源码 switch 的逐分支重绘。</figcaption></figure></section><section id="categories" aria-labelledby="h-categories"><h2 id="h-categories">3. 识别关键字、标识符、字面量和参数</h2><table><thead><tr><th scope="col">输入示例</th><th scope="col">词法角色</th><th scope="col">语义边界</th></tr></thead><tbody>
 <tr><td><code>SELECT</code>、<code>WHERE</code></td><td>SQL 关键字</td><td>语法位置由 parser 解释</td></tr>
 <tr><td><code>users</code>、<code>user_id</code></td><td>未加引号标识符候选</td><td>可能通过关键词判定</td></tr>
 <tr><td><code>"where"</code></td><td>双引号标识符</td><td>不是 SQL 字符串的首选语法</td></tr>

@@ -19,7 +19,7 @@
 <h3>函数注册的命名与重载</h3><p>函数注册关联名称、参数个数、编码与函数属性。SQLite 也允许同名不同参数个数或编码选项。不要直接把某个版本内部 <code>FuncDef</code> 结构体字段写成公开 ABI；应用应该依赖 <code>sqlite3_create_function_v2()</code> 等文档化 API。</p></section><section id="aggregate" aria-labelledby="h-aggregate"><h2 id="h-aggregate">3. 为什么 COUNT / SUM 不是每行返回一个值？</h2><p>聚合函数通常先对查询组内每一行调用 <code>xStep()</code>，把中间状态保存在 <code>sqlite3_aggregate_context()</code> 获取的私有区域，等该组结束时调用 <code>xFinal()</code> 形成最终 SQL 值。这一状态属于聚合调用，不应该由应用共享一个全局变量承载所有 GROUP BY 组的数据。</p>
 <figure tabindex="0"><img src="../assets/svg/19-aggregate-window.svg" width="960" loading="lazy" alt="聚合函数的 xStep/xFinal 与窗口函数的 xInverse/xValue 在生命周期上的差异"><figcaption>图 2 · GROUP BY 聚合与滑动窗口都可能反复处理多行，但窗口的帧移动可要求移除旧行、请求当前帧值。</figcaption></figure>
 <p>例如自定义聚合 <code>sum_squares(x)</code> 在 xStep 中计算输入平方的累积和，在 xFinal 输出结果。<strong>即使算式简单，也需要考虑 SQL NULL、内存分配失败、整数溢出与空输入。</strong>最小示例使用固定的小整数避免溢出，但仍按 C API 的状态管理契约写代码。</p>
-<table><thead><tr><th>函数类型</th><th>核心回调</th><th>运行语义</th></tr></thead><tbody>
+<table><thead><tr><th scope="col">函数类型</th><th scope="col">核心回调</th><th scope="col">运行语义</th></tr></thead><tbody>
 <tr><td>标量 scalar</td><td><code>xFunc</code></td><td>表达式求值所需时返回一个值</td></tr>
 <tr><td>聚合 aggregate</td><td><code>xStep</code>、<code>xFinal</code></td><td>每组累积，再形成最终结果</td></tr>
 <tr><td>窗口 window</td><td><code>xStep</code>、<code>xInverse</code>、<code>xValue</code>、<code>xFinal</code></td><td>维护可移动窗口帧的状态</td></tr>

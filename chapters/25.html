@@ -29,7 +29,7 @@ SELECT b FROM t WHERE a = 1;
 <section id="pragma" aria-labelledby="h-pragma"><h2 id="h-pragma">3. 关键 PRAGMA 与其语义</h2>
 <p>参数不少，但先抓这几个高频的。注意：<strong>它们的默认值与会随版本变化</strong>，下面是官方文档可核对的语义。</p>
 <figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/25-pragmas.svg" alt="cache_size、mmap_size、temp_store、synchronous、page_size 等 PRAGMA 各影响哪一层"><figcaption>图 1 · 不同 PRAGMA 作用在不同层：页缓存、内存映射、临时存储、提交同步与页粒度。参数多为“建议/上限”，是否被采纳取决于页缓存实现。</figcaption></figure>
-<table><thead><tr><th>PRAGMA</th><th>作用（官方语义）</th></tr></thead><tbody><tr><td><code>cache_size</code></td><td>建议的内存页上限；内置默认约为 -2000（约 2MB），负值 N 表示 KiB 而非页</td></tr><tr><td><code>mmap_size</code></td><td>单个数据库可用于内存映射 I/O 的最大字节数</td></tr><tr><td><code>temp_store</code></td><td>临时表/索引放 FILE 还是 MEMORY（DEFAULT/FILE/MEMORY）</td></tr><tr><td><code>synchronous</code></td><td>同步级别 OFF/NORMAL/FULL/EXTRA</td></tr><tr><td><code>page_size</code></td><td>页大小，512–65536 的 2 的幕，创库时确定</td></tr></tbody></table>
+<table><thead><tr><th scope="col">PRAGMA</th><th scope="col">作用（官方语义）</th></tr></thead><tbody><tr><td><code>cache_size</code></td><td>建议的内存页上限；内置默认约为 -2000（约 2MB），负值 N 表示 KiB 而非页</td></tr><tr><td><code>mmap_size</code></td><td>单个数据库可用于内存映射 I/O 的最大字节数</td></tr><tr><td><code>temp_store</code></td><td>临时表/索引放 FILE 还是 MEMORY（DEFAULT/FILE/MEMORY）</td></tr><tr><td><code>synchronous</code></td><td>同步级别 OFF/NORMAL/FULL/EXTRA</td></tr><tr><td><code>page_size</code></td><td>页大小，512–65536 的 2 的幕，创库时确定</td></tr></tbody></table>
 <div class="callout"><strong>synchronous=NORMAL 的准确说法</strong>在 WAL 模式下，NORMAL 仍能保证<strong>不损坏</strong>，但会<strong>丢失已提交但未持久化的事务</strong>（掉电/崩溃后可能回滚）。它不是“绝对安全”也不是“不安全”，而是“一致但不持久”。</div></section>
 <section id="batch" aria-labelledby="h-batch"><h2 id="h-batch">4. 批处理事务与同步次数</h2>
 <p>最容易被忽略的优化不是索引，而是<strong>事务粒度</strong>。把 N 条 INSERT 各自提交，就产生 N 次提交开销（包括磁盘同步）；把它们放进一个事务，则只在提交时发生一次同步。写入的数据量完全一样，差别在提交/同步次数。</p>
@@ -45,7 +45,7 @@ INSERT INTO t VALUES (1,'a'), (2,'b'), (3,'c');</code></pre>
 <p>注意权衡：单次事务过大也会拉长持锁时间、增加回滚风险。应结合实际写入批量与同步策略取值，而不是一味追求“一个事务写全部”。</p></section>
 <section id="limits" aria-labelledby="h-limits"><h2 id="h-limits">5. 性能边界：什么时候该换数据库</h2>
 <p>了解边界与了解优化同样重要。SQLite 的结构性约束：</p>
-<table><thead><tr><th>维度</th><th>事实</th></tr></thead><tbody><tr><td>写并发</td><td>同一数据库在同一时刻只有一个写事务；WAL 允许读与写并行，但不等于多写并行</td></tr><tr><td>体积上限</td><td>最多 4294967294 页；在最大 65536 字节页下约为 <strong>281 TB</strong>（官方注明该上限未实测）</td></tr><tr><td>复制/高可用</td><td>没有原生主从复制或集群；跨节点复制需借助外部工具自行实现</td></tr><tr><td>分布式查询</td><td>没有跨节点的分布式查询引擎</td></tr></tbody></table>
+<table><thead><tr><th scope="col">维度</th><th scope="col">事实</th></tr></thead><tbody><tr><td>写并发</td><td>同一数据库在同一时刻只有一个写事务；WAL 允许读与写并行，但不等于多写并行</td></tr><tr><td>体积上限</td><td>最多 4294967294 页；在最大 65536 字节页下约为 <strong>281 TB</strong>（官方注明该上限未实测）</td></tr><tr><td>复制/高可用</td><td>没有原生主从复制或集群；跨节点复制需借助外部工具自行实现</td></tr><tr><td>分布式查询</td><td>没有跨节点的分布式查询引擎</td></tr></tbody></table>
 <p>因此：<strong>高并发写入、需要原生高可用/复制、或需要跨节点扩展</strong>的场景，应考虑客户端/服务器数据库。反之，对于本地缓存、移动端存储、嵌入式与桌面应用这类“单进程为主、延迟敏感”的场景，SQLite 的低延迟与零运维往往是优势。</p>
 <div class="callout warn"><strong>别用编造的基准数据</strong>旧文声称“SQLite 在单机单连接下比 PostgreSQL 快 2–5 倍”并指向一个脚本。这<strong>无官方出处</strong>，已删除。不同负载下的真实对比应以可复现的基准与官方说明为准。</div></section>
 <section id="lab" aria-labelledby="h-lab"><h2 id="h-lab">6. 可运行实验</h2>

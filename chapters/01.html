@@ -16,7 +16,7 @@ git clone https://github.com/sqlite/sqlite.git
 # C. 从 sqlite.org/download.html 下载匹配版本的 amalgamation
 #    解压后可见 sqlite3.c / sqlite3.h / shell.c</code></pre>
 <p>如果目标是定位回归问题，应先记录 <code>sqlite3_sourceid()</code>、<code>sqlite3_libversion()</code> 与构建选项，并绑定对应源代码检出；只看“最新分支”的行号容易比错版本。</p></section><section id="files" aria-labelledby="h-files"><h2 id="h-files">3. 第一次走进源文件树</h2><p>不需要逐个打开全部文件。先从“可观察到的行为”逆向寻找模块：SQL 进入程序从 <code>main.c</code>、<code>prepare.c</code> 附近开始；语法走 <code>tokenize.c</code>、<code>parse.y</code>；选查询路径看 <code>where.c</code>；执行循环看 <code>vdbe.c</code>；存储访问依次追踪 <code>btree.c</code>、<code>pager.c</code>、<code>os_unix.c</code> 或 <code>os_win.c</code>。</p>
-<table><thead><tr><th>阅读目的</th><th>先打开的文件</th><th>关键问题</th></tr></thead><tbody>
+<table><thead><tr><th scope="col">阅读目的</th><th scope="col">先打开的文件</th><th scope="col">关键问题</th></tr></thead><tbody>
 <tr><td>SQL 怎样成为程序</td><td><code>tokenize.c</code>、<code>parse.y</code>、<code>select.c</code></td><td>词法 token、语法规则、指令生成如何衔接？</td></tr>
 <tr><td>为什么选这个索引</td><td><code>where.c</code>、<code>wherecode.c</code></td><td>访问路径如何被估价并转成字节码？</td></tr>
 <tr><td>指令如何执行</td><td><code>vdbe.c</code>、<code>vdbeapi.c</code></td><td><code>sqlite3_step()</code> 何时返回一行？</td></tr>

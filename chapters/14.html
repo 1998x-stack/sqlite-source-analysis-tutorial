@@ -2,7 +2,7 @@
 <figure tabindex="0"><img src="../assets/svg/14-vfs-trace.svg" loading="lazy" width="960" alt="SELECT 经 Pager 请求页面并由 PCache 判断是否触发 VFS xRead 的条件路径"><figcaption>图 1 · Cache hit 通常不需要再次触发 xRead；commit 写路径里的 xWrite/xSync 受日志模式和同步约束。</figcaption></figure>
 <p>官方 <a href="https://sqlite.org/vfs.html" target="_blank" rel="noopener noreferrer">VFS 说明</a>还指出，VFS 能用于测试 I/O 故障或建立 shim。要理解它应该从“文件打开时安装的方法表”开始，而不是仅凭目录里的 <code>os_unix.c</code> 函数名猜工作机制。</p></section><section id="objects" aria-labelledby="h-objects"><h2 id="h-objects">2. 三个结构体，各自负责什么</h2><p><code>sqlite3_vfs</code> 代表平台/自定义文件系统接口；<code>sqlite3_file</code> 代表一个打开的文件对象；<code>sqlite3_io_methods</code> 是这个文件对象的操作方法表。</p>
 <figure tabindex="0"><img src="../assets/svg/14-vfs-interface.svg" loading="lazy" width="960" alt="sqlite3_vfs 通过 xOpen 初始化 sqlite3_file，再由 sqlite3_io_methods 承接文件操作"><figcaption>图 2 · VFS 层控制文件创建与平台服务，文件对象的 pMethods 决定打开后的 xRead、xWrite、xSync 等行为。</figcaption></figure>
-<table><thead><tr><th>对象</th><th>核心成员/方法</th><th>生命周期</th></tr></thead><tbody>
+<table><thead><tr><th scope="col">对象</th><th scope="col">核心成员/方法</th><th scope="col">生命周期</th></tr></thead><tbody>
 <tr><td><code>sqlite3_vfs</code></td><td><code>zName</code>、<code>xOpen</code>、<code>xAccess</code>、<code>xDelete</code> 等</td><td>可注册并复用</td></tr>
 <tr><td><code>sqlite3_file</code></td><td>指向 <code>sqlite3_io_methods</code> 的 <code>pMethods</code></td><td>与已打开文件相关联</td></tr>
 <tr><td><code>sqlite3_io_methods</code></td><td><code>xRead</code>、<code>xWrite</code>、<code>xSync</code>、<code>xLock</code>、<code>xUnlock</code> 等</td><td>方法表由 VFS 实现提供</td></tr>

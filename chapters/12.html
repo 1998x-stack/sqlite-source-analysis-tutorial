@@ -8,7 +8,7 @@ WHERE type IN ('table','index')
 ORDER BY rootpage;</code></pre>
 <p>这里的 <code>rootpage</code> 是 B-Tree 的根页面编号，不是 root pointer 的内存地址。每个文件页从第 1 页开始编号；数据库第 1 页包含数据库文件头并且其 B-Tree 是 <code>sqlite_schema</code>。虚拟表不按同样的物理一表一树规则直接存储；其 shadow tables 另有实现差异。</p></section><section id="page" aria-labelledby="h-page"><h2 id="h-page">2. 真正的页面包含哪几段？</h2><p>SQLite 数据库采用固定大小的 page。文件第 1 页开头有 100 字节数据库头，B-Tree 页面头紧跟其后；其余普通 B-Tree 页直接从页首放头。<strong>叶页头 8 字节，内部页头 12 字节</strong>。随后是 2 字节偏移数组，它按 key 顺序索引 cell，而 cell 本身往往位于页面靠后的空间，不保证物理位置按键值排序。</p>
 <figure tabindex="0"><img src="../assets/svg/12-page-layout.svg" loading="lazy" width="960" alt="SQLite B-Tree 页面数据库文件头、页面头、cell pointer array、free space、cell content、reserved 的区域示意"><figcaption>图 2 · 它是区域顺序图，不按比例代表每个区间实际字节数。只有 page 1 包含最前面的 100-byte 数据库文件头；其他页没有这段。</figcaption></figure>
-<table><thead><tr><th>区域</th><th>位置与含义</th><th>对调试的价值</th></tr></thead><tbody>
+<table><thead><tr><th scope="col">区域</th><th scope="col">位置与含义</th><th scope="col">对调试的价值</th></tr></thead><tbody>
 <tr><td>数据库头</td><td>仅 page 1，前 100 bytes</td><td>Magic、page_size、计数器等</td></tr>
 <tr><td>B-Tree 页头</td><td>叶 8 bytes / 内部 12 bytes</td><td>页类型、cell 数量、freeblock 入口</td></tr>
 <tr><td>Cell offset array</td><td>页头之后，按键顺序排列</td><td>每项 2 bytes，定位实际 cell</td></tr>

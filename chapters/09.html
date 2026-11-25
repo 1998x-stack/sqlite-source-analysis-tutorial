@@ -22,7 +22,7 @@ SELECT 10 - 3 - 2 AS result;      -- 5，左结合
 SELECT 1 + 2 * 3 = 7 AS is_seven; -- 1</code></pre>
 <p>这些 SQL 只验证表达式语义；它们不能直接证明 SQLite 在内核中执行了某个固定编号的 reduce。</p></section><section id="fallback" aria-labelledby="h-fallback"><h2 id="h-fallback">5. Fallback、错误恢复与析构器为何必要</h2><p>SQL 的关键字常与应用想要使用的标识符冲突。Lemon 的 <code>%fallback</code> 机制允许某些 token 在特定 parser 状态中按标识符处理，这是语法兼容性策略，不是词法层“忽略所有关键字”。</p>
 <p>另一个重要设计是<strong>非终结符析构器</strong>（destructor）：如果解析中途失败，先前构造的语义值可能持有动态内存；解析栈清理需要调用文法中的对应规则释放资源，否则长时间运行的嵌入式应用会累积泄漏。官方 <a href="https://sqlite.org/lemon.html" target="_blank" rel="noopener noreferrer">Lemon 说明</a>将可重入与 destructor 列为其关键特性。</p>
-<table><thead><tr><th>内部机制</th><th>读源码时观察什么</th><th>常见错误理解</th></tr></thead><tbody>
+<table><thead><tr><th scope="col">内部机制</th><th scope="col">读源码时观察什么</th><th scope="col">常见错误理解</th></tr></thead><tbody>
 <tr><td><code>%fallback</code></td><td>哪些 token 可回退以及生效状态</td><td>所有关键词都能被当作列名</td></tr>
 <tr><td>优先级声明</td><td>语法冲突怎样被消解</td><td>运行完 SQL 后再重新调整顺序</td></tr>
 <tr><td>Destructor</td><td>非法输入时如何回收语义值</td><td>解析失败只需 free(parser)</td></tr>

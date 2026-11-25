@@ -4,7 +4,7 @@
 <p>对外的 <code>sqlite3</code> 类型是故意不透明的。扩展或应用程序应优先使用公开的 C API，而不是读取某个版本的 <code>struct sqlite3</code> 字段。源码研究可以观察 <code>sqliteInt.h</code> 中的实现，但字段顺序、内部类型和宏控制的条件成员不是稳定 ABI。</p>
 <h3>Table / Index 与数据库文件中的记录</h3><p><code>Table</code> 和 <code>Index</code> 主要表现 schema 语义元数据；它们不等于真正存放记录的磁盘页。连接通过读取 schema 构建相关内部结构，运行时再用 B-Tree 打开对应游标。区分这两者，才能明白为什么 <code>CREATE TABLE</code> 会影响 schema，<code>INSERT</code> 则涉及实际数据页。</p></section><section id="parse" aria-labelledby="h-parse"><h2 id="h-parse">3. Parse、Expr、Select：编译时发生了什么</h2><p>以 <code>SELECT name FROM users WHERE id = ?</code> 为例，SQL 首先被 token 化与解析；编译器随后需要解析表名 <code>users</code>、列名 <code>name</code> 与 <code>id</code>，检查表达式合法性，识别绑定参数，再把条件、投影和访问路径转成字节码。</p>
 <figure tabindex="0"><img src="../assets/svg/04-ast.svg" alt="SELECT 语句中 WHERE id 等于参数问号的简化表达式树" loading="lazy"><figcaption>图 2 · WHERE 条件是一棵运算节点树。这里的树仅说明语义关联，不声称内部 Expr 结构体与图中节点一一对应。</figcaption></figure>
-<table><thead><tr><th>概念</th><th>教学意义</th><th>误区</th></tr></thead><tbody>
+<table><thead><tr><th scope="col">概念</th><th scope="col">教学意义</th><th scope="col">误区</th></tr></thead><tbody>
 <tr><td><code>Parse</code></td><td>汇集本次编译的状态和上下文</td><td>认为它是跨连接共享的全局语法树</td></tr>
 <tr><td><code>Expr</code></td><td>表达运算及子表达式关系</td><td>认为每个操作符都有不变的固定字段布局</td></tr>
 <tr><td><code>Select</code></td><td>表达查询核心结构，便于后续分析</td><td>认为查询规划只需要一次线性语法遍历</td></tr>

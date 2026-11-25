@@ -2,7 +2,7 @@
 <figure tabindex="0"><img src="../assets/svg/13-pager-layers.svg" loading="lazy" width="960" alt="Btree 到 Pager、PCache、VFS 的读取路径及缓存命中分支"><figcaption>图 1 · Pager 和 PCache 分别承担事务/页状态与缓存驻留职责。命中缓存时可避免底层读取，但写事务安全性另由 journal/WAL 与同步协议保证。</figcaption></figure>
 <p>SQLite 的官方 <a href="https://sqlite.org/arch.html" target="_blank" rel="noopener noreferrer">架构文档</a>描述 page cache 与操作系统接口的分层。源码主要从 <code>pager.c</code>、<code>pcache.c</code>、<code>pcache1.c</code> 阅读，再按当前日志模式追踪 <code>wal.c</code> 与相应 <code>os_*.c</code>。</p>
 <h3>同一页的五种概念</h3>
-<table><thead><tr><th>概念</th><th>实质</th><th>不能混淆为</th></tr></thead><tbody>
+<table><thead><tr><th scope="col">概念</th><th scope="col">实质</th><th scope="col">不能混淆为</th></tr></thead><tbody>
 <tr><td>Database page</td><td>SQLite 文件逻辑页号与内容</td><td>OS 磁盘扇区</td></tr>
 <tr><td>Cached page</td><td>内存里某一页面的数据</td><td>已经写入物理存储</td></tr>
 <tr><td>Dirty page</td><td>在事务中被修改的缓存页面</td><td>已经提交</td></tr>
@@ -27,7 +27,7 @@ PRAGMA cache_size;</code></pre>
 # 计数与库版本、事务和页面调度有关，不做固定数值断言。</code></pre>
 <h3>公平的前后对比</h3><p>要比较两组 cache_size，最好重新打开连接、控制数据集/查询顺序，并分开记录<strong>冷缓存</strong>与<strong>热缓存</strong>。即使 SQLite cache miss 发生，OS 仍可能从其页缓存返回数据；观察不到物理磁盘读取的事实不能被误写为“VFS 每次 miss 都必然读取硬盘”。</p></section><section id="journal" aria-labelledby="h-journal"><h2 id="h-journal">5. 连接缓存管理与事务同步：为什么必须协同？</h2><p>修改页面时，上层 B-Tree 通常要先向 Pager 声明将要写入，以让它建立适当的日志保护或 WAL 记录；只有满足事务安全前提之后才能执行一些写回操作。日志方式与同步级别共同决定哪些阶段必须确保数据已经持久化。</p>
 <p>在 rollback mode，保护旧内容的日志一般先于主数据库的修改得到必要同步保证。WAL mode 则倾向于先追加 WAL 帧，后续由 checkpoint 决定何时把内容写回主文件。二者不能套用完全相同的写回时序。具体同步语义依赖 VFS 的设备特性和 synchronous 设置，超出缓存算法本身。</p>
-<table><thead><tr><th>问题</th><th>观察入口</th></tr></thead><tbody>
+<table><thead><tr><th scope="col">问题</th><th scope="col">观察入口</th></tr></thead><tbody>
 <tr><td>某页为何没有 xRead？</td><td>PCache 命中，或 mmap 等优化路径</td></tr>
 <tr><td>缓存达到上限后发生什么？</td><td>缓存回收、pin、dirty page 与 spill 条件</td></tr>
 <tr><td>事务出错后谁回滚？</td><td>Pager、rollback journal / WAL 对应路径</td></tr>

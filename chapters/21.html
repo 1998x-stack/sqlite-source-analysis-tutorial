@@ -25,7 +25,7 @@
 <p>FTS3/FTS4 的倒排索引不是一棵全局 B-Tree，而是<strong>一组 B-Tree segment</strong>。每个 segment 的键是<strong>词条（term）</strong>，键对应的值是 <strong>doclist</strong>：它由零到多个条目组成，每个条目包含一个 <code>docid</code> 和该词在该文档中的<strong>词位置列表</strong>。正是位置列表让短语查询和短语邻近判断成为可能——只存“出现过”是不够的。</p>
 <figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/21-segments.svg" alt="新文档写成小 segment，后台按层级合并，optimize 把全部 segment 合并为一个"><figcaption>图 2 · 写入产生小 segment，后台合并成更大的 segment。层级数和触发阈值由 <code>merge=X,Y</code>、<code>automerge=N</code> 等命令与默认策略共同决定，不是一个固定层数。</figcaption></figure>
 <p>这种“先追加、再合并”的结构解释了常见现象：批量写入时查询会同时命中许多小 segment，因此先慢后快；大量写入后做一次 <code>optimize</code> 可以合并索引、让查询更快，但合并本身要花时间和临时空间。</p>
-<table><thead><tr><th>层次</th><th>含义</th></tr></thead><tbody><tr><td>segment</td><td>一棵以词条为键的 B-Tree，属于某个合并层级</td></tr><tr><td>doclist 条目</td><td>一个 docid 加上该词在该文档中的词位置列表</td></tr><tr><td>合并层级</td><td>多个小 segment 归并成更大的 segment，减少查询需读取的 segment 数</td></tr></tbody></table>
+<table><thead><tr><th scope="col">层次</th><th scope="col">含义</th></tr></thead><tbody><tr><td>segment</td><td>一棵以词条为键的 B-Tree，属于某个合并层级</td></tr><tr><td>doclist 条目</td><td>一个 docid 加上该词在该文档中的词位置列表</td></tr><tr><td>合并层级</td><td>多个小 segment 归并成更大的 segment，减少查询需读取的 segment 数</td></tr></tbody></table>
 </section>
 <section id="tokenizer" aria-labelledby="h-tokenizer"><h2 id="h-tokenizer">3. 分词器决定“词”的边界</h2>
 <p>倒排索引的键来自分词器（tokenizer）。建表时用 <code>tokenize=</code> 指定，省略则默认 <code>simple</code>：按空白与标点切分并转小写，只比较 ASCII。SQLite 自带四类：<code>simple</code>、<code>porter</code>（英语词干提取，使 running 匹配 run）、<code>unicode61</code> 与 <code>icu</code>。</p>
@@ -69,7 +69,7 @@ FROM docs5 WHERE docs5 MATCH 'index' ORDER BY score;</code></pre>
 </section>
 <section id="maintenance" aria-labelledby="h-maintenance"><h2 id="h-maintenance">7. 合并、optimize 与一致性</h2>
 <p>FTS3/FTS4 提供一组写入特殊命令（把它们当作插入索引表自身来执行）：</p>
-<table><thead><tr><th>命令</th><th>作用</th></tr></thead><tbody><tr><td><code>INSERT INTO t(t) VALUES('optimize')</code></td><td>把全部 segment 合并成一个，查询更快，但消耗时间与临时空间</td></tr><tr><td><code>INSERT INTO t(t) VALUES('rebuild')</code></td><td>依据内容重建整份索引</td></tr><tr><td><code>INSERT INTO t(t) VALUES('integrity-check')</code></td><td>校验索引与内容是否一致</td></tr><tr><td><code>INSERT INTO t(t) VALUES('merge=X,Y')</code></td><td>合并策略参数：Y 取值须在 2–16，推荐 8</td></tr><tr><td><code>INSERT INTO t(t) VALUES('automerge=N')</code></td><td>调整自动合并阈值</td></tr></tbody></table>
+<table><thead><tr><th scope="col">命令</th><th scope="col">作用</th></tr></thead><tbody><tr><td><code>INSERT INTO t(t) VALUES('optimize')</code></td><td>把全部 segment 合并成一个，查询更快，但消耗时间与临时空间</td></tr><tr><td><code>INSERT INTO t(t) VALUES('rebuild')</code></td><td>依据内容重建整份索引</td></tr><tr><td><code>INSERT INTO t(t) VALUES('integrity-check')</code></td><td>校验索引与内容是否一致</td></tr><tr><td><code>INSERT INTO t(t) VALUES('merge=X,Y')</code></td><td>合并策略参数：Y 取值须在 2–16，推荐 8</td></tr><tr><td><code>INSERT INTO t(t) VALUES('automerge=N')</code></td><td>调整自动合并阈值</td></tr></tbody></table>
 <p>关键一致性事实：FTS 表与外部的“真正内容表”<strong>不会自动同步</strong>。若用触发器或在应用层维护两份数据，就必须保证两者同时更新；用 <code>content=</code> 指向外部表时，索引与外部内容的一致性是使用者的责任。<code>rebuild</code> 能修复脏索引，但它是重建，不是实时同步。</p>
 <p>下一章从 FTS 的独立索引结构转向另一类“自动维护”的索引优化：表达式索引与自修复索引。章节记录均以官方文档与可运行实验为边界，内部数据结构与函数名随源码版本变化。</p>
 </section>

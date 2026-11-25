@@ -2,7 +2,7 @@
 <p>这就是表达式代码生成的任务。SQLite 的 <code>expr.c</code> 包含表达式分析和生成相关实现，<code>select.c</code>、<code>where.c</code>、<code>wherecode.c</code> 会在适当时机调用它，生成 VDBE 指令。官方 <a href="https://sqlite.org/arch.html" target="_blank" rel="noopener noreferrer">架构文档</a>明确将 <code>expr.c</code> 列为代码生成的重要组成部分。</p>
 <figure tabindex="0"><img loading="lazy" src="../assets/svg/10-expression-compile.svg" width="960" alt="表达式树经 expr.c 代码生成 VDBE 寄存器指令，执行期才读取并计算"><figcaption>图 1 · 输入 Expr 树决定计算依赖，但中间代码可有寄存器复用、常量折叠、条件跳转和指令重排。示意图不承诺 EXPLAIN 中一定出现 Multiply 和 Add 两条固定指令。</figcaption></figure></section><section id="tree" aria-labelledby="h-tree"><h2 id="h-tree">2. Expr、名字解析和寄存器：三次不同的“绑定”</h2><p>以 <code>WHERE price &gt; ?1</code> 为例：语法分析识别 <code>&gt;</code> 的左右操作数；名称解析把 <code>price</code> 关联到有效的表、列或表达式上下文；参数分析给 <code>?1</code> 分配绑定参数的位置。然后代码生成器才能根据访问路径决定应该从哪个游标读取列，使用寄存器还是跳转指令。</p>
 <h3>2.1 语义树上的“节点”与 VDBE 上的“寄存器”不同</h3>
-<table><thead><tr><th>层次</th><th>对象</th><th>主要职责</th></tr></thead><tbody>
+<table><thead><tr><th scope="col">层次</th><th scope="col">对象</th><th scope="col">主要职责</th></tr></thead><tbody>
 <tr><td>解析结构</td><td><code>Expr</code> / <code>ExprList</code></td><td>表达运算符与子表达式关系</td></tr>
 <tr><td>分析上下文</td><td><code>Parse</code> / 名称上下文</td><td>语义检查、绑定列与参数、组织生成状态</td></tr>
 <tr><td>指令生成</td><td><code>sqlite3ExprCode*</code> 等函数族</td><td>选择计算/跳转，安排寄存器</td></tr>

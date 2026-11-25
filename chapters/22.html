@@ -48,7 +48,7 @@ CREATE INDEX i ON t(random());
 REINDEX EXPRESSIONS;
 -- CLI 中查看表达式索引
 .indexes --expr</code></pre>
-<table><thead><tr><th>做法</th><th>何时用</th><th>代价</th></tr></thead><tbody><tr><td><code>REINDEX EXPRESSIONS</code></td><td>怀疑因换了 ADF/平台导致过期</td><td>只重算表达式索引，I/O 小于全量 <code>REINDEX</code></td></tr><tr><td>STORED 生成列 + 普通索引</td><td>新建表、想从源头避开表达式索引</td><td>每行多存一列，但索引键就是列值</td></tr></tbody></table>
+<table><thead><tr><th scope="col">做法</th><th scope="col">何时用</th><th scope="col">代价</th></tr></thead><tbody><tr><td><code>REINDEX EXPRESSIONS</code></td><td>怀疑因换了 ADF/平台导致过期</td><td>只重算表达式索引，I/O 小于全量 <code>REINDEX</code></td></tr><tr><td>STORED 生成列 + 普通索引</td><td>新建表、想从源头避开表达式索引</td><td>每行多存一列，但索引键就是列值</td></tr></tbody></table>
 <p><strong>最稳的替代方案</strong>是根本不用表达式索引：把表达式定义成 <strong>STORED 生成列</strong>，再在该列上建普通索引。官方给出的改写就是把 <code>CREATE INDEX doc_mtime ON docstore(doc-&gt;&gt;'mtime')</code> 换成生成列 <code>mtime AS (doc-&gt;&gt;'mtime') STORED</code> 再索引 <code>mtime</code>。</p>
 </section>
 <section id="lab" aria-labelledby="h-lab"><h2 id="h-lab">6. 可运行实验</h2>

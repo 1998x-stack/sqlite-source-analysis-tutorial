@@ -10,7 +10,7 @@
 <h3>崩溃测试为什么不等于手工删 journal</h3>
 <p>正确的崩溃一致性测试需要在受控 VFS/模拟电源故障条件下，在指定 I/O 边界停止、重启、恢复并校验数据库。随意 kill 一个进程只覆盖很小的时间窗口；手工删除 journal 更是可能摧毁恢复数据。本章的可运行示例<strong>验证事务回滚和连接隔离</strong>，并不冒充真正的断电故障注入测试。</p></section><section id="begin" aria-labelledby="h-begin"><h2 id="h-begin">4. DEFERRED、IMMEDIATE 与 EXCLUSIVE 的真正差别</h2><p>SQLite 支持三种显式 BEGIN 形式。默认 <code>DEFERRED</code> 先关闭自动提交，直到首条数据库访问才建立实际读或写事务；<code>IMMEDIATE</code> 立即尝试开始写事务，因此在另一个 writer 活跃时可能直接遇到 <code>SQLITE_BUSY</code>；<code>EXCLUSIVE</code> 在传统 rollback 模式下还会更强地排除其他读连接。</p>
 <figure tabindex="0"><img src="../assets/svg/15-transaction-locks.svg" width="960" loading="lazy" alt="SQLite DEFERRED、IMMEDIATE、EXCLUSIVE 三种 BEGIN 模式与读写锁条件"><figcaption>图 3 · 模式区别在事务开始及锁约束，不意味着有三个独立的“提交安全等级”。WAL 模式中 EXCLUSIVE 与 IMMEDIATE 的事务行为基本相同。</figcaption></figure>
-<table><thead><tr><th>模式</th><th>建立时机</th><th>需要注意</th></tr></thead><tbody>
+<table><thead><tr><th scope="col">模式</th><th scope="col">建立时机</th><th scope="col">需要注意</th></tr></thead><tbody>
 <tr><td><code>DEFERRED</code></td><td>首次实际读/写时才建立对应事务</td><td>读后升级为写可能因并发而 BUSY</td></tr>
 <tr><td><code>IMMEDIATE</code></td><td>BEGIN 时尝试成为 writer</td><td>已有 writer 时 BEGIN 可能失败</td></tr>
 <tr><td><code>EXCLUSIVE</code></td><td>BEGIN 时请求更排他的写事务</td><td>rollback 模式禁止其它连接读；WAL 与 IMMEDIATE 基本同义</td></tr>

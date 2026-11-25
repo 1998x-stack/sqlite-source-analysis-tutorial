@@ -3,7 +3,7 @@
 <figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/18-planner-stages.svg" alt="SQLite WHERE 约束拆分成候选 WhereLoop，搜索合适路径后生成 VDBE"><figcaption>图 1 · Planner 对访问候选做成本比较，之后由代码生成阶段形成虚拟机程序；WHERE 分解与 JOIN 顺序并不是执行期才临时决定。</figcaption></figure></section><section id="where" aria-labelledby="h-where"><h2 id="h-where">2. 从 WHERE 条件到索引前缀</h2><p>在 B-Tree 索引 <code>CREATE INDEX idx_events_cat_time ON events(category,created_at)</code> 下，<code>category='A'</code> 可以限定一个等值前缀，随后 <code>created_at &gt;= 100</code> 可在这个范围内进一步定位。若仅使用 <code>WHERE created_at &gt;= 100</code>，不能机械推断一定有相同的索引查找：前导列缺失时，规划器可能考虑 skip-scan，是否可用与重复值分布及统计信息有关。</p>
 <figure tabindex="0"><img loading="lazy" width="960" src="../assets/svg/18-index-prefix.svg" alt="复合索引 category 与 created_at 的等值前缀加范围约束"><figcaption>图 2 · 先限定 category，再在 created_at 上做范围查找是组合索引的典型有效路径；它不是任意列顺序都等价的证据。</figcaption></figure>
 <p>从源码阅读可搜索 <code>where.c</code> 的 WhereTerm/WhereLoop 分析与候选生成，结合 <code>wherecode.c</code> 观察已选方案如何生成循环指令。不要把教材的伪代码直接当作当前源码原函数签名；不同 SQLite 版本和扩展选项会改变优化分支。</p>
-<table><thead><tr><th>SQL 条件</th><th>可能的索引机会</th><th>需要额外检查</th></tr></thead><tbody>
+<table><thead><tr><th scope="col">SQL 条件</th><th scope="col">可能的索引机会</th><th scope="col">需要额外检查</th></tr></thead><tbody>
 <tr><td><code>category = ?</code></td><td>前导列等值前缀</td><td>匹配比例与覆盖</td></tr>
 <tr><td><code>category = ? AND created_at &gt; ?</code></td><td>等值前缀 + 后续范围</td><td>排序需求、选择性</td></tr>
 <tr><td><code>created_at &gt; ?</code></td><td>可能扫描 / skip-scan</td><td>重复度、ANALYZE 统计</td></tr>

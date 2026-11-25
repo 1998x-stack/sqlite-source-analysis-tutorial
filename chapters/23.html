@@ -25,7 +25,7 @@
 <pre><code>SELECT name FROM sqlite_schema
 WHERE type IN ('table','view') AND name NOT LIKE 'sqlite_%'
 ORDER BY 1;  -- .tables 还会覆盖所有已附加的数据库，并排成多列</code></pre>
-<table><thead><tr><th>点命令</th><th>干什么</th></tr></thead><tbody><tr><td><code>.tables</code></td><td>列出表/视图（跨所有附加库，列对齐）</td></tr><tr><td><code>.schema [tbl]</code></td><td>打印整个库（或单表）的建表/建索引语句</td></tr><tr><td><code>.indexes [tbl]</code></td><td>列出索引；带表名时只看该表</td></tr><tr><td><code>.indexes --expr</code></td><td>只列出表达式索引（3.53.0+）</td></tr></tbody></table>
+<table><thead><tr><th scope="col">点命令</th><th scope="col">干什么</th></tr></thead><tbody><tr><td><code>.tables</code></td><td>列出表/视图（跨所有附加库，列对齐）</td></tr><tr><td><code>.schema [tbl]</code></td><td>打印整个库（或单表）的建表/建索引语句</td></tr><tr><td><code>.indexes [tbl]</code></td><td>列出索引；带表名时只看该表</td></tr><tr><td><code>.indexes --expr</code></td><td>只列出表达式索引（3.53.0+）</td></tr></tbody></table>
 <p>注意最后一行与上一章的呼应：表达式索引与普通索引在元数据里同属 <code>sqlite_schema</code>，需要用 <code>.indexes --expr</code> 才能方便地筛出来。</p></section>
 <section id="modes" aria-labelledby="h-modes"><h2 id="h-modes">3. .mode 与 QRF：结果如何排版</h2>
 <p>查询结果的排版由 <code>.mode</code> 控制，与 SQL 语法无关。官方的快速例子包括 <code>.mode box</code>（Unicode 框线）、<code>.mode quote</code>（SQL 字面量）、<code>.mode csv</code>。<code>.mode --list</code> 列出全部模式，<code>.mode</code> 显示当前模式，<code>.mode --once box</code> 只对下一条语句临时生效。</p>
