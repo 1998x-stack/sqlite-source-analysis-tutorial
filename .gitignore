@@ -1,0 +1,5 @@
+# 本地浏览器 QA 产物（由 scripts/browser_smoke.py 生成，见 README「浏览器 QA 输出到 qa-local/（不提交）」）
+qa-local/
+
+# 本地构建/部署输出（见 README）
+dist/
