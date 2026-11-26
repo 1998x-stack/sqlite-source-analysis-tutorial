@@ -1,6 +1,6 @@
 # SQLite 源码解剖：从一条 SQL 理解数据库内核
 
-> 28 章 SQLite 内核原理与源码分析的中文阅读路线。已重构 **01–20**；**21–28 保留原版**，后续将逐章核对、绘制可解释的 SVG，并补充可复现实验。
+> 28 章 SQLite 内核原理与源码分析的中文阅读路线。**01–28 已全部逐章复核**，每章配独立叙事、可解释的 SVG 图解、可复现实验与证据台账。
 
 **课程首页**（GitHub Pages 已部署）：https://1998x-stack.github.io/sqlite-source-analysis-tutorial/
 
@@ -27,9 +27,16 @@
 | 18 | Planner、N3、索引前缀、ANALYZE | 深度重构 |
 | 19 | 标量、聚合与窗口 C API | 深度重构 |
 | 20 | sqlite3_module 与可执行的 C 虚拟表 | 深度重构 |
-| 21–28 | 后续优化、扩展、CLI、WASM 等 | 原版迁移，待复核 |
+| 21 | FTS 倒排索引、segment 与 FTS5 | 深度重构 |
+| 22 | 表达式索引与自修复 | 深度重构 |
+| 23 | CLI shell 与库的边界 | 深度重构 |
+| 24 | TCL/TH3/SLT 测试框架 | 深度重构 |
+| 25 | 性能分析与优化边界 | 深度重构 |
+| 26 | WASM 与 JS 绑定 | 深度重构 |
+| 27 | 3.53、3.54 新特性 | 深度重构 |
+| 28 | 定制编译、扩展与 VFS | 深度重构 |
 
-章节清单和真实相对路径以 [courses.json](courses.json) 为准。首页既是学习入口，也清楚标记哪些章节还未完成技术复审。
+章节清单和真实相对路径以 [courses.json](courses.json) 为准。首页是学习入口；每章正文自行声明其版本边界与教学简化，未标注来源的数字均按“教学示意”看待。
 
 ## 项目结构
 
@@ -37,14 +44,13 @@
 .
 ├── index.html                 # GitHub Pages 首页（根目录发布）
 ├── chapters/
-│   ├── 01.html ... 20.html   # 已完成独立叙事 + 图解 + 实验
-│   ├── 21.html ... 28.html   # 从根目录迁移的原版
+│   ├── 01.html ... 28.html   # 已完成独立叙事 + 图解 + 实验
 │   ├── index.html            # 旧章内“返回首页”兼容跳转
-│   └── theme.css             # 原版页面暂用的兼容主题
+│   └── theme.css             # 兼容旧页面的主题（迁移后逐步淘汰）
 ├── assets/
-│   ├── css/site.css          # 重构版视觉系统
-│   └── svg/*.svg             # 56 张原创可访问的独立 SVG
-├── evidence/01.json ... 20.json
+│   ├── css/site.css          # 新版视觉系统
+│   └── svg/*.svg             # 72 张原创可访问的独立 SVG
+├── evidence/01.json ... 28.json
 ├── examples/                 # SQL / C 实验（不复制上游 SQLite）
 ├── scripts/                  # 静态检查、浏览器 QA、部署打包
 ├── courses.json              # 28 章导航数据和重构状态
@@ -87,7 +93,7 @@ python3 scripts/build_site.py
 
 浏览器 QA 输出到 `qa-local/`（不提交），部署输出在 `dist/`。CI 将校验链接、章节完整性、SVG XML 可解析性、证据台账、响应式布局和交互。Pages 工作流已预置；**是否上线以仓库 Pages 设置和部署结果为准**。
 
-请优先参照 [AGENTS.md](AGENTS.md) 改写章节；不要把旧页对特定版本的新特性或固定性能指标的断言误认为已复核。
+请优先参照 [AGENTS.md](AGENTS.md) 改写章节。每章正文区分官方文档事实、教学简化与未核验推导；任何数字都应在证据台账 [evidence/NN.json](evidence/) 中找到对应条目。
 
 ## 主要上游资料
 
@@ -134,7 +140,7 @@ cc -std=c11 -Wall -Wextra -Werror -O2 examples/14_vfs_select.c -lsqlite3 -o /tmp
 C 程序的链接参数为 Unix-like 示例；页面检查和事务测试使用 Python 标准库，不需要下载 SQLite 私有 C 文件。事务脚本只验证回滚和锁冲突，**不是实际断电模拟**。
 
 ## 第四轮：16–20 快照、规划与扩展
-本批增加 15 张新的专业 SVG，累计 56 张。五篇分别从 WAL 帧与 end mark、锁错误、N3 路径搜索、SQL 函数回调和虚拟表约束协商切入。源码与实验均优先使用 SQLite 官方文档和公开 C API。
+本批增加 15 张新的专业 SVG（截至本轮累计 56 张）。五篇分别从 WAL 帧与 end mark、锁错误、N3 路径搜索、SQL 函数回调和虚拟表约束协商切入。源码与实验均优先使用 SQLite 官方文档和公开 C API。
 
 ```bash
 python examples/16_wal_snapshot.py
@@ -146,3 +152,24 @@ cc -std=c11 -Wall -Wextra -Werror -O2 examples/20_vtab_rows.c -lsqlite3 -o /tmp/
 python scripts/check_site.py
 ```
 `generate_series` 是 SQLite CLI 常见扩展而非所有核心库默认函数。新增 `examples/20_json_virtual.sql` 为可选 JSON 表值函数练习，主 CI 则运行无需特定扩展安装的 C 模块实验。
+
+## 第五轮：21–28 扩展、工具链与定制
+
+此轮把此前保留原版的 21–28 章逐章对照官方文档重写，全站累计 **72** 张独立 SVG。每章新增证据台账 `evidence/NN.json`，并把断言绑定到具体版本文档：
+
+- 21 FTS：区分 FTS3/FTS4 与 FTS5 两套实现，版本日期以 `fts3.html` 为准。
+- 22 表达式索引：确定性契约与 3.53 自修复行为按 `expridx.html` 核对。
+- 23 CLI：点命令、`.mode` 与 QRF 以官方 `cli.html` 为基线。
+- 24 测试：TCL/TH3/SLT 与异常测试口径按 `testing.html` 描述。
+- 25 性能：只讲可观测的 PRAGMA 与计划，不给跨版本性能承诺。
+- 26 WASM：C API、Worker、OPFS VFS 与 npm 交付以官方 `wasm` 文档为准。
+- 27 新特性：3.53、3.54 的内容逐条对齐发布历史。
+- 28 定制：编译剪裁、扩展入口与 SEE 边界按 `compile.html` / `loadext.html`。
+
+```bash
+python3 scripts/check_site.py
+python3 examples/21_fts.py
+python3 examples/22_expr_index.py
+```
+
+未列出运行命令的章节实验为可选练习，其“教学示意”输出不能当作固定断言；浏览器验收以 `python3 scripts/browser_smoke.py` 的 1440 / 390 / 360 结果为准。
