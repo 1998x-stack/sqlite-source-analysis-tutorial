@@ -46,7 +46,7 @@
 ├── chapters/
 │   ├── 01.html ... 28.html   # 已完成独立叙事 + 图解 + 实验
 │   ├── index.html            # 旧章内“返回首页”兼容跳转
-│   └── theme.css             # 兼容旧页面的主题（迁移后逐步淘汰）
+│   └── theme.css             # 早期页面保留的样式，暂不移除
 ├── assets/
 │   ├── css/site.css          # 新版视觉系统
 │   └── svg/*.svg             # 72 张原创可访问的独立 SVG

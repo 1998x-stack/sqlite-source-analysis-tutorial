@@ -11,8 +11,8 @@
 ## 仓库边界
 - `index.html` 是 GitHub Pages 首页；`chapters/NN.html` 是章节唯一正文。
 - 根目录 `01.html` … `28.html` 只是旧链接兼容重定向，**不要在这里写文章内容**。
-- `chapters/21.html` … `28.html` 是尚待逐章技术审计的历史正文，不得标记为已验证。
-- 新版文章 CSS 只维护在 `assets/css/site.css`；旧版页面暂用 `chapters/theme.css`，下一轮迁移后可以逐步淘汰。
+- `chapters/21.html` … `28.html` 已在后续轮次逐章对照官方文档重写并登记证据台账；若再次改动引入版本相关主张，仍须附 release note 与源版本，不得默认为跨版本不变量。
+- 新版文章 CSS 只维护在 `assets/css/site.css`；28 章正文均已引用它。`chapters/theme.css` 为早期页面保留，仍列在 `scripts/check_site.py` 的目录清单中，暂不移除。
 - 每张原创 SVG 存在 `assets/svg/` 并登记到 `assets/svg/manifest.json`。示意箭头、单位与 caption 必须与真实执行关系一致。
 - `courses.json` 是章节清单的事实单源，章节状态字段取值 `revised`、`legacy`。新增、改名、迁移同步修改首页链接。
 - `evidence/NN.json` 为每篇文章的主张台账，`examples/` 为可复现实验，`scripts/` 为质量门禁，`.github/workflows/` 为 CI 和部署。
