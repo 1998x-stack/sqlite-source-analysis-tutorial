@@ -461,116 +461,303 @@
       "file": "21-inverted-index.svg",
       "chapter": "21",
       "source": [
+        "https://sqlite.org/fts5.html",
         "https://sqlite.org/fts3.html"
       ]
     },
     {
-      "file": "21-segments.svg",
+      "file": "21-segment-merging.svg",
       "chapter": "21",
       "source": [
+        "https://sqlite.org/fts5.html",
         "https://sqlite.org/fts3.html"
       ]
     },
     {
-      "file": "22-expr-index.svg",
+      "file": "21-tokenizer-ranking.svg",
+      "chapter": "21",
+      "source": [
+        "https://sqlite.org/fts5.html",
+        "https://sqlite.org/fts3.html"
+      ]
+    },
+    {
+      "file": "22-expression-index.svg",
       "chapter": "22",
       "source": [
         "https://sqlite.org/expridx.html",
-        "https://sqlite.org/staleexpridx.html"
+        "https://sqlite.org/staleexpridx.html",
+        "https://sqlite.org/changes.html#version_3_53_0"
+      ]
+    },
+    {
+      "file": "22-expression-match.svg",
+      "chapter": "22",
+      "source": [
+        "https://sqlite.org/expridx.html",
+        "https://sqlite.org/staleexpridx.html",
+        "https://sqlite.org/changes.html#version_3_53_0"
       ]
     },
     {
       "file": "22-stale-selfheal.svg",
       "chapter": "22",
       "source": [
-        "https://sqlite.org/staleexpridx.html"
+        "https://sqlite.org/expridx.html",
+        "https://sqlite.org/staleexpridx.html",
+        "https://sqlite.org/changes.html#version_3_53_0"
       ]
     },
     {
-      "file": "23-cli-layers.svg",
+      "file": "23-cli-pipeline.svg",
       "chapter": "23",
       "source": [
-        "https://sqlite.org/cli.html"
+        "https://sqlite.org/cli.html",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/shell.c.in",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/qrf/qrf.h"
       ]
     },
     {
-      "file": "23-shell-build.svg",
+      "file": "23-dot-vs-sql.svg",
       "chapter": "23",
       "source": [
-        "https://sqlite.org/cli.html"
+        "https://sqlite.org/cli.html",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/shell.c.in",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/qrf/qrf.h"
       ]
     },
     {
-      "file": "24-harnesses.svg",
+      "file": "23-qrf-pipeline.svg",
+      "chapter": "23",
+      "source": [
+        "https://sqlite.org/cli.html",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/shell.c.in",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/qrf/qrf.h"
+      ]
+    },
+    {
+      "file": "24-test-harnesses.svg",
       "chapter": "24",
       "source": [
-        "https://sqlite.org/testing.html"
+        "https://sqlite.org/testing.html",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/test/tester.tcl",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/test/fuzzcheck.c"
       ]
     },
     {
-      "file": "24-coverage.svg",
+      "file": "24-anomaly-testing.svg",
       "chapter": "24",
       "source": [
-        "https://sqlite.org/testing.html"
+        "https://sqlite.org/testing.html",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/test/tester.tcl",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/test/fuzzcheck.c"
       ]
     },
     {
-      "file": "25-pragmas.svg",
+      "file": "24-coverage-layers.svg",
+      "chapter": "24",
+      "source": [
+        "https://sqlite.org/testing.html",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/test/tester.tcl",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/test/fuzzcheck.c"
+      ]
+    },
+    {
+      "file": "25-measurement-loop.svg",
       "chapter": "25",
       "source": [
+        "https://sqlite.org/eqp.html",
+        "https://sqlite.org/c3ref/stmt_status.html",
+        "https://sqlite.org/lang_analyze.html",
         "https://sqlite.org/pragma.html"
       ]
     },
     {
-      "file": "25-batch-fsync.svg",
+      "file": "25-query-counters.svg",
       "chapter": "25",
       "source": [
-        "https://sqlite.org/lang_transaction.html",
+        "https://sqlite.org/eqp.html",
+        "https://sqlite.org/c3ref/stmt_status.html",
+        "https://sqlite.org/lang_analyze.html",
         "https://sqlite.org/pragma.html"
       ]
     },
     {
-      "file": "26-js-stack.svg",
+      "file": "25-tuning-tradeoffs.svg",
+      "chapter": "25",
+      "source": [
+        "https://sqlite.org/eqp.html",
+        "https://sqlite.org/c3ref/stmt_status.html",
+        "https://sqlite.org/lang_analyze.html",
+        "https://sqlite.org/pragma.html"
+      ]
+    },
+    {
+      "file": "26-wasm-execution-stack.svg",
       "chapter": "26",
       "source": [
-        "https://sqlite.org/wasm/doc/trunk/api-index.md",
-        "https://sqlite.org/wasm/doc/trunk/persistence.md"
+        "https://sqlite.org/wasm/doc/trunk/persistence.md",
+        "https://sqlite.org/wasm/doc/trunk/api-oo1.md",
+        "https://sqlite.org/wasm/doc/trunk/api-worker1.md",
+        "https://github.com/sqlite/sqlite-wasm/blob/main/README.md",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/wasm/GNUmakefile",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/wasm/api/sqlite3-api-oo1.c-pp.js",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/wasm/api/sqlite3-vfs-opfs.c-pp.js"
       ]
     },
     {
-      "file": "26-vfs-choice.svg",
+      "file": "26-oo1-lifecycle.svg",
       "chapter": "26",
       "source": [
-        "https://sqlite.org/wasm/doc/trunk/persistence.md"
+        "https://sqlite.org/wasm/doc/trunk/persistence.md",
+        "https://sqlite.org/wasm/doc/trunk/api-oo1.md",
+        "https://sqlite.org/wasm/doc/trunk/api-worker1.md",
+        "https://github.com/sqlite/sqlite-wasm/blob/main/README.md",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/wasm/GNUmakefile",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/wasm/api/sqlite3-api-oo1.c-pp.js",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/wasm/api/sqlite3-vfs-opfs.c-pp.js"
       ]
     },
     {
-      "file": "27-timeline.svg",
+      "file": "26-worker-transaction.svg",
+      "chapter": "26",
+      "source": [
+        "https://sqlite.org/wasm/doc/trunk/persistence.md",
+        "https://sqlite.org/wasm/doc/trunk/api-oo1.md",
+        "https://sqlite.org/wasm/doc/trunk/api-worker1.md",
+        "https://github.com/sqlite/sqlite-wasm/blob/main/README.md",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/wasm/GNUmakefile",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/wasm/api/sqlite3-api-oo1.c-pp.js",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/wasm/api/sqlite3-vfs-opfs.c-pp.js"
+      ]
+    },
+    {
+      "file": "26-opfs-vfs-matrix.svg",
+      "chapter": "26",
+      "source": [
+        "https://sqlite.org/wasm/doc/trunk/persistence.md",
+        "https://sqlite.org/wasm/doc/trunk/api-oo1.md",
+        "https://sqlite.org/wasm/doc/trunk/api-worker1.md",
+        "https://github.com/sqlite/sqlite-wasm/blob/main/README.md",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/wasm/GNUmakefile",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/wasm/api/sqlite3-api-oo1.c-pp.js",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/wasm/api/sqlite3-vfs-opfs.c-pp.js"
+      ]
+    },
+    {
+      "file": "27-release-timeline.svg",
       "chapter": "27",
       "source": [
-        "https://sqlite.org/changes.html"
+        "https://sqlite.org/changes.html",
+        "https://sqlite.org/chronology.html",
+        "https://sqlite.org/news.html",
+        "https://sqlite.org/staleexpridx.html",
+        "https://sqlite.org/c3ref/result_str.html",
+        "https://sqlite.org/c3ref/c_dbconfig_defensive.html",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/mutex_w32.c",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/os_unix.c"
       ]
     },
     {
-      "file": "27-planner.svg",
+      "file": "27-release-feature-map.svg",
       "chapter": "27",
       "source": [
-        "https://sqlite.org/changes.html"
+        "https://sqlite.org/changes.html",
+        "https://sqlite.org/chronology.html",
+        "https://sqlite.org/news.html",
+        "https://sqlite.org/staleexpridx.html",
+        "https://sqlite.org/c3ref/result_str.html",
+        "https://sqlite.org/c3ref/c_dbconfig_defensive.html",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/mutex_w32.c",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/os_unix.c"
       ]
     },
     {
-      "file": "28-levers.svg",
+      "file": "27-stale-index-repair.svg",
+      "chapter": "27",
+      "source": [
+        "https://sqlite.org/changes.html",
+        "https://sqlite.org/chronology.html",
+        "https://sqlite.org/news.html",
+        "https://sqlite.org/staleexpridx.html",
+        "https://sqlite.org/c3ref/result_str.html",
+        "https://sqlite.org/c3ref/c_dbconfig_defensive.html",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/mutex_w32.c",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/os_unix.c"
+      ]
+    },
+    {
+      "file": "28-customization-contract.svg",
       "chapter": "28",
       "source": [
+        "https://sqlite.org/howtocompile.html",
         "https://sqlite.org/compile.html",
-        "https://sqlite.org/loadext.html"
+        "https://sqlite.org/c3ref/vfs.html",
+        "https://sqlite.org/c3ref/io_methods.html",
+        "https://sqlite.org/loadext.html",
+        "https://sqlite.org/c3ref/enable_load_extension.html",
+        "https://sqlite.org/c3ref/c_deterministic.html",
+        "https://sqlite.org/see",
+        "https://www.zetetic.net/sqlcipher/",
+        "https://csrc.nist.gov/pubs/sp/800/38/a/final"
       ]
     },
     {
-      "file": "28-extension.svg",
+      "file": "28-build-pipeline.svg",
       "chapter": "28",
       "source": [
-        "https://sqlite.org/loadext.html"
+        "https://sqlite.org/howtocompile.html",
+        "https://sqlite.org/compile.html",
+        "https://sqlite.org/c3ref/vfs.html",
+        "https://sqlite.org/c3ref/io_methods.html",
+        "https://sqlite.org/loadext.html",
+        "https://sqlite.org/c3ref/enable_load_extension.html",
+        "https://sqlite.org/c3ref/c_deterministic.html",
+        "https://sqlite.org/see",
+        "https://www.zetetic.net/sqlcipher/",
+        "https://csrc.nist.gov/pubs/sp/800/38/a/final"
+      ]
+    },
+    {
+      "file": "28-extension-lifecycle.svg",
+      "chapter": "28",
+      "source": [
+        "https://sqlite.org/howtocompile.html",
+        "https://sqlite.org/compile.html",
+        "https://sqlite.org/c3ref/vfs.html",
+        "https://sqlite.org/c3ref/io_methods.html",
+        "https://sqlite.org/loadext.html",
+        "https://sqlite.org/c3ref/enable_load_extension.html",
+        "https://sqlite.org/c3ref/c_deterministic.html",
+        "https://sqlite.org/see",
+        "https://www.zetetic.net/sqlcipher/",
+        "https://csrc.nist.gov/pubs/sp/800/38/a/final"
+      ]
+    },
+    {
+      "file": "28-vfs-encryption-boundary.svg",
+      "chapter": "28",
+      "source": [
+        "https://sqlite.org/howtocompile.html",
+        "https://sqlite.org/compile.html",
+        "https://sqlite.org/c3ref/vfs.html",
+        "https://sqlite.org/c3ref/io_methods.html",
+        "https://sqlite.org/loadext.html",
+        "https://sqlite.org/c3ref/enable_load_extension.html",
+        "https://sqlite.org/c3ref/c_deterministic.html",
+        "https://sqlite.org/see",
+        "https://www.zetetic.net/sqlcipher/",
+        "https://csrc.nist.gov/pubs/sp/800/38/a/final"
+      ]
+    },
+    {
+      "file": "27-release-354-map.svg",
+      "chapter": "27",
+      "source": [
+        "https://sqlite.org/changes.html",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/where.c",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/mutex_w32.c",
+        "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/os_unix.c"
       ]
     }
   ]
