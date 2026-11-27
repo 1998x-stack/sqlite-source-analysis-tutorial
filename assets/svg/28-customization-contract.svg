@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="560" viewBox="0 0 1000 560" role="img" aria-labelledby="svg-title svg-desc">
+<title id="svg-title">定制 SQLite 的交付合同</title><desc id="svg-desc">定制方案从需求合同开始，逐步确定 SQL 能力、编译配置、扩展、VFS、安全与发布验收。</desc>
+<defs>
+ <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#147f80"/></marker>
+ <marker id="arrow-rust" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#c76743"/></marker>
+ <style>
+ .bg{fill:#fffdf9}.teal{fill:#dff1eb;stroke:#147f80;stroke-width:2}.rust{fill:#fff0e8;stroke:#c76743;stroke-width:2}.violet{fill:#eeeafd;stroke:#7161b5;stroke-width:2}.gold{fill:#fbf1d9;stroke:#a77b28;stroke-width:2}.line{stroke:#147f80;stroke-width:3;fill:none;marker-end:url(#arrow)}.line-r{stroke:#c76743;stroke-width:3;fill:none;marker-end:url(#arrow-rust)}.dash{stroke:#8c9c98;stroke-width:2;stroke-dasharray:7 7;fill:none}.head{font:700 29px system-ui,sans-serif;fill:#153438}.label{font:700 21px system-ui,sans-serif;fill:#203035}.small{font:17px system-ui,sans-serif;fill:#53676d}.tiny{font:15px system-ui,sans-serif;fill:#53676d}
+ </style>
+</defs>
+<rect class="bg" width="1000" height="560" rx="22"/>
+<text x="48" y="52" class="head">定制 SQLite 的交付合同</text>
+<rect x="45" y="130" width="180" height="120" rx="15" class="gold"/><text x="135" y="173" text-anchor="middle" class="label">需求合同</text><text x="135" y="207" text-anchor="middle" class="small">功能 / 平台 / 风险</text><path d="M225 190 H270" class="line"/><rect x="270" y="130" width="180" height="120" rx="15" class="teal"/><text x="360" y="173" text-anchor="middle" class="label">编译配置</text><text x="360" y="207" text-anchor="middle" class="small">feature / build flags</text><path d="M450 190 H495" class="line"/><rect x="495" y="130" width="180" height="120" rx="15" class="violet"/><text x="585" y="173" text-anchor="middle" class="label">扩展 API</text><text x="585" y="207" text-anchor="middle" class="small">函数 / vtab / collation</text><path d="M675 190 H720" class="line"/><rect x="720" y="130" width="235" height="120" rx="15" class="rust"/><text x="837" y="173" text-anchor="middle" class="label">VFS / 安全边界</text><text x="837" y="207" text-anchor="middle" class="small">I/O / lock / crypto</text><path d="M837 250 V335 H585" class="line"/><rect x="390" y="335" width="390" height="115" rx="15" class="teal"/><text x="585" y="378" text-anchor="middle" class="label">验收与维护</text><text x="585" y="412" text-anchor="middle" class="small">测试 / source id / 兼容 / 升级</text><path d="M390 392 H135 V260" class="dash"/><text x="48" y="520" class="small">任何一个层次的改动，都必须回到同一份需求、测试和升级合同。</text>
+</svg>

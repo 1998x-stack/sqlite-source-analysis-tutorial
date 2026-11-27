@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="SQLite 源码解剖的 28 章技术证据索引，展示 178 条可追踪主张和版本化官方文档来源，区分 verified、derived、illustrative。">
+<meta name="theme-color" content="#153438">
+<link rel="canonical" href="https://1998x-stack.github.io/sqlite-source-analysis-tutorial/evidence/">
+<meta property="og:type" content="website"><meta property="og:title" content="SQLite 28 章源码证据索引"><meta property="og:description" content="28 份证据台账、178 条技术主张，链接官方 SQLite 文档与版本化源码。">
+<meta property="og:url" content="https://1998x-stack.github.io/sqlite-source-analysis-tutorial/evidence/">
+<title>技术证据索引 · SQLite 源码解剖</title>
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body>
+<a class="skip" href="#main">跳转到证据索引</a>
+<header class="sitebar"><div class="shell nav-inner"><a class="brand" href="../index.html"><span class="brand-icon">SQLite</span><span>SQLite 源码解剖<br><small>源码事实与可验证证据</small></span></a><nav class="navlinks" aria-label="证据导航"><a href="../index.html#route">学习路线</a><a href="../index.html#chapters">全部章节</a><a href="https://github.com/1998x-stack/sqlite-source-analysis-tutorial/tree/main/evidence">GitHub 台账</a></nav></div></header>
+<main id="main">
+<section class="hero"><div class="shell"><span class="eyebrow">Evidence-first study · 28 chapters</span><h1>每一个重要结论，都应该可以追问来源。</h1><p>本页索引 28 份可下载、可审查的 JSON 证据台账，共 178 条主张。每条记录包含 claim、kind、source_url、locator 和 status，便于追溯具体 SQLite 版本与官方原始资料。</p><div class="statline"><span><strong>28</strong> 份证据台账</span><span><strong>178</strong> 条主张记录</span><span><strong>83</strong> 张对应机制图</span></div><div class="actions"><a class="btn" href="../chapters/01.html">从第一章开始阅读</a><a class="btn secondary" href="../audits/2026-11-22.md">阅读审计记录</a></div></div></section>
+<section class="band"><div class="shell"><h2>证据状态不等于自动技术认证</h2><p class="band-lead"><strong>verified</strong> 表示已经记录相应的来源和定位；<strong>derived</strong> 表示在明确前提下从来源推导；<strong>illustrative</strong> 表示教学示意，不能按真实内部实现逐字段解释；<strong>unverified</strong> 需要进一步复核。自动审计可检查格式和链接一致性，但不代表人工证明所有代码路径的正确性。</p><div class="note">需要复现实验？<a href="../examples/">浏览实验源目录</a> 或访问 <a href="https://github.com/1998x-stack/sqlite-source-analysis-tutorial/tree/main/examples">GitHub 的 examples/</a>。实验执行依赖本地 SQLite 版本、可选扩展、编译选项和平台权限；请参照各章的运行说明。</div></div></section>
+<section class="band" aria-labelledby="evidence-heading"><div class="shell"><h2 id="evidence-heading">逐章查看证据台账</h2><p class="band-lead">点击对应卡片打开该章 JSON 原始记录。正文网页末尾还列出可直接阅读的 SQLite 官方来源。</p><div class="chapter-grid">
+<a class="chapter-card" href="01.json" aria-label="查看第 01 章的 4 条技术证据"><span class="cardtop"><span class="number">01</span><span class="pill new">4 条证据</span></span><h3>从一条 SQL 开始：SQLite 源码与获取</h3><p>SQLite 源码发布方式 · Canonical 与 Amalgamation</p></a>
+<a class="chapter-card" href="02.json" aria-label="查看第 02 章的 4 条技术证据"><span class="cardtop"><span class="number">02</span><span class="pill new">4 条证据</span></span><h3>SQLite 编译与源码生成链</h3><p>Canonical 与合并版构建 · 编译宏的版本边界</p></a>
+<a class="chapter-card" href="03.json" aria-label="查看第 03 章的 4 条技术证据"><span class="cardtop"><span class="number">03</span><span class="pill new">4 条证据</span></span><h3>SQLite 内核分层架构</h3><p>编译期 / 执行期 / 存储期 · Parser → VDBE → B-Tree</p></a>
+<a class="chapter-card" href="04.json" aria-label="查看第 04 章的 4 条技术证据"><span class="cardtop"><span class="number">04</span><span class="pill new">4 条证据</span></span><h3>SQLite 内部对象与生命周期</h3><p>sqlite3 连接级状态 · Parse / Expr / Select 语义树</p></a>
+<a class="chapter-card" href="05.json" aria-label="查看第 05 章的 5 条技术证据"><span class="cardtop"><span class="number">05</span><span class="pill new">5 条证据</span></span><h3>SQLite 内存管理：Lookaside 与页缓存</h3><p>连接级 Lookaside · PCache 与内存统计</p></a>
+<a class="chapter-card" href="06.json" aria-label="查看第 06 章的 5 条技术证据"><span class="cardtop"><span class="number">06</span><span class="pill new">5 条证据</span></span><h3>错误处理与断言</h3><p>基础/扩展结果码 · sqlite3_step 状态</p></a>
+<a class="chapter-card" href="07.json" aria-label="查看第 07 章的 5 条技术证据"><span class="cardtop"><span class="number">07</span><span class="pill new">5 条证据</span></span><h3>调试基础设施</h3><p>EQP 与 EXPLAIN · 生成期与执行期 Trace</p></a>
+<a class="chapter-card" href="08.json" aria-label="查看第 08 章的 5 条技术证据"><span class="cardtop"><span class="number">08</span><span class="pill new">5 条证据</span></span><h3>词法分析器</h3><p>Token 边界 · 引用与参数</p></a>
+<a class="chapter-card" href="09.json" aria-label="查看第 09 章的 5 条技术证据"><span class="cardtop"><span class="number">09</span><span class="pill new">5 条证据</span></span><h3>Lemon解析器与语法</h3><p>parse.y 与 Lemon · Shift / Reduce</p></a>
+<a class="chapter-card" href="10.json" aria-label="查看第 10 章的 6 条技术证据"><span class="cardtop"><span class="number">10</span><span class="pill new">6 条证据</span></span><h3>表达式编译</h3><p>Expr 代码生成 · VDBE 寄存器</p></a>
+<a class="chapter-card" href="11.json" aria-label="查看第 11 章的 4 条技术证据"><span class="cardtop"><span class="number">11</span><span class="pill new">4 条证据</span></span><h3>VDBE虚拟机</h3><p>指令与寄存器 · Cursor / B-Tree</p></a>
+<a class="chapter-card" href="12.json" aria-label="查看第 12 章的 5 条技术证据"><span class="cardtop"><span class="number">12</span><span class="pill new">5 条证据</span></span><h3>B-Tree存储引擎</h3><p>Table / Index B-Tree · 页头与 Cell Offset</p></a>
+<a class="chapter-card" href="13.json" aria-label="查看第 13 章的 5 条技术证据"><span class="cardtop"><span class="number">13</span><span class="pill new">5 条证据</span></span><h3>Pager与页缓存</h3><p>Pager 状态与事务 · PCache Hit/Miss</p></a>
+<a class="chapter-card" href="14.json" aria-label="查看第 14 章的 5 条技术证据"><span class="cardtop"><span class="number">14</span><span class="pill new">5 条证据</span></span><h3>VFS抽象层</h3><p>sqlite3_vfs / sqlite3_file · xRead / xSync / xLock</p></a>
+<a class="chapter-card" href="15.json" aria-label="查看第 15 章的 7 条技术证据"><span class="cardtop"><span class="number">15</span><span class="pill new">7 条证据</span></span><h3>原子提交与事务</h3><p>Rollback Journal · Hot Journal 恢复</p></a>
+<a class="chapter-card" href="16.json" aria-label="查看第 16 章的 5 条技术证据"><span class="cardtop"><span class="number">16</span><span class="pill new">5 条证据</span></span><h3>WAL 模式深度解析</h3><p>Frame / End mark · 快照隔离</p></a>
+<a class="chapter-card" href="17.json" aria-label="查看第 17 章的 5 条技术证据"><span class="cardtop"><span class="number">17</span><span class="pill new">5 条证据</span></span><h3>锁机制与并发</h3><p>Rollback 五级锁 · BUSY / LOCKED</p></a>
+<a class="chapter-card" href="18.json" aria-label="查看第 18 章的 6 条技术证据"><span class="cardtop"><span class="number">18</span><span class="pill new">6 条证据</span></span><h3>查询规划器</h3><p>WhereLoop / N3 · 索引前缀</p></a>
+<a class="chapter-card" href="19.json" aria-label="查看第 19 章的 5 条技术证据"><span class="cardtop"><span class="number">19</span><span class="pill new">5 条证据</span></span><h3>内置函数实现</h3><p>Scalar / Aggregate · Window Function</p></a>
+<a class="chapter-card" href="20.json" aria-label="查看第 20 章的 5 条技术证据"><span class="cardtop"><span class="number">20</span><span class="pill new">5 条证据</span></span><h3>虚拟表与扩展</h3><p>xBestIndex / xFilter · sqlite3_module</p></a>
+<a class="chapter-card" href="21.json" aria-label="查看第 21 章的 7 条技术证据"><span class="cardtop"><span class="number">21</span><span class="pill new">7 条证据</span></span><h3>FTS5 全文搜索</h3><p>倒排索引与 posting lists · Segment B-tree 与合并</p></a>
+<a class="chapter-card" href="22.json" aria-label="查看第 22 章的 7 条技术证据"><span class="cardtop"><span class="number">22</span><span class="pill new">7 条证据</span></span><h3>表达式索引与自修复</h3><p>表达式语法匹配 · 确定性函数与 stale index</p></a>
+<a class="chapter-card" href="23.json" aria-label="查看第 23 章的 7 条技术证据"><span class="cardtop"><span class="number">23</span><span class="pill new">7 条证据</span></span><h3>SQLite CLI 源码</h3><p>process_input / do_meta_command · 点命令与 SQL 分流</p></a>
+<a class="chapter-card" href="24.json" aria-label="查看第 24 章的 7 条技术证据"><span class="cardtop"><span class="number">24</span><span class="pill new">7 条证据</span></span><h3>SQLite 测试体系</h3><p>TCL / TH3 / SQL Logic Test · OOM / VFS 故障注入</p></a>
+<a class="chapter-card" href="25.json" aria-label="查看第 25 章的 7 条技术证据"><span class="cardtop"><span class="number">25</span><span class="pill new">7 条证据</span></span><h3>性能诊断与可重复基准</h3><p>EXPLAIN / stmt_status · ANALYZE / PRAGMA optimize</p></a>
+<a class="chapter-card" href="26.json" aria-label="查看第 26 章的 12 条技术证据"><span class="cardtop"><span class="number">26</span><span class="pill new">12 条证据</span></span><h3>SQLite WASM：从 C 内核到浏览器持久化</h3><p>WebAssembly / ESM / OO1 · Worker 线程与消息事务</p></a>
+<a class="chapter-card" href="27.json" aria-label="查看第 27 章的 20 条技术证据"><span class="cardtop"><span class="number">27</span><span class="pill new">20 条证据</span></span><h3>SQLite 3.53–3.54：版本演进与源码变更</h3><p>3.52 撤回与 3.53 重发 · 浮点转换 / Stale Index</p></a>
+<a class="chapter-card" href="28.json" aria-label="查看第 28 章的 12 条技术证据"><span class="cardtop"><span class="number">28</span><span class="pill new">12 条证据</span></span><h3>定制 SQLite：编译、扩展与 VFS 安全边界</h3><p>Canonical source / compile options · Extension API / VFS 装饰器</p></a>
+</div></div></section>
+</main><footer class="foot"><div class="shell foot-inner"><span>SQLite 源码解剖 · 来源可追溯，结论有边界</span><a href="../index.html">返回课程首页</a></div></footer>
+</body></html>

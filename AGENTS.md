@@ -14,7 +14,7 @@
 - `chapters/21.html` … `28.html` 已在后续轮次逐章对照官方文档重写并登记证据台账；若再次改动引入版本相关主张，仍须附 release note 与源版本，不得默认为跨版本不变量。
 - 新版文章 CSS 只维护在 `assets/css/site.css`；28 章正文均已引用它。`chapters/theme.css` 为早期页面保留，仍列在 `scripts/check_site.py` 的目录清单中，暂不移除。
 - 每张原创 SVG 存在 `assets/svg/` 并登记到 `assets/svg/manifest.json`。示意箭头、单位与 caption 必须与真实执行关系一致。
-- `courses.json` 是章节清单的事实单源，章节状态字段取值 `revised`、`legacy`。新增、改名、迁移同步修改首页链接。
+- `courses.json` 是章节清单的事实单源，目前全部状态为 `revised`。新增、改名、迁移必须同步首页链接、站内知识路径、SEO 元数据、章节导航与审计报告。
 - `evidence/NN.json` 为每篇文章的主张台账，`examples/` 为可复现实验，`scripts/` 为质量门禁，`.github/workflows/` 为 CI 和部署。
 
 ## 每篇文章强制叙事顺序
@@ -64,7 +64,7 @@
 - Tokenizer：Token 边界、字符串转义、UTF-8 字节位置与 parser fallback 必须明确分层。
 - Lemon：构建期 parse.y → parse.c/h 与运行期 token 驱动的 parser 必须区分。玩具 reduce 模型需明确标注非真实 SQLite 状态栈。
 - Expr：区分 AST/寄存器/控制流；NULL 三值逻辑、CASE 惰性、列 affinity 和 CAST 要有固定 SQL 测例。
-- 静态检查与浏览器检查覆盖 `chapters/01.html` 到 `chapters/10.html`；所有新增 C 程序需在 CI 实际编译并运行。
+- 静态检查与浏览器检查覆盖 `chapters/01.html` 到 `chapters/28.html`；所有新增 C 程序需在 CI 实际编译并运行。
 
 ## 11–15 存储与事务专项规则
 - VDBE：用 EXPLAIN 解释职责，严禁固定 opcode 数量、指令地址或把伪指令称为 SQLite 真实指令。
@@ -81,3 +81,35 @@
 - Functions：公开的 sqlite3_create_function_v2 与 sqlite3_create_window_function API 优先于私有 FuncDef 字段图；deterministic 是正确性契约，不是必然 memoization。
 - Virtual table：区分 sqlite3_module/vtab/cursor 的生命周期；xBestIndex 在 prepare，xFilter 在执行期。argvIndex/omit 语义严格，避免错误的类型过滤；普通核心库不保证 generate_series 可用。
 - 更新网页状态、证据台账、SVG manifest、单元实验及浏览器 1440/390/360 验收，才可合并发布。
+
+## 21–25 FTS / CLI / 测试 / 性能专项约束
+- FTS5：区分普通 B-tree 与全文倒排索引；tokenizer 决定 MATCH 语义。unicode61 不等于中文词典分词；trigram 是子串检索 tokenization，不是语言学分词。segment automerge 在写入路径推进，optimize 可能是长操作；external-content 必须同步触发器并支持 rebuild。
+- 表达式索引：Planner 按表达式结构匹配，不做一般代数等价证明。函数必须 deterministic；SQLite 3.53+ 的 stale-expression self-healing 只覆盖特定 UPDATE/DELETE 路径，不等于通用索引修复。REINDEX EXPRESSIONS 是显式重建，不是自修复标志。
+- CLI：分开 shell.c.in 与 SQLite library。process_input / do_meta_command / runOneSqlLine / shell_exec 的源码定位按版本核对；dot command 不是 SQL，不能声称存在 sqlite3_import API。QRF 真实接口以 ext/qrf/qrf.h 为准。
+- 测试：准确区分 TCL、TH3、SQL Logic Test、dbsqlfuzz；TH3/dbsqlfuzz 专有。fuzzcheck 是回放器，不验证 SQL 结果。覆盖率数字必须说明目标、配置和工具，不能泛化到所有扩展/平台。
+- 性能：EQP 输出不是稳定 API；stmt_status 是语句工作量计数器，不等于磁盘 I/O。PRAGMA optimize 依据连接生命周期使用；cache_size 正负单位不同；synchronous 的持久性风险必须说明。任何 benchmark 都不得设硬件无关速度承诺。
+- 本批源码内部引用固定 SQLite 3.54.1 快照，release note 解释 3.53+ 特性；示例运行时按实际 sqlite_version/sourceid 记录。新增 21–25 的 SQL/Python/C/CLI 示例必须在 CI 执行。
+
+## 26–28 WASM / Release / Customization 专项规则
+- WASM：区分 SQLite C 内核、Emscripten WASM 模块、JS 胶水层和 OO1/C API。Worker 只是线程边界，不自动等于持久化。Node.js 官方 WASM 包仅以内存数据库为支持范围，不得写成 Node 文件持久化。
+- OPFS：标准 OPFS VFS 仅在 Worker 可用并依赖 COOP/COEP；opfs-wl 需要 Web Locks / Atomics.waitAsync；sahpool 的多实例协调合同不同。WAL 在当前 WASM 共享内存限制下不能宣传为桌面多连接并发优化。浏览器存储必须区分能力检测、配额、锁冲突与持久性。
+- Worker：新应用不要继续推荐已 deprecated 的 Worker1 / Promiser API；消息协议要有 request id、错误路径和超时；同一连接的事务不可跨可交错消息拆分。
+- Release：每个版本主张都要对应 release notes、chronology 和版本固定源码。3.52 撤回、3.53 重发、3.54.1 的 32-bit heap-buffer overflow 修复必须正确交代。浮点 17 位是文本转换有效数字，不是 binary64 存储精度提升。sqlite3_result_str 签名以 sqlite3.h 为准。
+- Build：SQLITE_OMIT_* 多数不受支持；通常只在 canonical source 构建可靠，相关生成工具也要使用一致宏集合。不能宣称固定体积下降或安全收益，除非给出构建配置和测量数据。
+- Extensions：扩展加载默认关闭。若动态加载，只打开 SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION 对应的 C API，不要无必要开启 SQL load_extension。DETERMINISTIC / DIRECTONLY / INNOCUOUS 是不同语义，必须按函数实际行为标记。
+- VFS：区分 sqlite3_vfs、sqlite3_file 与 sqlite3_io_methods。VFS 装饰器必须保留父 VFS 合同。示例 tracing VFS 只截获 xOpen，不是加密实现，不得把它改名为 encryption VFS。
+- Encryption：禁止 AES-ECB、固定密钥、硬编码 IV/nonce 的教学代码作为生产方案。加密设计必须覆盖数据库、journal、WAL、临时文件、同步、锁、崩溃恢复、认证、nonce 唯一性、KDF、密钥轮换与备份。优先评估有独立安全维护记录的方案，不自行发明协议。
+- 新增 26–28 的 Node、Python、C 示例都要进入 CI；浏览器 QA 覆盖首页 + 28 章 × 1440/390/360，并检查图片、原生 details、打印和无横向溢出。
+
+## 2026-11 全站深度审计新增约束
+- 新文章或修改页面必须有唯一 SEO description、canonical URL，以及准确的交叉章节锚点；绝对不能把所有文章描述复制成同一条模板。
+- 知识关联应解释「为什么阅读这两个上下游机制」而非只重复“上一章 / 下一章”。关联链接应尽可能指向相关小节且被自动验收。
+- 可放大的 SVG 必须有独立可访问的链接；移动端保留清晰的矢量标签，不能以全图缩小到不可读为代价消除横向滚动。键盘用户应可触达 SVG 链接。
+- 全站审计程序至少验证：章节清单与首页状态同步、跨文档 fragment 锚点存在、章节首选 URL、双向前后页导航、evidence id 唯一且与章节一致、SVG manifest 唯一且图解实际使用、SVG 内没有危险的脚本或远程资源。
+- 任何审计数字应来自确定性脚本输出；审核报告必须区分“本地或 CI 实际检查通过”与“未执行的人工视觉和外部链接检查”。
+
+## Pages 公开证据和质量门禁
+- 所有 28 份 evidence JSON、所有仓库内原始实验源码、`data/reading_paths.json` 与 `audits/2026-11-22.md` 必须被 `scripts/build_site.py` 复制进 Pages 发布包；禁止把证据索引写成仅存在于 GitHub 仓库而不对网页读者开放。
+- 维护 `evidence/index.html` 与 `examples/index.html` 时，同步台账 claim 数和实验文件数量；`scripts/audit_content.py` 必须发现失同步。
+- 所有章节的 reference section 下方提供本章 JSON 台账与实验源文件索引链接。删除或移动资源必须同步 `scripts/audit_deployment.py` 和部署工作流 path filters。
+- CI 的完整构建链：静态结构 → 深度内容/链接审计 → 实际 Pages 包体审计 → 可复现 SQL/C/Node/Python → Chromium SVG 文本边界 → 桌面/移动端与资源索引页 → WASM OPFS 持久化。

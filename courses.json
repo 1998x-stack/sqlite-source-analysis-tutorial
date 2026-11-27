@@ -6,60 +6,55 @@
   "chapters": [
     {
       "num": "01",
-      "title": "概览与源码获取",
+      "title": "从一条 SQL 开始：SQLite 源码与获取",
       "topics": [
-        "历史演进",
-        "版本号体系",
-        "三种源码获取方式",
-        "目录结构鸟瞰"
+        "SQLite 源码发布方式",
+        "Canonical 与 Amalgamation",
+        "查找 src/ 和执行实验"
       ],
       "file": "chapters/01.html",
       "status": "revised"
     },
     {
       "num": "02",
-      "title": "编译体系深度解析",
+      "title": "SQLite 编译与源码生成链",
       "topics": [
-        "Autotools/Makefile.msc/CMake",
-        "SQLITE_* 编译选项",
-        "合并版生成内幕",
-        "自定义编译实战"
+        "Canonical 与合并版构建",
+        "编译宏的版本边界",
+        "Lemon 与源码生成工具"
       ],
       "file": "chapters/02.html",
       "status": "revised"
     },
     {
       "num": "03",
-      "title": "源码整体架构",
+      "title": "SQLite 内核分层架构",
       "topics": [
-        "10层架构管线",
-        "src/目录文件映射",
-        "核心头文件关系",
-        "生成文件的角色"
+        "编译期 / 执行期 / 存储期",
+        "Parser → VDBE → B-Tree",
+        "Pager 与 VFS 的职责边界"
       ],
       "file": "chapters/03.html",
       "status": "revised"
     },
     {
       "num": "04",
-      "title": "核心数据结构",
+      "title": "SQLite 内部对象与生命周期",
       "topics": [
-        "sqlite3连接对象",
-        "Parse编译上下文",
-        "Table/Index模式对象",
-        "Select/Expr查询树"
+        "sqlite3 连接级状态",
+        "Parse / Expr / Select 语义树",
+        "Vdbe / Op 与运行时资源"
       ],
       "file": "chapters/04.html",
       "status": "revised"
     },
     {
       "num": "05",
-      "title": "内存管理机制",
+      "title": "SQLite 内存管理：Lookaside 与页缓存",
       "topics": [
-        "Lookaside allocator",
-        "Page cache分配策略",
-        "Scratch pool",
-        "内存统计与调试"
+        "连接级 Lookaside",
+        "PCache 与内存统计",
+        "Scratch 的历史与当前边界"
       ],
       "file": "chapters/05.html",
       "status": "revised"
@@ -231,7 +226,7 @@
     },
     {
       "num": "21",
-      "title": "FTS全文搜索",
+      "title": "FTS5 全文搜索",
       "topics": [
         "倒排索引与 doclist",
         "segment 合并与 optimize",
@@ -255,7 +250,7 @@
     },
     {
       "num": "23",
-      "title": "CLI shell源码",
+      "title": "SQLite CLI 源码",
       "topics": [
         "CLI 与库的两层边界",
         "点命令与便捷查询",
@@ -267,7 +262,7 @@
     },
     {
       "num": "24",
-      "title": "测试框架",
+      "title": "SQLite 测试体系",
       "topics": [
         "四套独立测试框架",
         "branch 与 MC/DC 口径",
@@ -279,7 +274,7 @@
     },
     {
       "num": "25",
-      "title": "性能分析与优化",
+      "title": "性能诊断与可重复基准",
       "topics": [
         "EXPLAIN 与查询计划",
         "关键 PRAGMA 语义",
@@ -291,7 +286,7 @@
     },
     {
       "num": "26",
-      "title": "SQLite WASM与JS绑定",
+      "title": "SQLite WASM：从 C 内核到浏览器持久化",
       "topics": [
         "capi/oo1/Worker1 接口",
         "内存与 OPFS 持久化 VFS",
@@ -303,7 +298,7 @@
     },
     {
       "num": "27",
-      "title": "2026新特性源码解读",
+      "title": "SQLite 3.53–3.54：版本演进与源码变更",
       "topics": [
         "3.53.0 发布内容",
         "查询规划器改进",
@@ -315,7 +310,7 @@
     },
     {
       "num": "28",
-      "title": "实战：定制SQLite",
+      "title": "定制 SQLite：编译、扩展与 VFS 安全边界",
       "topics": [
         "编译时剪裁选项",
         "扩展注册函数/虚拟表",
@@ -326,5 +321,5 @@
       "status": "revised"
     }
   ],
-  "description": "01–20 已逐章独立图解重构并配有证据台账与可复现代码；21–28 为迁移保留的原版，仍待版本化技术审计。"
+  "description": "01–28 全部章节均已逐章独立叙事重构，配有专业 SVG、版本化证据台账与可复现实验；所有章节纳入静态和浏览器质量门禁。"
 }

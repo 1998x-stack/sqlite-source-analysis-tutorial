@@ -12,13 +12,22 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Verify chapters, source links, and SVGs
         run: python scripts/check_site.py
+      - name: Audit all 28 HTML articles, evidence, SVGs and deep links
+        run: python scripts/audit_content.py --output qa-local/editorial-audit.json
+      - name: Build and verify full GitHub Pages payload
+        run: |
+          python scripts/build_site.py
+          python scripts/audit_deployment.py
       - name: Test SQL and C examples
         run: |
           python scripts/test_examples.py
           sudo apt-get update -qq
-          sudo apt-get install -y -qq libsqlite3-dev
+          sudo apt-get install -y -qq libsqlite3-dev sqlite3
           cc -std=c11 -Wall -Wextra -Werror -O2 examples/05_lookaside_status.c -lsqlite3 -o /tmp/sqlite-lookaside-status
           /tmp/sqlite-lookaside-status
           python examples/09_toy_reduce.py
@@ -46,12 +55,37 @@ jobs:
             cc -std=c11 -Wall -Wextra -Werror -O2 "examples/${name}.c" -lsqlite3 -o "/tmp/sqlite-${name}"
             "/tmp/sqlite-${name}"
           done
+      - name: Verify FTS5, CLI, regression and performance examples
+        run: |
+          python examples/21_tokenizer_probe.py
+          python examples/24_test_contracts.py
+          python examples/25_benchmark.py
+          sqlite3 :memory: < examples/23_cli_workflow.sql > /tmp/sqlite-cli-output.txt
+          grep -q "Ada" /tmp/sqlite-cli-output.txt
+          grep -q "Mira" /tmp/sqlite-cli-output.txt
+          cc -std=c11 -Wall -Wextra -Werror -O2 examples/25_stmt_status.c -lsqlite3 -o /tmp/sqlite-25-status
+          /tmp/sqlite-25-status
+      - name: Verify WASM, release probes, extensions and custom VFS
+        run: |
+          python examples/27_release_probe.py
+          npm install --prefix examples/26_wasm --no-audit --no-fund
+          npm run --prefix examples/26_wasm test:node
+          npm run --prefix examples/26_wasm build
+          cc -std=c11 -Wall -Wextra -Werror -O2 examples/28_vfs_trace.c -lsqlite3 -o /tmp/sqlite-28-vfs
+          (cd /tmp && /tmp/sqlite-28-vfs)
+          cc -std=c11 -Wall -Wextra -Werror -O2 -fPIC -shared examples/28_course_ext.c -o /tmp/course_ext.so
+          cc -std=c11 -Wall -Wextra -Werror -O2 examples/28_extension_host.c -lsqlite3 -o /tmp/sqlite-28-extension-host
+          /tmp/sqlite-28-extension-host /tmp/course_ext.so
       - name: Install Chromium for visual smoke tests
         run: |
           python -m pip install playwright
           python -m playwright install --with-deps chromium
+      - name: Verify SVG text bounds in Chromium
+        run: python scripts/svg_visual_audit.py
       - name: Verify responsive reading and native interactions
         run: python scripts/browser_smoke.py
+      - name: Verify SQLite WASM Worker and OPFS persistence
+        run: python scripts/wasm_browser_smoke.py
       - name: Upload browser screenshots
         if: always()
         uses: actions/upload-artifact@v4
