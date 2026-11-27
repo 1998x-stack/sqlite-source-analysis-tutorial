@@ -80,7 +80,7 @@ def main() -> int:
     for c in chapters:
         path = ROOT / c["file"]
         check(path.exists(), f"missing chapter {c['num']}: {c['file']}")
-        check(c["status"] in ("revised", "legacy"), f"chapter status invalid: {c['num']}")
+        check(c["status"] == "revised", f"chapter status mismatch: {c['num']}")
         if path.exists():
             p = inspect_html(path, strict=c["status"] == "revised")
             if c["status"] == "revised":

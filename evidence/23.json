@@ -1,15 +1,71 @@
 {
   "chapter": "23",
   "reviewed_at": "2026-11-22",
-  "scope": "SQLite official CLI documentation (cli.html) and the 3.53.0 release notes; exact command set is version-scoped",
+  "source_baseline": "SQLite 3.54.1 (2026-10-16)",
+  "scope": "Official SQLite documentation and version-pinned SQLite source; examples are independently authored",
   "claims": [
-    {"id": "23-01", "claim": "The sqlite3 command-line program is a separate application from the SQLite library; dot-commands are interpreted by the CLI and will not work as arguments to sqlite3_prepare() or sqlite3_exec()", "kind": "technical", "source_url": "https://sqlite.org/cli.html", "locator": "1.1 and 3.3", "status": "verified", "notes": ""},
-    {"id": "23-02", "claim": ".tables is approximately SELECT name FROM sqlite_schema WHERE type IN ('table','view') AND name NOT LIKE 'sqlite_%' ORDER BY 1, but also covers all attached databases and arranges output in columns", "kind": "technical", "source_url": "https://sqlite.org/cli.html", "locator": "5. Querying the database schema", "status": "verified", "notes": ""},
-    {"id": "23-03", "claim": ".schema and .indexes are convenience shortcuts; .schema shows the whole schema or one table, .indexes lists indexes (optionally for a table)", "kind": "technical", "source_url": "https://sqlite.org/cli.html", "locator": "5. Querying the database schema", "status": "verified", "notes": ".indexes --expr is documented in staleexpridx.html"},
-    {"id": "23-04", "claim": "The .mode command controls result formatting; .mode --list lists modes, .mode shows the current mode, and .mode --once box applies a mode to the next statement only", "kind": "technical", "source_url": "https://sqlite.org/cli.html", "locator": "4. Output Formats", "status": "verified", "notes": ""},
-    {"id": "23-05", "claim": "SQLite 3.53.0 added the Query Result Formatter (QRF) library used for CLI result formatting; interactive sessions default to box output and numeric values are right-justified", "kind": "technical", "source_url": "https://sqlite.org/changes.html", "locator": "3.53.0 (2026-04-09)", "status": "verified", "notes": "Replaces the earlier chapter's invented QRFormatter struct and 3.54.0 streaming claims"},
-    {"id": "23-06", "claim": ".dump writes the whole database as a UTF-8 SQL text file that can be piped back into sqlite3 to rebuild it; .recover is the analogue for a corrupted database", "kind": "technical", "source_url": "https://sqlite.org/cli.html", "locator": "9. and 10.", "status": "verified", "notes": ""},
-    {"id": "23-07", "claim": "shell.c is generated from src/shell.c.in (regenerate with 'make shell.c') and compiled together with the library sources, e.g. gcc -o sqlite3 shell.c sqlite3.c -ldl -lpthread -lz -lm", "kind": "technical", "source_url": "https://sqlite.org/cli.html", "locator": "24.1 Do-It-Yourself Builds", "status": "verified", "notes": "Replaces the earlier chapter's invented line-count table and aDotCommands callback array"},
-    {"id": "23-08", "claim": "When sqlite3 is started with a database name and one SQL argument, it runs that SQL, prints results in list mode and exits; this makes it easy to use from shell scripts", "kind": "technical", "source_url": "https://sqlite.org/cli.html", "locator": "21. Using sqlite3 in a shell script", "status": "verified", "notes": ""}
+    {
+      "id": "23-01",
+      "claim": "The sqlite3 CLI is an application separate from the SQLite library",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/cli.html#sqlite3_program_versus_sqlite_library",
+      "locator": "§1.1",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "23-02",
+      "claim": "CLI dot commands are interpreted by the shell and the documented command set exceeds 60",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/cli.html#special_commands_dot_commands",
+      "locator": "§2",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "23-03",
+      "claim": "process_input routes dot commands to do_meta_command and SQL through runOneSqlLine",
+      "kind": "technical",
+      "source_url": "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/shell.c.in#L13612-L13723",
+      "locator": "process_input, 3.54.1",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "23-04",
+      "claim": "mkshellc.tcl generates shell.c from src/shell.c.in and included components",
+      "kind": "technical",
+      "source_url": "https://github.com/sqlite/sqlite/blob/version-3.54.1/tool/mkshellc.tcl",
+      "locator": "file header and generation passes",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "23-05",
+      "claim": "QRF was added in SQLite 3.53.0; interactive CLI uses QRF box output while batch sessions retain legacy output",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/changes.html#version_3_53_0",
+      "locator": "3.53.0 release notes",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "23-06",
+      "claim": "QRF uses sqlite3_qrf_spec and sqlite3_format_query_result",
+      "kind": "technical",
+      "source_url": "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/qrf/qrf.h",
+      "locator": "QRF public interface",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "23-07",
+      "claim": "QRF columnar styles evaluate the full query and buffer results in memory to calculate column widths",
+      "kind": "technical",
+      "source_url": "https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/qrf/qrf.c#L2016-L2065",
+      "locator": "qrfColumnar and sqlite3_format_query_result",
+      "status": "verified",
+      "notes": "Streaming styles use a different output path."
+    }
   ]
 }

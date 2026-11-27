@@ -1,15 +1,116 @@
 {
   "chapter": "28",
   "reviewed_at": "2026-11-22",
-  "scope": "SQLite official compile.html, loadext.html, howtocompile.html and the SQLite Encryption Extension documentation",
+  "source_baseline": "SQLite 3.54.1",
+  "scope": "Official compile-time option, build, VFS, I/O methods, extension and function API documentation",
   "claims": [
-    {"id": "28-01", "claim": "Feature trimming is done with real compile-time options such as SQLITE_OMIT_JSON, SQLITE_OMIT_VACUUM, SQLITE_OMIT_LOAD_EXTENSION, SQLITE_OMIT_DEPRECATED, SQLITE_OMIT_UTF16, SQLITE_OMIT_SHARED_CACHE, SQLITE_OMIT_AUTOINIT and SQLITE_OMIT_COMPLETE; optional modules are added with SQLITE_ENABLE_* (e.g. SQLITE_ENABLE_FTS3/FTS5, SQLITE_ENABLE_RTREE)", "kind": "technical", "source_url": "https://sqlite.org/compile.html", "locator": "Compile-time options", "status": "verified", "notes": "Corrects the earlier chapter's non-existent SQLITE_OMIT_FTS4/FTS5 and SQLITE_OMIT_RTREE"},
-    {"id": "28-02", "claim": "SQLITE_OMIT_VACUUM removes the VACUUM command; executing VACUUM then causes a parse error", "kind": "technical", "source_url": "https://sqlite.org/compile.html", "locator": "SQLITE_OMIT_VACUUM", "status": "verified", "notes": ""},
-    {"id": "28-03", "claim": "Omitting deprecated interfaces (SQLITE_OMIT_DEPRECATED) does not make SQLite run faster but reduces the library footprint", "kind": "technical", "source_url": "https://sqlite.org/compile.html", "locator": "SQLITE_OMIT_DEPRECATED", "status": "verified", "notes": ""},
-    {"id": "28-04", "claim": "An extension is a shared library/DLL or statically linked code; its entry point is sqlite3_extension_init, it uses SQLITE_EXTENSION_INIT1/INIT2, and registers capabilities with APIs such as sqlite3_create_function and sqlite3_create_module; when statically linking, rename the entry point to avoid collisions", "kind": "technical", "source_url": "https://sqlite.org/loadext.html", "locator": "1. Extension Header / 2. Loading An Extension", "status": "verified", "notes": ""},
-    {"id": "28-05", "claim": "The official encryption product is the SQLite Encryption Extension (SEE), whose source is provided only to licensees", "kind": "technical", "source_url": "https://sqlite.org/see", "locator": "SQLite Encryption Extension Documentation", "status": "verified", "notes": "The earlier chapter's home-rolled AES-256-ECB extension and invented size/optimization tables were removed"},
-    {"id": "28-06", "claim": "Loading extensions at run time is a security-sensitive operation and must be explicitly enabled by the application", "kind": "derived", "source_url": "https://sqlite.org/loadext.html", "locator": "Loading An Extension", "status": "derived", "notes": "Mechanistic guidance; exact enable/disable APIs are version-scoped"},
-    {"id": "28-07", "claim": "Compile-time options on an amalgamation build are set via preprocessor defines, and any trimming should be followed by re-running the test suite on the target platform", "kind": "derived", "source_url": "https://sqlite.org/howtocompile.html", "locator": "Compiling the amalgamation", "status": "derived", "notes": "No size or speedup numbers are asserted; the earlier chapter's tables were unverifiable"},
-    {"id": "28-08", "claim": "Link-time and profile-guided compiler optimizations are applied by the compiler toolchain, not by SQLite itself, and their effect depends on the workload and platform", "kind": "derived", "source_url": "https://sqlite.org/howtocompile.html", "locator": "Compiling the amalgamation", "status": "derived", "notes": ""}
+    {
+      "id": "28-01",
+      "claim": "SQLITE_OMIT_* options are mostly unsupported and may not work reliably with a prebuilt amalgamation",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/compile.html",
+      "locator": "Options To Omit Features",
+      "status": "verified",
+      "notes": "The same option set may need to be passed to Lemon and mkkeywordhash when generating canonical-source builds."
+    },
+    {
+      "id": "28-02",
+      "claim": "Custom amalgamation generation should configure the canonical source tree and use the sqlite3.c make target",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/howtocompile.html",
+      "locator": "§5 Building The Amalgamation",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "28-03",
+      "claim": "sqlite3_vfs defines the OS interface and includes xOpen, xDelete, xAccess and other platform services",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/vfs.html",
+      "locator": "OS Interface Object",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "28-04",
+      "claim": "sqlite3_io_methods defines per-file read, write, truncate, sync, lock, shared-memory and related operations",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/io_methods.html",
+      "locator": "OS Interface File Virtual Methods Object",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "28-05",
+      "claim": "Extension loading is disabled by default; SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION can enable only the C API while keeping SQL load_extension disabled",
+      "kind": "security",
+      "source_url": "https://sqlite.org/c3ref/enable_load_extension.html",
+      "locator": "Security warning",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "28-06",
+      "claim": "SQLITE_DETERMINISTIC and SQLITE_INNOCUOUS express different function properties and must not be applied casually",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/c_deterministic.html",
+      "locator": "Function Flags",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "28-07",
+      "claim": "sqlite3_create_function_v2 registers application-defined scalar, aggregate or window callbacks",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/create_function.html",
+      "locator": "Create Or Redefine SQL Functions",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "28-08",
+      "claim": "The tracing VFS example intercepts xOpen and delegates to the parent VFS; it does not transform or encrypt file bytes",
+      "kind": "illustrative",
+      "source_url": "https://github.com/sqlite/sqlite/blob/version-3.54.1/src/os_unix.c",
+      "locator": "Parent VFS xOpen delegation pattern",
+      "status": "illustrative",
+      "notes": "The code is independently authored and tested against the system SQLite library."
+    },
+    {
+      "id": "28-09",
+      "claim": "A complete VFS must preserve file, sync, lock and shared-memory contracts, not merely wrap main database xRead/xWrite",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/c3ref/io_methods.html",
+      "locator": "Complete sqlite3_io_methods interface",
+      "status": "derived",
+      "notes": "The article explicitly distinguishes a tracing wrapper from an encryption implementation."
+    },
+    {
+      "id": "28-10",
+      "claim": "The SQLite Encryption Extension is a separately licensed extension rather than a generic core encryption switch",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/see",
+      "locator": "SQLite Encryption Extension overview",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "28-11",
+      "claim": "SQLCipher is a third-party encrypted SQLite distribution",
+      "kind": "technical",
+      "source_url": "https://www.zetetic.net/sqlcipher/",
+      "locator": "Project overview",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "28-12",
+      "claim": "ECB mode reveals repeated plaintext block patterns and is not a suitable database-file encryption design",
+      "kind": "security",
+      "source_url": "https://csrc.nist.gov/pubs/sp/800/38/a/final",
+      "locator": "Block cipher modes of operation",
+      "status": "verified",
+      "notes": "The tutorial does not publish a homemade production encryption protocol."
+    }
   ]
 }

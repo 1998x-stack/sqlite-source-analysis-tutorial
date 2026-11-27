@@ -1,13 +1,71 @@
 {
   "chapter": "21",
   "reviewed_at": "2026-11-22",
-  "scope": "SQLite official FTS3/FTS4 and FTS5 documentation; internal details vary with source version and build options",
+  "source_baseline": "SQLite 3.54.1 (2026-10-16)",
+  "scope": "Official SQLite documentation and version-pinned SQLite source; examples are independently authored",
   "claims": [
-    {"id": "21-01", "claim": "FTS3 has been available since SQLite 3.5.0 (2007-09-04); the FTS4 enhancements were added in 3.7.4 (2010-12-07)", "kind": "technical", "source_url": "https://sqlite.org/fts3.html", "locator": "1. Overview", "status": "verified", "notes": "Corrects the earlier page dates (3.6.0/2009 and 3.7.4/2011)"},
-    {"id": "21-02", "claim": "An FTS3/FTS4 index is a set of b-tree segments; each segment entry has a term key and a doclist of (docid, term-offset list) pairs", "kind": "technical", "source_url": "https://sqlite.org/fts3.html", "locator": "Full-Text Indexes", "status": "verified", "notes": ""},
-    {"id": "21-03", "claim": "The unicode61 tokenizer is available beginning with SQLite 3.7.13 (2012-06-11); simple, porter and icu are the other bundled tokenizers", "kind": "technical", "source_url": "https://sqlite.org/fts3.html", "locator": "8. Tokenizers", "status": "verified", "notes": ""},
-    {"id": "21-04", "claim": "FTS3/FTS4 expose special commands optimize, rebuild, integrity-check, merge=X,Y and automerge=N; merge Y must be between 2 and 16 with a recommended value of 8", "kind": "technical", "source_url": "https://sqlite.org/fts3.html", "locator": "7. Special Commands For FTS3 and FTS4", "status": "verified", "notes": ""},
-    {"id": "21-05", "claim": "FTS5 is a separate module (added in 3.9.0) with its own index format, a built-in rank column and its own tokenizer options; it does not share the fts3.c implementation", "kind": "technical", "source_url": "https://sqlite.org/fts5.html", "locator": "FTS5 Overview", "status": "derived", "notes": "Pointer for readers; not independently re-read this session, treat exact API surface as version-scoped"},
-    {"id": "21-06", "claim": "A MATCH query should drive the full-text lookup directly; wrapping it in rowid IN (SELECT ...) can bypass the FTS index and force per-row checks", "kind": "illustrative", "source_url": "https://sqlite.org/fts3.html", "locator": "3. Full-Text Index Queries", "status": "illustrative", "notes": "Teaching guidance; actual plan depends on the query and SQLite version"}
+    {
+      "id": "21-01",
+      "claim": "FTS5 is a virtual table module providing full-text search",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fts5.html",
+      "locator": "§1 Overview",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "21-02",
+      "claim": "unicode61 treats each contiguous run of token characters as one token; it does not implement Chinese dictionary segmentation",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fts5.html#unicode61_tokenizer",
+      "locator": "§4.3.1",
+      "status": "derived",
+      "notes": "Inferred from unicode61 token-character rules and confirmed by the fts5vocab probe in examples/21_tokenizer_probe.py."
+    },
+    {
+      "id": "21-03",
+      "claim": "FTS5 writes transaction segments as B-trees; queries visit each segment and merge results",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fts5.html#the_automerge_configuration_option",
+      "locator": "§6.1 automerge",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "21-04",
+      "claim": "automerge work is normally performed within INSERT/UPDATE/DELETE operations, not by a background thread",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fts5.html#the_automerge_configuration_option",
+      "locator": "§6.1 automerge",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "21-05",
+      "claim": "optimize merges component B-trees and can take a long time; merge can divide work into steps",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fts5.html#the_optimize_command",
+      "locator": "§6.8–6.9",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "21-06",
+      "claim": "bm25 scores rank better matches with numerically lower values; rank defaults to bm25 and may be faster for ORDER BY",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fts5.html#sorting_by_auxiliary_function_results",
+      "locator": "§5.2",
+      "status": "verified",
+      "notes": ""
+    },
+    {
+      "id": "21-07",
+      "claim": "external content tables require application synchronization; rebuild recreates the index from the content table",
+      "kind": "technical",
+      "source_url": "https://sqlite.org/fts5.html#external_content_tables",
+      "locator": "§4.4.3 and §6.12",
+      "status": "verified",
+      "notes": ""
+    }
   ]
 }

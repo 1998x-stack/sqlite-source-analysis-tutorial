@@ -2,8 +2,6 @@
 """Exercise SQL syntax, FTS5 semantics and deterministic examples with stdlib SQLite."""
 from __future__ import annotations
 import sqlite3
-import subprocess
-import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -15,12 +13,16 @@ SQL_FILES = (
 )
 
 def main() -> None:
-    for chapter in ("01_sql_path.sql", "03_explain.sql", "08_lexical.sql", "09_parser_semantics.sql", "10_expressions.sql", "11_vdbe.sql", "15_rollback.sql", "18_planner.sql", "19_windows.sql", "23_cli.sql"):
+    for chapter in SQL_FILES:
         conn = sqlite3.connect(":memory:")
         try:
             conn.executescript((ROOT / "examples" / chapter).read_text(encoding="utf-8"))
             count = conn.execute("SELECT COUNT(*) FROM sqlite_master").fetchone()[0]
-            if chapter in ("01_sql_path.sql", "03_explain.sql", "10_expressions.sql", "11_vdbe.sql", "15_rollback.sql", "18_planner.sql", "19_windows.sql", "23_cli.sql"):
+            if chapter in (
+                "01_sql_path.sql", "03_explain.sql", "10_expressions.sql",
+                "11_vdbe.sql", "15_rollback.sql", "18_planner.sql",
+                "19_windows.sql", "21_fts5.sql", "22_expression_index.sql",
+            ):
                 assert count > 0, (chapter, "schema missing")
             else:
                 assert count == 0, (chapter, "expression-only script unexpectedly created schema")
@@ -66,13 +68,9 @@ def main() -> None:
         assert conn.execute("SELECT 42 = '42'").fetchone() == (0,)
         assert conn.execute("SELECT CAST('123e+5' AS INTEGER)").fetchone() == (123,)
         assert conn.execute("SELECT 1 + 2 * 3, (1 + 2) * 3").fetchone() == (7, 9)
-        print("PASS: 10 SQL scripts and deterministic query results; sqlite3", sqlite3.sqlite_version)
+        print(f"PASS: {len(SQL_FILES)} SQL scripts and deterministic query results; sqlite3 {sqlite3.sqlite_version}")
     finally:
         conn.close()
-    for extra in ("21_fts.py", "22_expr_index.py", "24_anomaly.py", "25_perf.py", "26_demo_sql.py", "27_features.py", "28_udf.py"):
-        rc = subprocess.call([sys.executable, str(ROOT / "examples" / extra)])
-        assert rc == 0, f"{extra} exited {rc}"
-    print("PASS: FTS chapter example verified")
 
 if __name__ == "__main__":
     main()
