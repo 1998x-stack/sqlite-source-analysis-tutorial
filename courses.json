@@ -228,10 +228,9 @@
       "num": "21",
       "title": "FTS5 全文搜索",
       "topics": [
-        "倒排索引与 doclist",
-        "segment 合并与 optimize",
-        "分词器边界",
-        "FTS5 与 FTS3/4 差异"
+        "倒排索引与 posting lists",
+        "Segment B-tree 与合并",
+        "Tokenizer / BM25 / 外部内容"
       ],
       "file": "chapters/21.html",
       "status": "revised"
@@ -240,10 +239,9 @@
       "num": "22",
       "title": "表达式索引与自修复",
       "topics": [
-        "表达式索引与确定性契约",
-        "过期表达式索引成因",
-        "3.53.0 自修复行为",
-        "REINDEX EXPRESSIONS"
+        "表达式语法匹配",
+        "确定性函数与 stale index",
+        "3.53+ 自修复与 REINDEX EXPRESSIONS"
       ],
       "file": "chapters/22.html",
       "status": "revised"
@@ -252,10 +250,9 @@
       "num": "23",
       "title": "SQLite CLI 源码",
       "topics": [
-        "CLI 与库的两层边界",
-        "点命令与便捷查询",
-        ".mode 与 QRF 格式化",
-        "shell.c 生成与编译"
+        "process_input / do_meta_command",
+        "点命令与 SQL 分流",
+        "QRF 结果格式化"
       ],
       "file": "chapters/23.html",
       "status": "revised"
@@ -264,10 +261,9 @@
       "num": "24",
       "title": "SQLite 测试体系",
       "topics": [
-        "四套独立测试框架",
-        "branch 与 MC/DC 口径",
-        "异常测试与 OOM",
-        "OSS-Fuzz 与 dbsqlfuzz"
+        "TCL / TH3 / SQL Logic Test",
+        "OOM / VFS 故障注入",
+        "Fuzzing 与覆盖率边界"
       ],
       "file": "chapters/24.html",
       "status": "revised"
@@ -276,10 +272,9 @@
       "num": "25",
       "title": "性能诊断与可重复基准",
       "topics": [
-        "EXPLAIN 与查询计划",
-        "关键 PRAGMA 语义",
-        "批量事务与同步",
-        "性能边界"
+        "EXPLAIN / stmt_status",
+        "ANALYZE / PRAGMA optimize",
+        "基准测试与持久性取舍"
       ],
       "file": "chapters/25.html",
       "status": "revised"
@@ -288,10 +283,9 @@
       "num": "26",
       "title": "SQLite WASM：从 C 内核到浏览器持久化",
       "topics": [
-        "capi/oo1/Worker1 接口",
-        "内存与 OPFS 持久化 VFS",
-        "opfs-wl 与 Web Locks",
-        "Emscripten 构建与 npm 分发"
+        "WebAssembly / ESM / OO1",
+        "Worker 线程与消息事务",
+        "OPFS / opfs-wl / sahpool VFS"
       ],
       "file": "chapters/26.html",
       "status": "revised"
@@ -300,10 +294,9 @@
       "num": "27",
       "title": "SQLite 3.53–3.54：版本演进与源码变更",
       "topics": [
-        "3.53.0 发布内容",
-        "查询规划器改进",
-        "3.54.0 CLI 与平台",
-        "3.54.1 修复"
+        "3.52 撤回与 3.53 重发",
+        "浮点转换 / Stale Index",
+        "3.54 CLI / Planner / C API"
       ],
       "file": "chapters/27.html",
       "status": "revised"
@@ -312,10 +305,9 @@
       "num": "28",
       "title": "定制 SQLite：编译、扩展与 VFS 安全边界",
       "topics": [
-        "编译时剪裁选项",
-        "扩展注册函数/虚拟表",
-        "VFS 加密与 SEE",
-        "定制后测试验收"
+        "Canonical source / compile options",
+        "Extension API / VFS 装饰器",
+        "加密威胁模型 / 测试发布"
       ],
       "file": "chapters/28.html",
       "status": "revised"

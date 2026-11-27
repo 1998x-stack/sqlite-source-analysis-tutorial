@@ -1,69 +1,125 @@
 <!doctype html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="在浏览器里运行 SQLite 意味着什么？看清 capi/oo1/Worker1 三种 JS 接口、内存与 OPFS 持久化 VFS 的取舍，以及 opfs-wl 在 3.53.0 的角色。">
-<title>SQLite WASM 与 JS 绑定：接口变体、VFS 与构建 · SQLite 源码分析</title>
-<link rel="stylesheet" href="../assets/css/site.css">
-</head>
-<body>
-<a class="skip" href="#content">跳转至正文</a>
-<header class="sitebar"><div class="shell nav-inner"><a class="brand" href="../index.html"><span class="brand-icon">SQLite</span><span>SQLite 源码解剖<br><small>逐层理解数据库内核</small></span></a><nav class="navlinks" aria-label="站点导航"><a href="../index.html#chapters">章节目录</a><a href="../index.html#route">学习路线</a><a href="https://github.com/1998x-stack/sqlite-source-analysis-tutorial">GitHub</a></nav></div></header>
-<div class="shell article-layout">
-<aside class="toc" aria-label="章节内目录"><h2>本章内容</h2><nav><a href="#misconception">1. 在浏览器里跑 SQLite 意味着什么？</a><a href="#variants">2. 三种 JS 接口：capi、oo1、Worker1</a><a href="#persistence">3. 数据放哪：内存与 OPFS VFS 取舍</a><a href="#build">4. 构建与分发</a><a href="#practice">5. 一个最小示例与注意事项</a><a href="#lab">6. 可运行实验</a><a href="#references">官方资料</a></nav></aside>
-<main id="content" class="article"><article>
-<div class="crumb"><a href="../index.html">课程首页</a><span>›</span><span>章节 26 / 28</span></div>
-<header class="article-header"><span class="kicker">SQLite internals · 26</span><h1>SQLite WASM 与 JS 绑定：接口变体、VFS 与构建</h1><p class="dek">在浏览器里运行 SQLite 意味着什么？看清 capi/oo1/Worker1 三种 JS 接口、内存与 OPFS 持久化 VFS 的取舍，以及 opfs-wl 在 3.53.0 的角色。</p><div class="meta"><span>阅读时间约 30 分钟</span><span>SQLite 官方 WASM 文档与可运行实验</span></div></header>
-<section id="misconception" aria-labelledby="h-misconception"><h2 id="h-misconception">1. 在浏览器里跑 SQLite 意味着什么？</h2>
-<p>把 SQLite 编译成 WebAssembly，就能在浏览器里使用一个真正的 SQL 引擎：支持 JOIN、GROUP BY、子查询与事务，而不是一个键值缓存。官方有一个专门的 WASM/JS 子项目，文档入口在 <a href="https://sqlite.org/wasm" target="_blank" rel="noopener noreferrer">sqlite.org/wasm</a>；发布形式是一个 npm 模块。</p>
-<p>关键认识：<strong>SQLite 仍然在 C 层运行</strong>。WASM 只是把它编译成一个能在浏览器沙箱里执行的二进制，外加一层胶水 JS。你所调用的 <code>db.exec()</code> 最终仍落到与原生库相同的 prepare/step 逻辑上，只是存储位置换成了内存或浏览器提供的文件系统。</p>
-<div class="callout warn"><strong>修正旧版页面</strong>旧文给出了具体的 <code>emcc</code> 导出选项、<code>ext/wasm/</code> 文件清单与行数，以及好些无法核对的性能数字与迁移故事。这些已删除；本章只保留官方 WASM 文档能核对的接口、VFS 与注意事项。</div></section>
-<section id="variants" aria-labelledby="h-variants"><h2 id="h-variants">2. 三种 JS 接口：capi、oo1、Worker1</h2>
-<p>官方 API 不是把 C 函数一对一搬过来，而是提供了几个层次的封装，供不同习惯的客户选择：</p>
-<figure tabindex="0"><img loading="lazy" src="../assets/svg/26-js-stack.svg" width="960" height="400" alt="页面 JS 经 capi/oo1/Worker1 调用 sqlite3 WASM 模块，模块经 VFS 访问内存或 OPFS"><figcaption>图 1 · JS 接口层、WASM 模块与 VFS 层。SQLite 仍运行在 C 逻辑上；改变的是接口风格与存储后端。</figcaption></figure>
-<table><thead><tr><th scope="col">命名空间 / API</th><th scope="col">定位</th></tr></thead><tbody><tr><td><code>sqlite3.capi</code></td><td>对 C API 的包装，适合熟悉底层接口的使用者</td></tr><tr><td><code>sqlite3.oo1</code></td><td>面向对象的接口（OO API #1），如 <code>oo1.DB</code>、<code>oo1.OpfsWlDb</code></td></tr><tr><td>Worker1</td><td>让 sqlite3 完全运行在独立 Worker 线程中，并提供 Promise 风格的代理</td></tr></tbody></table>
-<pre><code>import sqlite3Init from '@sqlite.org/sqlite-wasm';
-const sqlite3 = await sqlite3Init();
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>第26章 SQLite WASM：从 C 内核到浏览器持久化</title><link rel="stylesheet" href="../assets/css/site.css"><meta name="description" content="同一套 SQLite SQL 引擎如何进入浏览器？关键不在于把数据库“改写成 JavaScript”，而在于保留 C 内核，通过 WebAssembly 执行，再由 JS API、Worker 与 VFS 接通浏览器的线程和存储模型。"><link rel="canonical" href="https://1998x-stack.github.io/sqlite-source-analysis-tutorial/chapters/26.html"><meta property="og:type" content="article"><meta property="og:title" content="SQLite WASM：从 C 内核到浏览器持久化 · SQLite 源码解剖"><meta property="og:description" content="同一套 SQLite SQL 引擎如何进入浏览器？关键不在于把数据库“改写成 JavaScript”，而在于保留 C 内核，通过 WebAssembly 执行，再由 JS API、Worker 与 VFS 接通浏览器的线程和存储模型。"><meta property="og:url" content="https://1998x-stack.github.io/sqlite-source-analysis-tutorial/chapters/26.html"><link rel="next" href="27.html"><link rel="prev" href="25.html"></head>
+<body><a class="skip" href="#content">跳转至正文</a>
+<header class="sitebar"><div class="shell nav-inner"><a class="brand" href="../index.html"><span class="brand-icon">SQLite</span><span>SQLite 源码解剖<br><small>逐层理解数据库内核</small></span></a><nav class="navlinks" aria-label="导航"><a href="../index.html#chapters">全部章节</a><a href="../index.html#route">学习路线</a><a href="https://github.com/1998x-stack/sqlite-source-analysis-tutorial">GitHub</a></nav></div></header>
+<div class="shell article-layout"><nav class="toc" aria-label="文章目录"><h2>本章内容</h2><a href="#execution">1. WASM 执行栈</a><a href="#oo1">2. ESM 与 OO1 生命周期</a><a href="#worker">3. Worker 线程边界</a><a href="#storage">4. VFS 与持久化选择</a><a href="#concurrency">5. 锁、WAL 与部署</a><a href="#node">6. Node.js 边界</a><a href="#source">7. 源码与实验</a><a href="#references">官方资料</a><a href="#reading-path">知识关联</a></nav>
+<main id="content"><article class="article"><div class="crumb"><a href="../index.html">课程首页</a><span>/</span><span>第 26 章</span><span>/</span><span>SQLite WASM：从 C 内核到浏览器持久化</span></div>
+<header class="article-header"><span class="kicker">WebAssembly · ESM · OPFS · Worker</span><h1>SQLite WASM：从 C 内核到浏览器持久化</h1><p class="dek">同一套 SQLite SQL 引擎如何进入浏览器？关键不在于把数据库“改写成 JavaScript”，而在于保留 C 内核，通过 WebAssembly 执行，再由 JS API、Worker 与 VFS 接通浏览器的线程和存储模型。</p><div class="meta"><span>版本基线：SQLite 3.54.1</span><span>官方 WASM 包：3.54.1-build1</span><span>源码入口：ext/wasm/</span></div></header><p class="figure-hint">阅读提示：可轻点图解打开独立矢量原图；窄屏图解支持横向查看细节。</p>
+
+<section id="execution" aria-labelledby="h-execution"><h2 id="h-execution">1. WASM 执行栈：数据库内核没有变成 JavaScript</h2>
+<p>SQLite WASM 的核心仍是 SQLite C 实现。构建系统通过 Emscripten 将 SQLite 源码编译为 WebAssembly 模块，并生成负责加载、内存适配和 API 暴露的 JavaScript 胶水层。应用导入 ES module 初始化函数，再调用对象式 API（OO1）或较低层的 C API 绑定。</p>
+<p>SQL 解析、查询规划、VDBE 执行、B-Tree、Pager 等核心职责仍由 SQLite 内核承担。变化发生在系统边界：传统平台 VFS 面向操作系统文件与锁；浏览器环境则必须通过浏览器允许的存储能力实现文件访问。WebAssembly 本身不会获得 Node.js 文件系统权限，也不会自动获得 DOM 权限。</p>
+<figure><a class="svg-zoom" href="../assets/svg/26-wasm-execution-stack.svg" target="_blank" rel="noopener noreferrer" aria-label="在新标签页打开矢量图：浏览器 UI、Worker、JavaScript API、WebAssembly、SQLite 核心和 VFS 的分层执行栈"><img src="../assets/svg/26-wasm-execution-stack.svg" alt="浏览器 UI、Worker、JavaScript API、WebAssembly、SQLite 核心和 VFS 的分层执行栈"></a><figcaption>图 1 · JS API 是调用适配层，WASM 承载 C 内核；VFS 才决定数据库文件最终落在内存、浏览器存储还是其他文件系统。</figcaption></figure>
+<p>官方 npm 包 <code>@sqlite.org/sqlite-wasm</code> 将官方 SQLite WASM 发布物包装为 ES module，并补充 TypeScript 类型；它不改写底层 SQLite WASM 实现。阅读源码时应区分三层：SQLite 核心源码、<code>ext/wasm/</code> 的绑定与 VFS 适配、npm 包装层。</p>
+<div class="callout"><strong>边界判断</strong>浏览器中的 SQLite 不意味着 SQL 查询一定在主线程执行，也不意味着数据库自动持久化。线程位置由应用决定；持久化由 VFS 和浏览器能力决定。</div></section>
+
+<section id="oo1" aria-labelledby="h-oo1"><h2 id="h-oo1">2. 从 ESM 初始化到 OO1：把 C API 变成可管理的对象</h2>
+<p>常规用法是先导入初始化函数，再等待模块就绪。<code>sqlite3InitModule()</code> 完成 WASM 装载后返回 API 对象。<code>sqlite3.oo1.DB</code> 对应一个 SQLite 数据库连接；它不是另一个 SQL 引擎，而是对底层 <code>sqlite3*</code> 句柄的 JavaScript 封装。</p>
+<pre><code>import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
+
+const sqlite3 = await sqlite3InitModule();
+console.log('SQLite', sqlite3.version.libVersion);
+
 const db = new sqlite3.oo1.DB(':memory:');
-const rows = db.exec('SELECT 1 AS n', { returnValue: 'resultRows' });</code></pre>
-<p>接口名称与可用性以官方 <a href="https://sqlite.org/wasm/doc/trunk/api-index.md" target="_blank" rel="noopener noreferrer">API Index</a> 为准；不同变体的加载方式与导出符号并不相同。</p></section>
-<section id="persistence" aria-labelledby="h-persistence"><h2 id="h-persistence">3. 数据放哪：内存与 OPFS VFS 取舍</h2>
-<p>浏览器沙箱挡住了直接的文件系统访问，所以 SQLite 通过 VFS 接入浏览器提供的存储。官方列出了多种持久化/会话存储方案，选哪一个取决于<strong>是否要持久化、是否要多标签页并发、能否设置响应头</strong>。</p>
-<figure tabindex="0"><img loading="lazy" src="../assets/svg/26-vfs-choice.svg" width="960" height="400" alt="按是否需要持久化、多标签页并发、能否设 COOP/COEP 选择内存、opfs、opfs-wl 或 opfs-sahpool"><figcaption>图 2 · 选择依据：多标签页并发用 <code>opfs</code> 或 <code>opfs-wl</code>；更看重性能或无法设置 COOP/COEP 时用 <code>opfs-sahpool</code>。</figcaption></figure>
-<table><thead><tr><th scope="col">VFS</th><th scope="col">要点</th></tr></thead><tbody><tr><td>内存（如 <code>:memory:</code>）</td><td>数据在 WASM 线性内存，刷新即丢，无需存储权限</td></tr><tr><td><code>opfs</code></td><td>基于 OPFS 的持久化；只在 Worker 线程可用</td></tr><tr><td><code>opfs-wl</code></td><td>3.53.0 加入；用 Web Locks 加锁，需 <code>Atomics.waitAsync()</code></td></tr><tr><td><code>opfs-sahpool</code></td><td>SyncAccessHandle 池；并发能力有限，但性能导向</td></tr><tr><td><code>kvvfs</code> / <code>JsStorageDb</code></td><td>基于 localStorage/sessionStorage 等会话级存储</td></tr></tbody></table>
-<div class="callout"><strong>容易忽略的一点</strong><strong>OPFS 只在 Worker 线程可用，不在主 UI 线程</strong>。因此在主线程直接“打开一个 OPFS 数据库”需要经过 Worker 或异步代理。此外，OPFS VFS 对 Safari 17 以前的版本有兼容性注意，部分配置依赖 COOP/COEP 响应头。</div></section>
-<section id="build" aria-labelledby="h-build"><h2 id="h-build">4. 构建与分发</h2>
-<p>官方用 <strong>Emscripten</strong> 工具链把 SQLite 的 C 源码编译成 WASM，具体的导出选项、内存配置与产物拆分记录在官方的 building / emscripten 文档中。作为使用者，通常不必自己编译，而是直接安装 npm 模块：</p>
-<pre><code>npm install @sqlite.org/sqlite-wasm
-# 具体版本与用法以官方 npm 文档为准</code></pre>
-<div class="callout warn"><strong>不要把编译参数写成不变量</strong>旧文列出了一长串 <code>emcc</code> 选项与导出函数名。这些随项目版本变化，应以官方 building/emscripten 页面为准；把某个版本的命令当成永久事实会误导读者。</div></section>
-<section id="practice" aria-labelledby="h-practice"><h2 id="h-practice">5. 一个最小示例与注意事项</h2>
-<p>下面的最小示例在浏览器中创建一个内存库并执行一条查询。它只依赖官方 npm 模块，不涉及服务器：</p>
-<pre><code>import sqlite3Init from '@sqlite.org/sqlite-wasm';
-const sqlite3 = await sqlite3Init();
-const db = new sqlite3.oo1.DB(':memory:');
-const rows = db.exec("SELECT 'Hello, SQLite WASM!' AS message", {
-  returnValue: 'resultRows', rowMode: 'object'
+try {
+  db.exec('CREATE TABLE item(id INTEGER PRIMARY KEY, label TEXT)');
+  db.exec({
+    sql: 'INSERT INTO item(label) VALUES ($label)',
+    bind: { $label: 'WASM memory smoke test' }
+  });
+  const rows = db.selectObjects(
+    'SELECT id, label FROM item ORDER BY id'
+  );
+  console.log(rows);
+} finally {
+  db.close();
+}</code></pre>
+<p><code>DB.exec()</code> 适合执行一条或多条 SQL，并在内部管理 prepared statement 的 prepare、step 和 finalize 生命周期。需要逐行控制或复用语句时才显式调用 <code>prepare()</code>；此时必须在 <code>finally</code> 中 finalize，否则未释放的 statement 可能延长文件锁持有时间。</p>
+<p>参数绑定仍应使用占位符，而不是字符串拼接。OO1 支持数组或对象形式的绑定；例如对象键 <code>$label</code> 对应 SQL 中的 <code>$label</code>。对象行模式遇到重名列时不能保留全部同名字段；需要严格列顺序时应选择数组行模式。</p>
+<figure><a class="svg-zoom" href="../assets/svg/26-oo1-lifecycle.svg" target="_blank" rel="noopener noreferrer" aria-label="在新标签页打开矢量图：OO1 数据库连接和 statement 的创建、绑定、执行、读取、释放生命周期"><img src="../assets/svg/26-oo1-lifecycle.svg" alt="OO1 数据库连接和 statement 的创建、绑定、执行、读取、释放生命周期"></a><figcaption>图 2 · OO1 把 C 句柄生命周期映射成 JS 对象；连接关闭之前，prepared statement 必须先完成释放。</figcaption></figure></section>
+
+<section id="worker" aria-labelledby="h-worker"><h2 id="h-worker">3. Worker 是线程边界，不是另一种数据库</h2>
+<p>WASM 运算仍可能占用 CPU。若把大量 SQL 放在 UI 主线程，页面绘制与交互就会受到影响。更稳妥的方式是让应用创建专用 Worker，在 Worker 内导入并初始化 SQLite WASM，再由主线程通过消息传递任务和结果。Worker 内仍然使用同一套 OO1 API。</p>
+<figure><a class="svg-zoom" href="../assets/svg/26-worker-transaction.svg" target="_blank" rel="noopener noreferrer" aria-label="在新标签页打开矢量图：UI 主线程发送一个完整数据库任务给 Worker，Worker 内完成事务后返回结果"><img src="../assets/svg/26-worker-transaction.svg" alt="UI 主线程发送一个完整数据库任务给 Worker，Worker 内完成事务后返回结果"></a><figcaption>图 3 · 把一个完整事务放在同一个 Worker 任务中，避免多个消息交错执行造成事务边界不清。</figcaption></figure>
+<p>仓库中的 <code>examples/26_wasm/main.js</code> 和 <code>worker.js</code> 给出最小结构。主线程发送 <code>{type:'run'}</code>；Worker 初始化 SQLite、打开数据库、执行 SQL、关闭连接并返回结果。正式应用还应为消息增加 request ID、超时、取消语义和结构化错误对象。</p>
+<pre><code>// main.js
+const worker = new Worker(new URL('./worker.js', import.meta.url), {
+  type: 'module'
 });
-console.log(rows);</code></pre>
-<p>要用持久化存储，把 <code>:memory:</code> 换成 OPFS VFS（通常在 Worker 内创建），并处理兼容性：先能力检测，不支持时降级到内存库。注意：<strong>浏览器端 SQL 与原生 SQL 语义一致</strong>，但存储后端、并发模型与持久化行为不同，不能把本机行为直接外推到 OPFS。</p>
-<ol><li>OPFS 仅在 Worker 线程可用；主线程需经 Worker 或异步代理；</li><li>部分 OPFS 配置依赖 COOP/COEP 响应头；</li><li>OPFS VFS 对 Safari 17 以前版本有兼容性注意；</li><li>会话级 <code>kvvfs</code>/<code>JsStorageDb</code> 适合小数据，不要当通用持久层。</li></ol></section>
-<section id="lab" aria-labelledby="h-lab"><h2 id="h-lab">6. 可运行实验</h2>
-<p>浏览器/WASM/OPFS 部分无法在 CI 的无头环境下当作命令行程序执行，所以我们把<strong>能被自动验证的部分</strong>抽出来：<code>examples/26_demo_sql.py</code> 用原生 sqlite3 运行演示中同样的 SQL，证明其语义与结果。</p>
-<pre><code>python3 examples/26_demo_sql.py
-# PASS: demo SQL semantics verified on native sqlite3 3.54.0; browser WASM/OPFS not executed (see notes)
-# 浏览器 WASM/OPFS 部分本周未在 CI 执行，属“未验证”。</code></pre>
-<p>这是有意的诚实做法：不能用“文件存在”或“本地跑过一次”去宣称浏览器端已通过。要验证 WASM/OPFS，需在真实浏览器中按官方 HOWTO 手动或自动化运行。</p>
-<div class="exercise"><h3>可重复练习</h3><ol><li>用官方 npm 模块在浏览器中跑通最小示例，记录加载与首个查询的耗时；</li><li>改用 OPFS，验证刷新后数据仍在；再把文件放到 Worker 中验证主子线程差异；</li><li>列出你所用浏览器支持的 VFS，并解释为何多标签页并发时倾向 <code>opfs</code>/<code>opfs-wl</code>。</li></ol></div>
-<details><summary>自测：为什么 OPFS 不能直接在主线程用？</summary><p>官方文档说明 OPFS 只在 Worker 线程上下文中可用；主线程需要把数据库操作交给 Worker，或经由异步代理转发请求。</p></details>
-</section>
-<section id="references" aria-labelledby="h-references"><h2 id="h-references">原始资料与版本边界</h2>
-<p>本章接口与 VFS 行为来自 SQLite 官方 WASM 文档；具体 API 名称、导出、浏览器支持与性能均随版本变化，应以官方页面为准。浏览器端实验本周未在 CI 执行。</p>
-<ol class="references"><li><a href="https://sqlite.org/wasm" target="_blank" rel="noopener noreferrer">SQLite WebAssembly &amp; JavaScript 文档</a> · SQLite 官方</li><li><a href="https://sqlite.org/wasm/doc/trunk/api-index.md" target="_blank" rel="noopener noreferrer">API Index（capi / oo1 / Worker1）</a> · SQLite 官方</li><li><a href="https://sqlite.org/wasm/doc/trunk/persistence.md" target="_blank" rel="noopener noreferrer">Persistent Storage Options</a> · SQLite 官方</li><li><a href="https://sqlite.org/wasm/doc/trunk/building.md" target="_blank" rel="noopener noreferrer">Building sqlite3 WASM</a> · SQLite 官方</li><li><a href="https://sqlite.org/changes.html" target="_blank" rel="noopener noreferrer">SQLite 3.53.0（opfs-wl）</a> · SQLite 官方</li></ol>
-</section>
-<nav class="article-nav" aria-label="相邻章节"><a href="25.html">← 上一章</a><a href="27.html">下一章 →</a></nav>
-</article></main></div>
-<footer class="foot"><div class="shell foot-inner"><span>SQLite 源码解剖 · 先证据，后抽象</span><a href="../index.html">返回首页</a></div></footer>
-</body>
-</html>
+worker.postMessage({ type: 'run' });
+worker.addEventListener('message', ({ data }) => {
+  if (data.type === 'success') render(data.rows);
+  else reportError(data.error);
+});
+
+// worker.js：初始化与 SQL 都在 Worker 内
+import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
+self.addEventListener('message', async ({ data }) => {
+  if (data.type !== 'run') return;
+  const sqlite3 = await sqlite3InitModule();
+  const db = new sqlite3.oo1.DB(':memory:');
+  try {
+    db.exec('BEGIN');
+    db.exec("CREATE TABLE IF NOT EXISTS t(x TEXT)");
+    db.exec("INSERT INTO t VALUES('done')");
+    db.exec('COMMIT');
+    self.postMessage({
+      type: 'success',
+      rows: db.selectObjects('SELECT x FROM t')
+    });
+  } catch (e) {
+    try { db.exec('ROLLBACK'); } catch {}
+    self.postMessage({ type: 'error', error: String(e) });
+  } finally {
+    db.close();
+  }
+});</code></pre>
+<p>Worker 不是天然的事务调度器。不要把 <code>BEGIN</code>、若干条 SQL 和 <code>COMMIT</code> 分散在多个可交错的消息中；同一连接的事务应在一个受控任务内完成。官方 Worker1 / Promiser1 消息 API 自 2026-04-15 起已标记 deprecated，不再推荐新项目采用。新项目更适合在应用自建 Worker 中直接加载模块，并定义自己的消息协议。</p></section>
+
+<section id="storage" aria-labelledby="h-storage"><h2 id="h-storage">4. VFS 决定数据活多久：浏览器存储并非一个选项</h2>
+<p>SQLite 通过 VFS 抽象文件打开、读写、同步和锁。WASM 环境中的不同 VFS 使用不同浏览器 API，能力和约束差异很大。选择时要同时看运行线程、是否持久化、并发方式、浏览器兼容和部署响应头，而不是只看“能否打开一个数据库文件”。</p>
+<figure><a class="svg-zoom" href="../assets/svg/26-opfs-vfs-matrix.svg" target="_blank" rel="noopener noreferrer" aria-label="在新标签页打开矢量图：内存、kvvfs、OPFS、OPFS Web Locks 和 SAH pool VFS 的线程、持久化和并发能力对比"><img src="../assets/svg/26-opfs-vfs-matrix.svg" alt="内存、kvvfs、OPFS、OPFS Web Locks 和 SAH pool VFS 的线程、持久化和并发能力对比"></a><figcaption>图 4 · OPFS 是持久化能力的集合，不是一个单一 VFS；不同实现对并发与部署条件做了不同取舍。</figcaption></figure>
+<div class="table-scroll"><table><thead><tr><th>后端</th><th>可用线程</th><th>持久化</th><th>主要边界</th></tr></thead><tbody>
+<tr><td><code>:memory:</code></td><td>主线程 / Worker</td><td>否</td><td>实例生命周期结束即丢失</td></tr>
+<tr><td><code>kvvfs</code></td><td>主线程</td><td>localStorage / sessionStorage</td><td>每种 storage 最多一个数据库；容量小、编码开销高</td></tr>
+<tr><td><code>opfs</code></td><td>Worker</td><td>是</td><td>SyncAccessHandle 文件锁；需要 COOP/COEP</td></tr>
+<tr><td><code>opfs-wl</code></td><td>Worker</td><td>是</td><td>Web Locks；需要 <code>Atomics.waitAsync()</code></td></tr>
+<tr><td><code>opfs-sahpool</code></td><td>Worker</td><td>是</td><td>吞吐量高；多实例共享需应用层协调；不要求 COOP/COEP</td></tr>
+<tr><td>WASMFS + OPFS</td><td>取决于定制构建</td><td>是</td><td>需单独构建，不属于 canonical 默认 WASM 产物</td></tr>
+</tbody></table></div>
+<p><code>kvvfs</code> 将数据库页编码后存入浏览器 Web Storage。它适合小型演示或没有 OPFS 时的轻量回退，不适合大型工作负载：容量通常只有几 MB，且每个 storage 对象只能容纳一个数据库。</p>
+<p>常规 <code>opfs</code> VFS 只在 Worker 中可用。其同步文件访问代理依赖 <code>SharedArrayBuffer</code>，因此服务器必须提供 <code>Cross-Origin-Opener-Policy: same-origin</code> 与 <code>Cross-Origin-Embedder-Policy: require-corp</code>（或适用场景下的 <code>credentialless</code>）。缺少这些响应头时，常规 OPFS VFS 不会加载。</p>
+<p><code>opfs-wl</code> 在 3.53.0 加入，以 Web Locks 代替原有锁协议；它要求 <code>Atomics.waitAsync()</code>，所以不是所有支持 OPFS 的浏览器都能使用。<code>opfs-sahpool</code> 使用预分配的 SyncAccessHandle 池，官方文档将其定位为高性能选项，但它默认不提供透明的多标签页并发。若选择它，必须理解 pool 容量、文件名映射和 pause/unpause 协作接口。</p></section>
+
+<section id="concurrency" aria-labelledby="h-concurrency"><h2 id="h-concurrency">5. OPFS 锁、WAL 与部署约束</h2>
+<p>OPFS 的同步访问句柄会独占锁定文件。不要把桌面数据库服务器的并发预期直接搬到浏览器：两个标签页同时打开同一个 OPFS 数据库，第二个实例可能收到锁错误。即使单标签页内，也应避免长事务、长时间不 reset 的 statement，以及同一 Worker 中对同一个文件打开多个连接。</p>
+<p>官方持久化指南建议把数据库工作拆成短小的 I/O 区间，并在应用层处理 <code>SQLITE_BUSY</code>。锁冲突是正常的运行时状态，不应该被当成“数据库文件坏了”。<code>opfs-unlock-asap=1</code> 可以作为特定并发问题的调优手段，但它可能增加 I/O 成本，不应在没有测量时默认启用。</p>
+<div class="callout warn"><strong>WASM 环境中的 WAL 不是桌面多读者方案</strong>官方 WASM 文档指出，当前构建没有常规共享内存 API；启用 WAL 需要连接立即切换到 exclusive locking mode，因此不会带来多连接并发收益，反而会消除常规 OPFS VFS 的并发能力。不要把“SQLite 支持 WAL”推导成“浏览器 OPFS 上 WAL 一定更快”。</div>
+<p>GitHub Pages 可以托管静态文件，但不能仅靠仓库中的 HTML 自动设置 COOP/COEP 响应头。若应用必须使用常规 OPFS VFS，应部署到可控制这些响应头的静态站点或应用服务器。示例中的 <code>vite.config.js</code> 为开发服务器和 preview 配置了相应头；生产环境必须在真正的托管层重复配置。</p></section>
+
+<section id="node" aria-labelledby="h-node"><h2 id="h-node">6. Node.js 与浏览器不是同一套持久化能力</h2>
+<p>官方 npm 包当前将 Node.js 支持限定为内存数据库，不提供 Node.js 文件持久化后端。浏览器 Worker + OPFS 的代码不能因为换成 Node.js import 就自动变成文件数据库。若 Node.js 应用需要持久化，应根据部署环境评估原生绑定、SQLite CLI/子进程或其他明确支持文件存储的方案。</p>
+<p>这也解释了为什么 <code>examples/26_wasm/node-smoke.mjs</code> 只创建 <code>:memory:</code> 数据库：它验证模块初始化、绑定参数、查询结果和连接释放，不伪装成磁盘持久化测试。</p>
+<details><summary>自测：把数据库代码放进 Worker，就自动获得 OPFS 持久化了吗？</summary><p>没有。Worker 只是线程执行位置。只有当当前 WASM 构建、浏览器 API 和 VFS 初始化都满足条件时，<code>OpfsDb</code> 才可用。否则仍可能是内存数据库；应用必须检测能力并明确报告实际后端。</p></details></section>
+
+<section id="source" aria-labelledby="h-source"><h2 id="h-source">7. 源码定位与可复现实验</h2>
+<p>SQLite 3.54.1 的 WASM 构建入口在 <code>ext/wasm/GNUmakefile</code>；生成物的 API 装配由 <code>ext/wasm/api/</code> 下的 prologue、OO1、VFS 和 Worker 模块构成。重点文件包括：</p>
+<ul><li><code>ext/wasm/GNUmakefile</code>：构建目标、Emscripten 参数、JS 文件装配顺序与 WASMFS 变体。</li><li><code>ext/wasm/api/sqlite3-api-oo1.c-pp.js</code>：DB / Stmt 的对象式封装。</li><li><code>ext/wasm/api/sqlite3-vfs-opfs.c-pp.js</code>：OPFS VFS 实现。</li><li><code>ext/wasm/api/sqlite3-vfs-opfs-wl.c-pp.js</code>：Web Locks 变体。</li><li><code>ext/wasm/api/sqlite3-vfs-opfs-sahpool.c-pp.js</code>：SyncAccessHandle pool 变体。</li><li><code>ext/wasm/api/sqlite3-worker1.c-pp.js</code>：旧 Worker1 API，仅用于理解兼容层。</li></ul>
+<pre><code>cd examples/26_wasm
+npm install
+npm run test:node
+
+# 浏览器 Worker + OPFS：Vite 会注入 COOP / COEP 响应头
+npm run dev
+# 打开本地地址，点击“运行一次 SQL 实验”</code></pre>
+<p>Node smoke test 断言查询结果并确保连接关闭；浏览器示例检测 <code>OpfsDb</code> 是否存在，不可用时明确回退到内存模式。浏览器持久化验证应在目标浏览器、目标部署响应头和实际存储配额下单独进行，不能用 Node 的内存测试替代。</p></section>
+
+<section id="references" aria-labelledby="h-refs"><h2 id="h-refs">官方资料与版本边界</h2><ol class="references">
+<li><a href="https://github.com/sqlite/sqlite-wasm/blob/main/README.md" target="_blank" rel="noopener noreferrer">sqlite/sqlite-wasm README</a>：官方 npm 包、Node.js 支持范围、Worker 示例和弃用说明。</li>
+<li><a href="https://sqlite.org/wasm/doc/trunk/api-oo1.md" target="_blank" rel="noopener noreferrer">SQLite WASM OO1 API</a>：DB、Stmt、OpfsDb 与查询绑定。</li>
+<li><a href="https://sqlite.org/wasm/doc/trunk/persistence.md" target="_blank" rel="noopener noreferrer">SQLite WASM Persistent Storage</a>：kvvfs、OPFS、opfs-wl、sahpool、WAL 与并发约束。</li>
+<li><a href="https://sqlite.org/wasm/doc/trunk/api-worker1.md" target="_blank" rel="noopener noreferrer">Worker1 / Promiser API</a>：旧消息式 API 的限制和弃用状态。</li>
+<li><a href="https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/wasm/GNUmakefile" target="_blank" rel="noopener noreferrer">SQLite 3.54.1 ext/wasm/GNUmakefile</a>：版本固定的 WASM 构建入口。</li>
+<li><a href="https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/wasm/api/sqlite3-vfs-opfs.c-pp.js" target="_blank" rel="noopener noreferrer">SQLite 3.54.1 OPFS VFS source</a> 与 <a href="https://github.com/sqlite/sqlite/blob/version-3.54.1/ext/wasm/api/sqlite3-api-oo1.c-pp.js" target="_blank" rel="noopener noreferrer">OO1 source</a>。</li></ol></section><div class="source-ledger" aria-label="本章来源与实验索引"><span class="kicker">Source ledger · reproducibility</span><p>本章的关键技术主张有结构化的 <a href="../evidence/26.json">逐条证据台账</a>；相关 SQL、C、Python 和 WASM 示例可从 <a href="../examples/index.html">实验源码索引</a> 查找。台账状态区分已核对资料、推导与教学示意。</p></div>
+<aside class="related-reading" id="reading-path" aria-labelledby="related-heading-26"><div class="related-heading"><span class="kicker">Concept connections</span><h2 id="related-heading-26">把本章放进更大的机制链</h2><p>下列链接指向另一章的具体机制，每篇都可独立阅读；先后顺序不是强制前置要求。</p></div><div class="related-grid"><a class="related-item" href="14.html#objects"><span class="related-kicker">第 14 章 · 关联机制</span><strong>浏览器 VFS 与传统 VFS 的共性</strong><span>SQLite core 仍使用文件方法合同，只是后端 API 改变。</span></a><a class="related-item" href="16.html#checkpoint"><span class="related-kicker">第 16 章 · 关联机制</span><strong>WASM 上的 WAL 能否复制桌面并发模型</strong><span>比较共享内存能力、end mark 和独占锁要求。</span></a></div></aside><nav class="article-nav" aria-label="章节导航"><a href="25.html">← 上一章：性能诊断</a><a href="27.html">下一章：版本演进 →</a></nav>
+</article></main></div><footer class="foot"><div class="shell foot-inner"><span>SQLite 源码解剖</span><a href="../index.html">返回首页</a></div></footer></body></html>

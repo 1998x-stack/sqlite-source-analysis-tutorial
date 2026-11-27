@@ -1,6 +1,6 @@
 # SQLite 源码解剖：从一条 SQL 理解数据库内核
 
-> 28 章 SQLite 内核原理与源码分析的中文阅读路线。**01–28 已全部逐章复核**，每章配独立叙事、可解释的 SVG 图解、可复现实验与证据台账。
+> 28 章 SQLite 内核原理与源码分析的中文阅读路线。已重构 **01–28**；全部章节均有独立叙事、图解、证据台账与可复现实验。
 
 **课程首页**（GitHub Pages 已部署）：https://1998x-stack.github.io/sqlite-source-analysis-tutorial/
 
@@ -27,16 +27,16 @@
 | 18 | Planner、N3、索引前缀、ANALYZE | 深度重构 |
 | 19 | 标量、聚合与窗口 C API | 深度重构 |
 | 20 | sqlite3_module 与可执行的 C 虚拟表 | 深度重构 |
-| 21 | FTS 倒排索引、segment 与 FTS5 | 深度重构 |
-| 22 | 表达式索引与自修复 | 深度重构 |
-| 23 | CLI shell 与库的边界 | 深度重构 |
-| 24 | TCL/TH3/SLT 测试框架 | 深度重构 |
-| 25 | 性能分析与优化边界 | 深度重构 |
-| 26 | WASM 与 JS 绑定 | 深度重构 |
-| 27 | 3.53、3.54 新特性 | 深度重构 |
-| 28 | 定制编译、扩展与 VFS | 深度重构 |
+| 21 | FTS5、倒排索引、segment merge、tokenizer 与 BM25 | 深度重构 |
+| 22 | 表达式索引、stale index、自修复与 REINDEX EXPRESSIONS | 深度重构 |
+| 23 | CLI 输入分流、点命令、shell.c.in 与 QRF | 深度重构 |
+| 24 | TCL、TH3、SQL Logic Test、dbsqlfuzz 与故障注入 | 深度重构 |
+| 25 | EQP、stmt_status、PRAGMA optimize 与可重复 benchmark | 深度重构 |
+| 26 | SQLite WASM、OO1、Worker、OPFS / opfs-wl / sahpool | 深度重构 |
+| 27 | 3.52 撤回、3.53–3.54 版本演进、浮点转换与 C API | 深度重构 |
+| 28 | canonical build、Extension API、VFS 与加密安全边界 | 深度重构 |
 
-章节清单和真实相对路径以 [courses.json](courses.json) 为准。首页是学习入口；每章正文自行声明其版本边界与教学简化，未标注来源的数字均按“教学示意”看待。
+章节清单和真实相对路径以 [courses.json](courses.json) 为准。首页既是学习入口，也展示完整 28 章路线、图解数量和统一质量门禁。
 
 ## 项目结构
 
@@ -44,14 +44,14 @@
 .
 ├── index.html                 # GitHub Pages 首页（根目录发布）
 ├── chapters/
-│   ├── 01.html ... 28.html   # 已完成独立叙事 + 图解 + 实验
+│   ├── 01.html ... 28.html   # 全部完成独立叙事 + 图解 + 实验
 │   ├── index.html            # 旧章内“返回首页”兼容跳转
-│   └── theme.css             # 早期页面保留的样式，暂不移除
+│   └── theme.css             # 原版页面暂用的兼容主题
 ├── assets/
-│   ├── css/site.css          # 新版视觉系统
-│   └── svg/*.svg             # 72 张原创可访问的独立 SVG
+│   ├── css/site.css          # 重构版视觉系统
+│   └── svg/*.svg             # 83 张原创可访问的独立 SVG
 ├── evidence/01.json ... 28.json
-├── examples/                 # SQL / C 实验（不复制上游 SQLite）
+├── examples/                 # SQL / Python / C / JavaScript 实验（不复制上游 SQLite）
 ├── scripts/                  # 静态检查、浏览器 QA、部署打包
 ├── courses.json              # 28 章导航数据和重构状态
 ├── AGENTS.md                 # 内容技术标准和维护约束
@@ -93,7 +93,7 @@ python3 scripts/build_site.py
 
 浏览器 QA 输出到 `qa-local/`（不提交），部署输出在 `dist/`。CI 将校验链接、章节完整性、SVG XML 可解析性、证据台账、响应式布局和交互。Pages 工作流已预置；**是否上线以仓库 Pages 设置和部署结果为准**。
 
-请优先参照 [AGENTS.md](AGENTS.md) 改写章节。每章正文区分官方文档事实、教学简化与未核验推导；任何数字都应在证据台账 [evidence/NN.json](evidence/) 中找到对应条目。
+请优先参照 [AGENTS.md](AGENTS.md) 改写章节；不要把旧页对特定版本的新特性或固定性能指标的断言误认为已复核。
 
 ## 主要上游资料
 
@@ -140,7 +140,7 @@ cc -std=c11 -Wall -Wextra -Werror -O2 examples/14_vfs_select.c -lsqlite3 -o /tmp
 C 程序的链接参数为 Unix-like 示例；页面检查和事务测试使用 Python 标准库，不需要下载 SQLite 私有 C 文件。事务脚本只验证回滚和锁冲突，**不是实际断电模拟**。
 
 ## 第四轮：16–20 快照、规划与扩展
-本批增加 15 张新的专业 SVG（截至本轮累计 56 张）。五篇分别从 WAL 帧与 end mark、锁错误、N3 路径搜索、SQL 函数回调和虚拟表约束协商切入。源码与实验均优先使用 SQLite 官方文档和公开 C API。
+本批增加 15 张新的专业 SVG，累计 56 张。五篇分别从 WAL 帧与 end mark、锁错误、N3 路径搜索、SQL 函数回调和虚拟表约束协商切入。源码与实验均优先使用 SQLite 官方文档和公开 C API。
 
 ```bash
 python examples/16_wal_snapshot.py
@@ -153,23 +153,71 @@ python scripts/check_site.py
 ```
 `generate_series` 是 SQLite CLI 常见扩展而非所有核心库默认函数。新增 `examples/20_json_virtual.sql` 为可选 JSON 表值函数练习，主 CI 则运行无需特定扩展安装的 C 模块实验。
 
-## 第五轮：21–28 扩展、工具链与定制
+## 第五轮：21–25 全文检索、CLI、测试与性能
+本批新增 15 张 SVG，累计 71 张；重写 FTS5、表达式索引、SQLite CLI、测试体系和性能诊断五篇文章。源码定位固定在 SQLite 3.54.1 快照，公开接口与内部实现分别标注。
 
-此轮把此前保留原版的 21–28 章逐章对照官方文档重写，全站累计 **72** 张独立 SVG。每章新增证据台账 `evidence/NN.json`，并把断言绑定到具体版本文档：
-
-- 21 FTS：区分 FTS3/FTS4 与 FTS5 两套实现，版本日期以 `fts3.html` 为准。
-- 22 表达式索引：确定性契约与 3.53 自修复行为按 `expridx.html` 核对。
-- 23 CLI：点命令、`.mode` 与 QRF 以官方 `cli.html` 为基线。
-- 24 测试：TCL/TH3/SLT 与异常测试口径按 `testing.html` 描述。
-- 25 性能：只讲可观测的 PRAGMA 与计划，不给跨版本性能承诺。
-- 26 WASM：C API、Worker、OPFS VFS 与 npm 交付以官方 `wasm` 文档为准。
-- 27 新特性：3.53、3.54 的内容逐条对齐发布历史。
-- 28 定制：编译剪裁、扩展入口与 SEE 边界按 `compile.html` / `loadext.html`。
+重点纠偏：
+- FTS5 的 unicode61 不会自动做中文词典分词；automerge 发生在写入路径，不是后台常驻线程。
+- SQLite 3.53.0 确实加入 stale expression index 的有限自修复和 REINDEX EXPRESSIONS，但不是通用 corruption repair。
+- CLI 的 dot commands 属于 Shell，不是 SQL；QRF 的真实接口是 sqlite3_qrf_spec / sqlite3_format_query_result()。
+- TH3 和 dbsqlfuzz 为专有测试工具；fuzzcheck 是 corpus 回放工具，不是 SQL 结果验证器。
+- EQP 是诊断输出；性能对比要记录 source id、数据、参数、事务、缓存和计数器。
 
 ```bash
-python3 scripts/check_site.py
-python3 examples/21_fts.py
-python3 examples/22_expr_index.py
+python scripts/test_examples.py
+python examples/21_tokenizer_probe.py
+python examples/24_test_contracts.py
+python examples/25_benchmark.py
+sqlite3 :memory: < examples/23_cli_workflow.sql
+cc -std=c11 -Wall -Wextra -Werror -O2 examples/25_stmt_status.c -lsqlite3 -o /tmp/25-status
+/tmp/25-status
+python scripts/check_site.py
 ```
 
-未列出运行命令的章节实验为可选练习，其“教学示意”输出不能当作固定断言；浏览器验收以 `python3 scripts/browser_smoke.py` 的 1440 / 390 / 360 结果为准。
+## 第六轮：26–28 浏览器运行时、版本演进与定制交付
+本批新增 12 张原创 SVG，全站累计 83 张；至此 28 章全部完成独立叙事重构。新增 SQLite WASM 的 Node/Worker 实验、版本门控的 REINDEX EXPRESSIONS 探针、动态 Extension host 和可运行 tracing VFS。新增 26–28 三份证据台账，内部实现以 SQLite 3.54.1 为基线。
+
+本轮关键纠偏：
+- OPFS VFS 运行在 Worker；标准 OPFS 依赖 COOP/COEP，opfs-wl 需要 Web Locks / Atomics.waitAsync，sahpool 有不同并发合同。
+- 官方 SQLite WASM npm 包的 Node.js 支持限定为内存数据库；不能把浏览器 OPFS 示例直接当成 Node 文件持久化。
+- Worker1 / Promiser API 已标记 deprecated；新应用在自建 Worker 中定义消息协议。
+- 3.52.0 曾撤回；3.53.0 重发并修复 WAL-reset 问题；3.54.1 修复部分 32 位构建中的 heap-buffer overflow。
+- sqlite3_result_str() 接收 sqlite3_str* 和所有权标志，不是普通 char* + 长度。
+- SQLITE_OMIT_* 多数不受支持；VFS tracing 示例只记录 xOpen 并委托父 VFS，明确不是加密实现。AES-ECB 旧方案不再作为生产加密示例。
+
+```bash
+python scripts/test_examples.py
+python examples/27_release_probe.py
+(cd examples/26_wasm && npm install && npm run test:node && npm run build)
+cc -std=c11 -Wall -Wextra -Werror -O2 examples/28_vfs_trace.c -lsqlite3 -o /tmp/vfs-trace
+(cd /tmp && /tmp/vfs-trace)
+cc -std=c11 -Wall -Wextra -Werror -O2 -fPIC -shared examples/28_course_ext.c -o /tmp/course_ext.so
+cc -std=c11 -Wall -Wextra -Werror -O2 examples/28_extension_host.c -lsqlite3 -o /tmp/extension-host
+/tmp/extension-host /tmp/course_ext.so
+python scripts/check_site.py
+python scripts/svg_visual_audit.py
+python scripts/browser_smoke.py
+python scripts/wasm_browser_smoke.py
+```
+
+## 第七轮：28 篇全文站精细化审计（2026-11-22）
+
+本轮不新增章节，重点修复“已经重构但系统元数据仍留在旧进度”的缺陷，并建立可重复运行的工程审计。
+
+- **知识依赖导航**：`data/reading_paths.json` 保存 28 篇的 56 条人工策划的机制级关系。文章文末“知识关联”说明为什么关联，并指向另一章的准确小节锚点；首页增加编译、执行、存储、事务链路导航。
+- **高清 SVG**：文章内 SVG 图解均可通过图片链接单独打开矢量原图；360px/390px 屏幕优先保持标签可读并允许局部横向滚动。
+- **独立网页身份**：每章含 canonical、独立 description、Open Graph 元数据以及上一章 / 下一章的 head 关系。28 个旧路径重定向页面使用有效 HTML，并指定正式 canonical。
+- **质量门禁**：`scripts/audit_content.py` 检查首页数据同步、全站链接 fragment、知识图谱、独立 SVG、evidence claim id、元数据唯一性及历史 URL；`scripts/check_site.py` 负责基础结构检查，`scripts/svg_visual_audit.py` 在真实 Chromium 中检测 SVG 文本越界。
+- **证据与实验可公开追溯**：Pages 构建现在包含 `evidence/`、`examples/`、`data/`、`audits/`，提供 [技术证据索引](https://1998x-stack.github.io/sqlite-source-analysis-tutorial/evidence/) 与 [实验源文件索引](https://1998x-stack.github.io/sqlite-source-analysis-tutorial/examples/)；每篇文章都能打开对应的 JSON 证据台账。
+- **真实实验及部署验证**：原有 SQL/Python/C/Node/Chromium 实验继续保留；首页、28 篇文章和两张资源索引页分别在 1440/390/360 测试，共 93 个视口。`scripts/audit_deployment.py` 核验 Pages 实际包含 28 个兼容地址、83 张 SVG、28 份台账、实验和审计记录。详见 `audits/2026-11-22.md`。
+
+```bash
+python scripts/check_site.py
+python scripts/audit_content.py --output qa-local/editorial-audit.json
+python scripts/build_site.py && python scripts/audit_deployment.py
+python scripts/test_examples.py
+python scripts/browser_smoke.py
+python scripts/wasm_browser_smoke.py
+```
+
+**验证边界**：静态审计只保证链接、结构和证据记录的一致性；它不自动证明每个 SQLite 技术主张正确，也不等同于人工逐像素视觉检查或实时校验全部外部网站。外部事实仍须以版本化 SQLite 官方资料复核。

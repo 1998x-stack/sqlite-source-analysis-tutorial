@@ -1,55 +1,69 @@
 <!doctype html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="先把 2026 年三个发布的日期放对，再逐条核对 3.53.0/3.54.0 的真实变更：QRF、17 位浮点、复合查询改排序合并、CLI 与 Windows 平台调整。">
-<title>2026 新特性：3.53.0 与 3.54.0 的真实变更 · SQLite 源码分析</title>
-<link rel="stylesheet" href="../assets/css/site.css">
-</head>
-<body>
-<a class="skip" href="#content">跳转至正文</a>
-<header class="sitebar"><div class="shell nav-inner"><a class="brand" href="../index.html"><span class="brand-icon">SQLite</span><span>SQLite 源码解剖<br><small>逐层理解数据库内核</small></span></a><nav class="navlinks" aria-label="站点导航"><a href="../index.html#chapters">章节目录</a><a href="../index.html#route">学习路线</a><a href="https://github.com/1998x-stack/sqlite-source-analysis-tutorial">GitHub</a></nav></div></header>
-<div class="shell article-layout">
-<aside class="toc" aria-label="章节内目录"><h2>本章内容</h2><nav><a href="#misconception">1. 先把版本与日期放对</a><a href="#v353">2. 3.53.0：修复、语言与 API</a><a href="#planner">3. 3.53.0 查询规划器改进</a><a href="#v354">4. 3.54.0：CLI 与平台调整</a><a href="#lab">5. 可运行实验</a><a href="#references">官方资料</a></nav></aside>
-<main id="content" class="article"><article>
-<div class="crumb"><a href="../index.html">课程首页</a><span>›</span><span>章节 27 / 28</span></div>
-<header class="article-header"><span class="kicker">SQLite internals · 27</span><h1>2026 新特性：3.53.0 与 3.54.0 的真实变更</h1><p class="dek">先把 2026 年三个发布的日期放对，再逐条核对 3.53.0/3.54.0 的真实变更：QRF、17 位浮点、复合查询改排序合并、CLI 与 Windows 平台调整。</p><div class="meta"><span>阅读时间约 30 分钟</span><span>SQLite 官方 changes.html 与可运行实验</span></div></header>
-<section id="misconception" aria-labelledby="h-misconception"><h2 id="h-misconception">1. 先把版本与日期放对</h2>
-<p>解读“新特性”最容易出错的地方不是代码，而是<strong>版本与时间线</strong>。官方发布说明写得很清楚：<strong>3.53.0 是 2026-04-09，3.54.0 是 2026-10-09，紧随其后的 3.54.1 是 2026-10-16</strong>。旧版页面把这些日期写成了“6 月 1 日发布”与“预计 10 月”，从第一句就错了。</p>
-<figure tabindex="0"><img loading="lazy" src="../assets/svg/27-timeline.svg" width="960" height="400" alt="3.53.0、3.54.0、3.54.1 三个发布节点与各自的代表变更"><figcaption>图 1 · 三个发布节点及代表性变更。条目与日期均来自官方 changes.html，不是推测。</figcaption></figure>
-<div class="callout warn"><strong>旧版页面还错了什么</strong>它把“自修复索引”描述成“统计信息不准时自动重建索引”，并引用了不存在的 <code>src/whence.c</code>、虚构的 <code>whereLoopAddBtree()</code> 伪代码、虚构的 <code>ext/misc/qrf.c</code> 与 <code>qrf_md()</code> 函数，以及一张虚构的“各文件变更行数”表。这些已删除；本章只保留官方发布说明能逐条核对的变更。</div></section>
-<section id="v353" aria-labelledby="h-v353"><h2 id="h-v353">2. 3.53.0：修复、语言与 API</h2>
-<p>3.53.0 既是修复版本，也是语言/API 版本。官方条目包括：</p>
-<table><thead><tr><th scope="col">类别</th><th scope="col">变更</th></tr></thead><tbody><tr><td>修复</td><td>修复 WAL-reset 数据库损坏 bug</td></tr><tr><td>输出</td><td>新增 QRF（Query Result Formatter）库，用于 CLI 结果格式化；Tabular 模式下数值默认右对齐</td></tr><tr><td>浮点</td><td>文本↔浮点转换重写；默认舍入到 <strong>17 位</strong>有效数字（旧版为 15），可用 <code>SQLITE_DBCONFIG_FP_DIGITS</code> 调整</td></tr><tr><td>DDL</td><td><code>ALTER TABLE</code> 支持增/删 <code>NOT NULL</code> 与 <code>CHECK</code> 约束</td></tr><tr><td>索引</td><td>新增 <code>REINDEX EXPRESSIONS</code>；新增自修复索引以处理<strong>过期表达式索引</strong>问题</td></tr><tr><td>函数</td><td>新增 <code>json_array_insert()</code> / <code>jsonb_array_insert()</code></td></tr><tr><td>C API</td><td><code>sqlite3_str_truncate()</code>、<code>sqlite3_str_free()</code>、<code>sqlite3_carray_bind_v2()</code>、<code>SQLITE_PREPARE_FROM_DDL</code>、<code>SQLITE_UTF8_ZT</code>、<code>SQLITE_LIMIT_PARSER_DEPTH</code></td></tr></tbody></table>
-<p>关于“自修复索引”，准确的来源是我们第 22 章讲过的官方文档：它针对的是<strong>过期表达式索引</strong>（确定性函数在不同平台/版本上结果漂移），而不是“统计信息不准”。兩者不能混为一谈。</p>
-</section>
-<section id="planner" aria-labelledby="h-planner"><h2 id="h-planner">3. 3.53.0 查询规划器改进</h2>
-<p>官方在 3.53.0 列出了一组规划器改动，其中最容易解释的是集合操作：<strong>对 <code>EXCEPT</code>、<code>INTERSECT</code>、<code>UNION</code> 统一改用 sort-and-merge 算法，而不是哈希表</strong>，因为前者“几乎总是更快”。</p>
-<figure tabindex="0"><img loading="lazy" src="../assets/svg/27-planner.svg" width="960" height="360" alt="EXCEPT/INTERSECT/UNION 采用排序合并，两条有序流线性比较前进"><figcaption>图 2 · 复合查询改排序合并：比哈希表更省内存，也能复用已有顺序。图中为机制示意，具体计划仍依数据与索引而定。</figcaption></figure>
-<ul><li>大型多路 JOIN 在<strong>星型 schema</strong> 上的连接顺序选择得到改进；</li><li><code>EXISTS-to-JOIN</code> 优化放宽：插入的 JOIN 项不再必须位于最内层循环；</li><li><code>omit-noop-join</code> 优化可以略去一整条不影响输出的 JOIN 链；</li><li>当 <code>GROUP BY e1 ORDER BY e2</code> 中的 e1/e2 仅 ASC/DESC 不同时，可用单个索引优化；</li><li>在某些结果集与 ORDER BY 不完全匹配时，允许虚拟表优化 <code>DISTINCT</code>。</li></ul>
-<p>注意：这些都是<strong>规划器策略</strong>的改进，而不是稳定的 EXPLAIN 输出变化；不要把某串计划文本当成必须在某版本出现的结果。</p>
-</section>
-<section id="v354" aria-labelledby="h-v354"><h2 id="h-v354">4. 3.54.0：CLI 与平台调整</h2>
-<p>3.54.0 的重点在 CLI 与平台，而不是大的用户可见特性：</p>
-<table><thead><tr><th scope="col">类别</th><th scope="col">变更</th></tr></thead><tbody><tr><td>CLI 提示符</td><td>提示符字符串可含转义序列显示状态；初始提示符可用 <code>SQLITE_PS1</code>/<code>SQLITE_PS2</code> 初始化；尊重 <code>NO_COLOR</code></td></tr><tr><td>.mode</td><td>新增 <code>--rowcount on</code>、<code>--titles always</code>（已成为默认）、<code>--ifmt</code>/<code>--fpfmt</code> 控制整数/浮点渲染</td></tr><tr><td>磁盘使用</td><td>新增 <code>diskused()</code> 扩展与 <code>.diskused</code> 点命令，取代已弃用的 <code>sqlite3_analyzer</code></td></tr><tr><td>C API</td><td>新增 <code>sqlite3_result_str()</code> 与 <code>sqlite3_incomplete()</code>；<code>sqlite3_limit()</code> 新增 <code>SQLITE_LIMIT_SCHEMA</code>、<code>SQLITE_LIMIT_TRIGGER_STEPS</code></td></tr><tr><td>平台（仅 Windows）</td><td>非递归 mutex 改用 SRWL；弃用 Windows XP 及更早版本（需 Vista 或更新）</td></tr><tr><td>平台（支持时）</td><td>生成临时文件时使用 Linux 的 <code>O_TMPFILE</code></td></tr></tbody></table>
-<p>3.54.0 还有一些规划器小改进（例如：对带表达式索引的表做 UPDATE 时，若被索引值未变则不改动索引；优化 <code>expr OR TRUE</code>/<code>expr OR FALSE</code>；忽略 <code>IN</code> 右侧的 <code>DISTINCT</code>；<code>UNION ... LIMIT 1</code> 更快）以及“对 DEFAULT 子句中的 SQL 函数调用 authorizer”的行为变化。</p>
-<div class="callout"><strong>性能数字要带限定条件</strong>官方给出 3.54.0 约 <strong>比上一版快 4%</strong>（speedtest1、valgrind、Linux x64）、<strong>比 3.51.0 快约 7.5%</strong>，并明确附上“因工作负载、构建选项、CPU、编译器和操作系统而异”。引用时应保留这个限定，不要把单次基准当成普遍事实。</div>
-<p><strong>3.54.1（2026-10-16）</strong> 修复了 32 位构建上可能的 heap-buffer overflow（64 位不受影响）以及 3.54.0 的其他用户反馈问题。</p></section>
-<section id="lab" aria-labelledby="h-lab"><h2 id="h-lab">5. 可运行实验</h2>
-<p><code>examples/27_features.py</code> 在本机 SQLite 上验证几个 3.53+ 可观察的行为：<code>REINDEX EXPRESSIONS</code> 可执行、对带表达式索引的表更新未变值后索引仍然一致、以及 <code>UNION ... LIMIT 1</code> 返回正确结果。版本低于 3.53.0 时脚本会输出 SKIPPED 而非谎报通过。</p>
-<pre><code>python3 examples/27_features.py
-# PASS: REINDEX EXPRESSIONS, expression-index consistency and UNION LIMIT ok; sqlite3 3.54.0</code></pre>
-<p>本实验<strong>不</strong>验证 CLI 提示符、<code>diskused()</code>、Windows 平台行为或性能提升——那些需要特定平台与真实 benchmark，本章不做断言。</p>
-<div class="exercise"><h3>可重复练习</h3><ol><li>对照官方 changes.html，找出你所用版本引入但本页未列的条目；</li><li>用 <code>SELECT sqlite_version()</code> 与 <code>sqlite_source_id()</code> 记录环境，再重现任一实验；</li><li>解释为何“40 个 commit / 变更行数”这类数字不能从两个版本号稳定推出。</li></ol></div>
-<details><summary>自测：为何不能把“自修复索引”当成“统计信息修复”？</summary><p>因为官方定义的是针对<strong>过期表达式索引</strong>：确定性函数在不同平台/版本下结果漂移一两 ULP，导致索引值与重算值不一致。它与“统计信息不准”是不同问题。</p></details>
-</section>
-<section id="references" aria-labelledby="h-references"><h2 id="h-references">原始资料与版本边界</h2>
-<p>本章所有条目与日期均来自 SQLite 官方发布历史；不同版本的具体实现、导出符号与性能数字会持续变化，应以官方 changelog 与源码为准。</p>
-<ol class="references"><li><a href="https://sqlite.org/changes.html" target="_blank" rel="noopener noreferrer">SQLite Release History</a> · SQLite 官方</li><li><a href="https://sqlite.org/releaselog/3_53_0.html" target="_blank" rel="noopener noreferrer">3.53.0 发布说明</a> · SQLite 官方</li><li><a href="https://sqlite.org/staleexpridx.html" target="_blank" rel="noopener noreferrer">Stale Expression Indexes（自修复）</a> · SQLite 官方</li><li><a href="https://sqlite.org/wasm/doc/trunk/persistence.md" target="_blank" rel="noopener noreferrer">opfs-wl VFS</a> · SQLite 官方</li></ol>
-</section>
-<nav class="article-nav" aria-label="相邻章节"><a href="26.html">← 上一章</a><a href="28.html">下一章 →</a></nav>
-</article></main></div>
-<footer class="foot"><div class="shell foot-inner"><span>SQLite 源码解剖 · 先证据，后抽象</span><a href="../index.html">返回首页</a></div></footer>
-</body>
-</html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>第27章 SQLite 3.53–3.54：版本演进与源码变更</title><link rel="stylesheet" href="../assets/css/site.css"><meta name="description" content="读懂一个数据库版本，不是把发布说明里的关键词改写成故事，而是把“发生了什么、为什么发生、影响哪个接口、落在哪个源文件、有哪些兼容风险”逐一对应起来。"><link rel="canonical" href="https://1998x-stack.github.io/sqlite-source-analysis-tutorial/chapters/27.html"><meta property="og:type" content="article"><meta property="og:title" content="SQLite 3.53–3.54：版本演进与源码变更 · SQLite 源码解剖"><meta property="og:description" content="读懂一个数据库版本，不是把发布说明里的关键词改写成故事，而是把“发生了什么、为什么发生、影响哪个接口、落在哪个源文件、有哪些兼容风险”逐一对应起来。"><meta property="og:url" content="https://1998x-stack.github.io/sqlite-source-analysis-tutorial/chapters/27.html"><link rel="next" href="28.html"><link rel="prev" href="26.html"></head>
+<body><a class="skip" href="#content">跳转至正文</a>
+<header class="sitebar"><div class="shell nav-inner"><a class="brand" href="../index.html"><span class="brand-icon">SQLite</span><span>SQLite 源码解剖<br><small>逐层理解数据库内核</small></span></a><nav class="navlinks" aria-label="导航"><a href="../index.html#chapters">全部章节</a><a href="../index.html#route">学习路线</a><a href="https://github.com/1998x-stack/sqlite-source-analysis-tutorial">GitHub</a></nav></div></header>
+<div class="shell article-layout"><nav class="toc" aria-label="文章目录"><h2>本章内容</h2><a href="#timeline">1. 版本时间线</a><a href="#features">2. 3.53.0 的真实变化</a><a href="#selfheal">3. Stale expression index</a><a href="#floating">4. 浮点文本转换</a><a href="#release540">5. 3.54.0 的源码变化</a><a href="#audit">6. 旧内容事实审计</a><a href="#source">7. 版本化源码阅读法</a><a href="#references">官方资料</a><a href="#reading-path">知识关联</a></nav>
+<main id="content"><article class="article"><div class="crumb"><a href="../index.html">课程首页</a><span>/</span><span>第 27 章</span><span>/</span><span>SQLite 3.53–3.54：版本演进与源码变更</span></div>
+<header class="article-header"><span class="kicker">Release engineering · 3.53 · 3.54</span><h1>SQLite 3.53–3.54：版本演进与源码变更</h1><p class="dek">读懂一个数据库版本，不是把发布说明里的关键词改写成故事，而是把“发生了什么、为什么发生、影响哪个接口、落在哪个源文件、有哪些兼容风险”逐一对应起来。</p><div class="meta"><span>源码基线：3.54.1</span><span>核查日期：2026-11-22</span><span>范围：3.52 撤回、3.53.x、3.54.x</span></div></header><p class="figure-hint">阅读提示：可轻点图解打开独立矢量原图；窄屏图解支持横向查看细节。</p>
+
+<section id="timeline" aria-labelledby="h-timeline"><h2 id="h-timeline">1. 先读版本时间线：3.52 撤回不是一个可以略过的脚注</h2>
+<p>2026 年 3 月 6 日发布的 SQLite 3.52.0 随后被撤回。官方说明指出，某些新特性在表达式索引或由文本 / JSONB 输入产生浮点数的虚拟生成列上，可能与旧版本发生少见的互操作问题。3.53.0 于 4 月 9 日重新发布，携带处理 stale expression index 的增强，并修复 WAL-reset 数据库损坏问题。</p>
+<p>之后 3.53.1、3.53.2、3.53.3、3.53.4 等维护版本陆续修复问题；官方 chronology 在 2026-11-13 还列出 3.53.6。另一条版本线是 3.54.0（10 月 9 日）和 3.54.1（10 月 16 日）。3.54.1 修复了 3.54.0 在部分 32 位构建中可能触发的 heap-buffer overflow。核查日的正式 chronology 中，版本号最高的已发布版本仍是 3.54.1；3.53.6 是更晚日期发布的旧分支维护补丁，而 draft chronology 将 3.55.0 标为 pending，不能把它当作已发布版本。</p>
+<figure><a class="svg-zoom" href="../assets/svg/27-release-timeline.svg" target="_blank" rel="noopener noreferrer" aria-label="在新标签页打开矢量图：SQLite 3.52 撤回、3.53.0 重新发布与维护、3.54.0 和 3.54.1 的版本时间线"><img src="../assets/svg/27-release-timeline.svg" alt="SQLite 3.52 撤回、3.53.0 重新发布与维护、3.54.0 和 3.54.1 的版本时间线"></a><figcaption>图 1 · 版本号不是单调替代关系：维护分支可以在较新主版本发布后继续出补丁；选版本应看维护线和已知修复，而不是只比较发布日期。</figcaption></figure>
+<div class="callout"><strong>本章源码基线</strong>涉及内部实现时以 SQLite 3.54.1 的 source tree 为准；发布说明负责确认“这个版本公开承诺了什么”，源代码负责确认“具体实现落在哪里”。不能用 trunk 的当前实现反向描述旧版本。</div></section>
+
+<section id="features" aria-labelledby="h-features"><h2 id="h-features">2. 3.53.0：数据库正确性、SQL 语义与 CLI 一起变化</h2>
+<p>3.53.0 的第一项重要修复是 WAL-reset 数据库损坏 bug。它不是普通查询优化，而是存储正确性问题；官方说明建议受影响版本升级。源码读者应把 WAL reset、checkpoint 和读者快照放回第 16 章的状态模型中理解，而不是把修复简化为“WAL 变快了”。</p>
+<p>第二个可见变化是 Query Result Formatter（QRF）。它用于把 SQL 查询结果排版成适合等宽终端阅读的表格，CLI 交互会话使用 QRF 改善表格展示；批处理会话仍保留旧格式以保持兼容。QRF 是结果格式化层，不是新的 SQL 执行引擎，也不是 SQL 函数集合。</p>
+<p>3.53.0 同时增加了若干 SQL 语言能力：<code>ALTER TABLE</code> 可添加和移除 <code>NOT NULL</code> 与 <code>CHECK</code> 约束；<code>REINDEX EXPRESSIONS</code> 只重建表达式索引；TEMP trigger 的主体可访问 main schema 中的表；<code>VACUUM INTO</code> 的 URI 目标支持 <code>reserve=N</code>。新增 JSON 函数包括 <code>json_array_insert()</code> 与 <code>jsonb_array_insert()</code>。</p>
+<p>3.53.0 还包含一组明确列出的 Planner 改进：对 <code>EXCEPT</code>、<code>INTERSECT</code> 和 <code>UNION</code> 始终使用 sort-and-merge 算法（发布说明指出它通常快于 hash table）；改善大型星型 schema 多表连接的 join-order 选择；放宽 EXISTS-to-JOIN 插入项必须位于最内层循环的限制；扩展 omit-noop-join 以消除不影响输出的连接链；在 <code>GROUP BY e1 ORDER BY e2</code> 且表达式仅排序方向不同的情况下复用单一索引；并允许虚拟表在结果集与 ORDER BY 不完全相同时优化 DISTINCT。这些是具体 Planner 路径的变化，不等于所有 SQL 查询都会更快。</p>
+<p>3.53.0 的 CLI 变化不只是“显示更好看”：QRF 的 Unicode box 输出用于交互会话，批处理继续使用 legacy 格式以兼容脚本；<code>.mode</code> 有大幅增强；<code>.testcase</code> 与 <code>.check</code> 修复后也被用于上游测试脚本；命令行参数可直接读取非空的 <code>.sql</code> / <code>.txt</code> 文件；新增 <code>.timer once</code> 和 <code>.progress --timeout S</code>，并调整 <code>.indexes</code> 的 PATTERN 匹配语义。点命令行末尾的 bare unquoted semicolon 也会被静默忽略，这是一项可能影响旧脚本的兼容性变化。</p>
+<p>3.53.0 的 C 接口变化包括 <code>sqlite3_str_truncate()</code>、<code>sqlite3_str_free()</code>、<code>sqlite3_carray_bind_v2()</code>、<code>SQLITE_PREPARE_FROM_DDL</code>、<code>SQLITE_UTF8_ZT</code>、<code>SQLITE_LIMIT_PARSER_DEPTH</code> 和 <code>SQLITE_DBCONFIG_FP_DIGITS</code>。Session Extension 还增加了逐列值写入 changegroup 的增量 API：<code>sqlite3changegroup_change_begin()</code>、<code>change_blob()</code>、<code>change_double()</code>、<code>change_int64()</code>、<code>change_null()</code>、<code>change_text()</code>、<code>sqlite3changegroup_change_finish()</code> 与 <code>sqlite3changegroup_config()</code>。同一版本还改进浮点文本转换，并在 JavaScript/WASM 中加入 <code>opfs-wl</code> VFS。</p>
+<figure><a class="svg-zoom" href="../assets/svg/27-release-feature-map.svg" target="_blank" rel="noopener noreferrer" aria-label="在新标签页打开矢量图：SQLite 3.53.0 的正确性修复、SQL 语言、CLI、WASM 和数值转换变化分组"><img src="../assets/svg/27-release-feature-map.svg" alt="SQLite 3.53.0 的正确性修复、SQL 语言、CLI、WASM 和数值转换变化分组"></a><figcaption>图 2 · 发布说明中的变化横跨存储正确性、SQL 语义、CLI、WASM 和数值转换；它们并非同一层的“性能优化”。</figcaption></figure></section>
+
+<section id="selfheal" aria-labelledby="h-selfheal"><h2 id="h-selfheal">3. Stale expression index：自修复有明确触发条件</h2>
+<p>表达式索引把表达式的计算结果存为索引键。即使某个函数被标记为 deterministic，若它的结果在 CPU 架构、操作系统、C 数学库或 SQLite 版本之间出现极小变化，旧索引键也可能与当前重新计算的值不同。官方记录的常见案例是浮点值偏离一两个 ULP；例如从 JSON 文本提取数值后建立表达式索引，升级文本到浮点转换实现后，重新计算结果可能发生微小变化。</p>
+<p>SQLite 3.53.0 起，在更新或删除关联行时，遇到 stale expression index 的某些情形会尝试修复索引，而不是像旧版本那样直接报错。这里的“自修复”不是后台扫描器，不代表数据库任意损坏都能自动恢复。<code>PRAGMA integrity_check</code> 仍可能报告类似 <code>index stores an imprecise floating-point value</code> 的信息。</p>
+<p>显式的 <code>REINDEX EXPRESSIONS</code> 则重建所有表达式索引，而不触碰普通索引。若应用希望完全避免表达式结果跨版本漂移，可评估 STORED generated column：先把表达式值写入表，再对该列建立普通索引。相关机制、边界与实验已在<a href="22.html">第 22 章</a>深入展开，本章只把它放回版本演进的因果链。</p>
+<figure><a class="svg-zoom" href="../assets/svg/27-stale-index-repair.svg" target="_blank" rel="noopener noreferrer" aria-label="在新标签页打开矢量图：表达式索引键在不同平台或版本间发生微小浮点漂移，3.53 起在特定 UPDATE 或 DELETE 时尝试修复"><img src="../assets/svg/27-stale-index-repair.svg" alt="表达式索引键在不同平台或版本间发生微小浮点漂移，3.53 起在特定 UPDATE 或 DELETE 时尝试修复"></a><figcaption>图 3 · 自修复针对的是“旧表达式键与当前表达式值不一致”的有限场景，不是通用 B-Tree 损坏恢复。</figcaption></figure></section>
+
+<section id="floating" aria-labelledby="h-floating"><h2 id="h-floating">4. 17 位有效数字：改变的是文本转换策略，不是 IEEE 754 存储精度</h2>
+<p>3.53.0 改进了浮点数与文本之间的转换。默认舍入从旧版本的 15 位有效数字调整为 17 位；<code>SQLITE_DBCONFIG_FP_DIGITS</code> 可改变该行为。双精度浮点数的二进制表示没有因此增加位数，也没有把 <code>REAL</code> 从 binary64 改成更高精度类型。</p>
+<p>17 位的意义在于：对 binary64 值采用足够长的十进制表示，可以支持更可靠的往返转换。它影响的是字符串表示和再次解析后的数值一致性；它不意味着所有输出都必须固定显示 17 个字符，也不意味着数学运算误差消失。</p>
+<p>这项变化与 stale expression index 的问题有关：若索引表达式涉及文本到浮点转换，微小的数值转换差异可能改变索引键。应把“数值格式化”“数值解析”“表达式索引一致性”区分为三个问题，不要把它们统称为“浮点精度升级”。</p></section>
+
+<section id="release540" aria-labelledby="h-release540"><h2 id="h-release540">5. 3.54.0：CLI、Planner、平台接口与 C API 的具体改动</h2>
+<p>3.54.0 的 CLI 更新包括：提示符可通过 <code>SQLITE_PS1</code> / <code>SQLITE_PS2</code> 环境变量配置；列式输出在空结果时默认仍显示列名；<code>.mode</code> 增加 <code>--rowcount on</code>、<code>--titles always</code>、<code>--ifmt</code> 和 <code>--fpfmt</code>；默认提示符尊重 <code>NO_COLOR</code>。新的 <code>diskused()</code> 扩展被 CLI 的 <code>.diskused</code> 使用，独立 <code>sqlite3_analyzer</code> 工具被标记为 deprecated。为兼容旧脚本，<code>-csv</code> 会自动关闭显示限制；单独一行的 <code>go</code> 或 <code>/</code> 终止 SQL 的旧行为默认停止，只有使用 <code>SQLITE_SHELL_LEGACY_COMMAND_TERMINATOR</code> 构建时才保留。</p>
+<p>Planner 改动包括：UPDATE 时若表达式索引键值未改变，就不必改写该索引；改善 <code>expr OR TRUE</code> / <code>expr OR FALSE</code> 优化；忽略 IN 右侧 SELECT 中无意义的 DISTINCT；对 <code>UNION ... LIMIT 1</code> 使用更省内存、更快的处理方式。<code>ALTER TABLE</code> 对添加、删除或重命名为 <code>ROWID</code>、<code>_ROWID_</code>、<code>OID</code> 的列名会报错，以避免特殊 rowid 名称冲突。</p>
+<p>3.54.0 还新增 <code>sqlite3_result_str()</code> 和 <code>sqlite3_incomplete()</code>。特别注意，<code>sqlite3_result_str()</code> 并不是“接收一个普通 C 字符串和长度”的函数；它接收的是 <code>sqlite3_str*</code> 动态字符串对象以及所有权处理标志：</p>
+<pre><code>sqlite3_str *out = sqlite3_str_new(db);
+sqlite3_str_appendf(out, "row=%d", rowNumber);
+
+/* SQLITE_FINISH：把字符串内容交给 SQL 函数结果，
+** 同时释放 sqlite3_str 对象。 */
+sqlite3_result_str(ctx, out, SQLITE_FINISH);</code></pre>
+<p>3.54.0 还增加 <code>%J</code> / <code>%j</code> 格式化转换、日期时间函数的 <code>weekday -N</code> 和 <code>end of</code> 修饰符，以及 <code>SQLITE_LIMIT_SCHEMA</code>、<code>SQLITE_LIMIT_TRIGGER_STEPS</code> 两个 limit 项。在 Unix 平台，<code>O_TMPFILE</code> 用于支持该特性的系统创建匿名临时文件；不支持的系统仍走其他临时文件路径。Windows XP、Windows CE 及更早版本不再支持，最低要求为 Windows Vista；非递归 mutex 改用独占 SRWLOCK，递归 mutex 仍需要递归语义，不能把这一改动描述成“SQLite 所有读操作现在共享读锁”。3.54.0 的性能说明约为 speedtest1 在 Linux x64 / Valgrind 计数环境下 CPU cycles 减少约 4%，与 3.51.0 相比约 7.5%；这不是任意 workload 的延迟承诺。</p>
+<figure><a class="svg-zoom" href="../assets/svg/27-release-354-map.svg" target="_blank" rel="noopener noreferrer" aria-label="在新标签页打开矢量图：SQLite 3.54.0 CLI、Planner、平台与 C API 变化及 3.54.1 补丁修复"><img src="../assets/svg/27-release-354-map.svg" alt="SQLite 3.54.0 CLI、Planner、平台与 C API 变化及 3.54.1 补丁修复"></a><figcaption>图 4 · 3.54.0 的变更分布在用户可见 CLI、查询规划、平台实现和公开 C API；3.54.1 继续修复了 32 位构建问题。</figcaption></figure></section>
+
+<section id="audit" aria-labelledby="h-audit"><h2 id="h-audit">6. 对旧版本介绍做事实审计：把“听起来合理”与“源码证据”分开</h2>
+<div class="table-scroll"><table><thead><tr><th>旧说法</th><th>核查结果</th><th>修正后的事实</th></tr></thead><tbody>
+<tr><td>3.53.0 增加星型 schema join-order 优化和 EXCEPT / INTERSECT / UNION sort-and-merge</td><td>官方发布说明明确列出</td><td>按其适用查询形态描述；不扩大成通用查询加速保证</td></tr>
+<tr><td><code>sqlite3_result_str(ctx, char*, len, destructor)</code></td><td>签名错误</td><td>实际接口是 <code>sqlite3_result_str(sqlite3_context*, sqlite3_str*, int)</code></td></tr>
+<tr><td>SRWLOCK 让 SQLite 读操作共享锁</td><td>把 Windows 原语的能力误写成 SQLite 的锁策略</td><td>3.54.0 的非递归 mutex 使用独占 SRWLOCK；递归 mutex 仍使用 CRITICAL_SECTION</td></tr>
+<tr><td>17 位意味着 SQLite REAL 的存储精度提升</td><td>概念混淆</td><td>变化在浮点数与文本转换默认有效数字，不改变 binary64 存储格式</td></tr>
+<tr><td>3.54.1 只是普通维护补丁</td><td>遗漏重要安全修复</td><td>它修复了 3.54.0 某些 32 位构建中的 heap-buffer overflow</td></tr>
+</tbody></table></div>
+<p>这种审计不是说某个源文件里搜不到关键词就能证明功能不存在；正确做法是先看 release note，再定位对应 check-in / 源码差异。若证据不足，明确标记“未核实”，而不是用推测补齐故事。</p>
+<details><summary>自测：17 位有效数字会让所有浮点运算更准确吗？</summary><p>不会。它改变浮点值转换成文本时的默认有效数字策略，帮助往返表示；它不改变 binary64 的运算精度，也不能消除浮点运算本身的舍入误差。</p></details></section>
+
+<section id="source" aria-labelledby="h-source"><h2 id="h-source">7. 版本化源码阅读法：从发布条目走到实现与测试</h2>
+<p>对 SQLite 3.54.1，可从这些源文件开始核查：<code>src/where.c</code>（Planner）、<code>src/printf.c</code>（格式化实现）、<code>src/sqlite.h.in</code>（公开 API 声明）、<code>src/os_unix.c</code>（Unix 临时文件）、<code>src/mutex_w32.c</code>（Windows mutex）、<code>src/alter.c</code>（ALTER TABLE）、<code>src/select.c</code>（复合 SELECT）、<code>ext/qrf/qrf.h</code>（QRF 接口）。</p>
+<p>不要把内部函数名当成公开 ABI，也不要把某个 release 的源文件行号写成永久定位。每次复核都记录 tag、source ID、文件路径、符号名和验证方式。公开接口的签名以对应版本的 <code>sqlite3.h</code> 为准；CLI 的实现不等同于 SQLite 核心库。</p>
+<pre><code>sqlite3 :memory: "SELECT sqlite_version(), sqlite_source_id();"
+sqlite3 :memory: "PRAGMA compile_options;"
+python examples/27_release_probe.py</code></pre></section>
+
+<section id="references" aria-labelledby="h-refs"><h2 id="h-refs">官方资料与版本边界</h2><ol class="references">
+<li><a href="https://sqlite.org/changes.html" target="_blank" rel="noopener noreferrer">SQLite Release History</a>：3.53.0 与 3.54.0 的完整变更条目。</li><li><a href="https://sqlite.org/chronology.html" target="_blank" rel="noopener noreferrer">SQLite Release Chronology</a>：3.53.6、3.54.1 等维护分支日期。</li><li><a href="https://sqlite.org/news.html" target="_blank" rel="noopener noreferrer">SQLite News</a>：3.52.0 撤回与 3.53.0 重发的背景。</li><li><a href="https://sqlite.org/staleexpridx.html" target="_blank" rel="noopener noreferrer">Stale Expression Indexes</a>：跨平台浮点差异、自修复范围和 REINDEX EXPRESSIONS。</li><li><a href="https://sqlite.org/c3ref/result_str.html" target="_blank" rel="noopener noreferrer">sqlite3_result_str()</a>：真实 C API 签名与字符串所有权标志。</li><li><a href="https://sqlite.org/c3ref/c_dbconfig_defensive.html" target="_blank" rel="noopener noreferrer">sqlite3_db_config()</a>：包括 SQLITE_DBCONFIG_FP_DIGITS。</li><li><a href="https://github.com/sqlite/sqlite/tree/version-3.54.1/src" target="_blank" rel="noopener noreferrer">SQLite 3.54.1 source tree</a>：版本固定的源码目录。</li><li><a href="https://github.com/sqlite/sqlite/blob/version-3.54.1/src/mutex_w32.c" target="_blank" rel="noopener noreferrer">mutex_w32.c</a> 与 <a href="https://github.com/sqlite/sqlite/blob/version-3.54.1/src/os_unix.c" target="_blank" rel="noopener noreferrer">os_unix.c</a>：SRWLOCK 与 O_TMPFILE 实现位置。</li></ol></section><div class="source-ledger" aria-label="本章来源与实验索引"><span class="kicker">Source ledger · reproducibility</span><p>本章的关键技术主张有结构化的 <a href="../evidence/27.json">逐条证据台账</a>；相关 SQL、C、Python 和 WASM 示例可从 <a href="../examples/index.html">实验源码索引</a> 查找。台账状态区分已核对资料、推导与教学示意。</p></div>
+<aside class="related-reading" id="reading-path" aria-labelledby="related-heading-27"><div class="related-heading"><span class="kicker">Concept connections</span><h2 id="related-heading-27">把本章放进更大的机制链</h2><p>下列链接指向另一章的具体机制，每篇都可独立阅读；先后顺序不是强制前置要求。</p></div><div class="related-grid"><a class="related-item" href="22.html#selfheal"><span class="related-kicker">第 22 章 · 关联机制</span><strong>版本升级为何暴露表达式索引旧键</strong><span>从 stale index 的有限自修复回溯索引一致性问题。</span></a><a class="related-item" href="23.html#qrf"><span class="related-kicker">第 23 章 · 关联机制</span><strong>新版 CLI 的 QRF 为什么不属于 SQL 执行器</strong><span>区分 SQL 查询结果与 shell 的终端排版层。</span></a></div></aside><nav class="article-nav" aria-label="章节导航"><a href="26.html">← 上一章：WASM 与 JS</a><a href="28.html">下一章：定制 SQLite →</a></nav>
+</article></main></div><footer class="foot"><div class="shell foot-inner"><span>SQLite 源码解剖</span><a href="../index.html">返回首页</a></div></footer></body></html>
